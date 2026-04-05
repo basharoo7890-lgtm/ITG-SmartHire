@@ -1,65 +1,88 @@
 # ITG SmartHire
 
-نظام ذكي لادارة التوظيف وتحليل طلبات المتقدمين بالذكاء الاصطناعي.
+An AI-powered recruitment screening system that automates CV analysis, candidate scoring, and interview preparation — reducing HR manual review time by over 80%.
 
-عند تقديم المتقدم على وظيفة ورفع الـ CV، النظام يحلل الـ CV تلقائي، يعطي درجة مطابقة من 100، يولد ملخص مهني، ويقترح أسئلة مقابلة مخصصة — مما يوفر على HR أكثر من 80% من وقت المراجعة اليدوية.
+## Features
 
----
+- AI-powered CV parsing and skill extraction (Google Gemini API)
+- Smart matching score (0-100) based on skills, experience, salary, and education
+- Auto-filtering (salary budget, minimum experience)
+- AI-generated professional candidate summaries
+- AI-generated custom interview questions per candidate
+- AI-powered job description generator
+- Side-by-side candidate comparison
+- Statistics dashboard with charts
+- HR dashboard with filters and ranking
+- Role-based access (Admin, HR, Applicant)
 
-## الميزات
+## Tech Stack
 
-- تحليل CV بالذكاء الاصطناعي واستخراج المهارات والخبرات
-- درجة مطابقة ذكية من 100 لكل متقدم
-- فلترة تلقائية (الراتب، الخبرة)
-- ملخص AI مهني لكل متقدم
-- أسئلة مقابلة مخصصة مولدة بالـ AI
-- توليد وصف وظيفي بالـ AI
-- مقارنة متقدمين جنب بعض
-- لوحة احصائيات
-- لوحة تحكم HR مع فلاتر وترتيب
+- **Backend + Frontend:** ASP.NET Core 8 MVC
+- **UI:** MVC Views + Bootstrap 5
+- **Database:** SQL Server + Entity Framework Core 8
+- **Authentication:** ASP.NET Identity (Cookie Auth)
+- **AI Engine:** Google Gemini API (Free Tier — 1,500 requests/day)
+- **PDF Processing:** PdfPig
+- **Charts:** Chart.js
+- **Hosting:** AWS (EC2 + RDS + S3)
+- **Containerization:** Docker
+- **Source Control:** GitHub
 
----
+## Getting Started
 
-## التقنيات
+### Prerequisites
 
-- ASP.NET Core 8 MVC — Backend + Frontend
-- MVC Views + Bootstrap 5 — واجهات المستخدم
-- SQL Server + Entity Framework Core 8 — قاعدة البيانات
-- ASP.NET Identity — تسجيل الدخول والصلاحيات
-- Google Gemini API — الذكاء الاصطناعي
-- Chart.js — الرسوم البيانية
-- PdfPig — قراءة ملفات PDF
-- AWS (EC2 + RDS + S3) — الاستضافة
-- Docker — تجهيز بيئة التشغيل
-- GitHub — ادارة الكود
+- .NET 8 SDK
+- Visual Studio 2022 or 2026
+- SQL Server (LocalDB or Developer Edition)
+- Git
 
----
+### Run Locally
 
-## تشغيل المشروع
-
-```
-git clone https://github.com/[username]/ITG-SmartHire.git
+```bash
+git clone https://github.com/basharOO99/ITG-SmartHire.git
 cd ITG-SmartHire
 cp .env.example .env
+# Edit .env and add your Gemini API key
 dotnet restore
 dotnet ef database update --project SmartHire
 dotnet run --project SmartHire
 ```
 
-يفتح على http://localhost:5000
+App runs at: http://localhost:5000
 
----
+### Run with Docker
 
-## الفريق
+```bash
+cd docker
+docker-compose up -d
+```
 
-بشار مقدم — PMO + DevOps
-عمر — Backend Developer
-مازن — Full-Stack Developer
-غزل — Backend + Documentation
-سدين — AI Developer
-فرح عاطف — Database + QA
-راما — UI/UX Design
+## Project Structure
 
----
+```
+SmartHire/
+├── Controllers/         # Request handling
+├── Models/              # Data entities
+├── ViewModels/          # View-specific models
+├── Services/            # Business logic + AI
+├── Views/               # Razor views (UI)
+├── Data/                # DbContext + Migrations
+└── wwwroot/             # Static files (CSS, JS, Bootstrap)
+```
 
-## التدريب — ITG Solutions 2026
+## Team
+
+| Name | Role |
+|------|------|
+| Bashar Mukaddam | PMO + DevOps |
+| Omar | Backend Developer (Core) |
+| Mazen | Full-Stack Developer (Dashboard + Admin) |
+| Ghazal | Backend + Documentation |
+| Sedeen | AI Developer |
+| Farah Atef | Database + QA |
+| Rama | UI/UX Design |
+
+## License
+
+Internal internship project — ITG Solutions © 2026
