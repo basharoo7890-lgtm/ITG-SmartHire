@@ -1,5 +1,44 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model Employment.Models.User
+
 @{
+    ViewData["Title"] = "إنشاء حساب جديد";
 }
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white text-center">
+                    <h4>إنشاء حساب جديد</h4>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Register" method="post">
+                        <div class="form-group mb-3">
+                            <label class="control-label">الأسم الكامل</label>
+                            <input asp-for="FullName" class="form-control" placeholder="أدخل اسمك" required />
+                        </div>
+                        <div class="form-group mb-3">
+                            <label class="control-label">البريد الإلكتروني</label>
+                            <input asp-for="Email" class="form-control" type="email" placeholder="example@mail.com" required />
+                        </div>
+                        <div class="form-group mb-3">
+                            <label class="control-label">كلمة المرور</label>
+                            <input asp-for="PasswordHash" class="form-control" type="password" required />
+                        </div>
+                        <div class="form-group mb-3">
+                            <label class="control-label">نوع الحساب</label>
+                            <select asp-for="Role" class="form-control">
+                                <option value="Candidate">باحث عن عمل</option>
+                                <option value="Employer">صاحب عمل</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">تسجيل</button>
+                    </form>
+                </div>
+                <div class="card-footer text-center">
+                    <a asp-action="Login">لديك حساب بالفعل؟ سجل دخولك</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
