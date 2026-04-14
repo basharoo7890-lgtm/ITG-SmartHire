@@ -1,33 +1,15 @@
-﻿@model Employment.Models.User
-
-@{
-    ViewData["Title"] = "تسجيل الدخول";
-}
-
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-5">
-            <div class="card shadow">
-                <div class="card-header bg-success text-white text-center">
-                    <h4>تسجيل الدخول</h4>
-                </div>
-                <div class="card-body">
-                    <form asp-action="Login" method="post">
-                        <div class="form-group mb-3">
-                            <label class="control-label">البريد الإلكتروني</label>
-                            <input asp-for="Email" class="form-control" type="email" required />
-                        </div>
-                        <div class="form-group mb-3">
-                            <label class="control-label">كلمة المرور</label>
-                            <input asp-for="PasswordHash" class="form-control" type="password" required />
-                        </div>
-                        <button type="submit" class="btn btn-success w-100">دخول</button>
-                    </form>
-                </div>
-                <div class="card-footer text-center">
-                    <a asp-action="Register">ليس لديك حساب؟ سجل الآن</a>
-                </div>
-            </div>
+﻿<div class="card p-4 mx-auto" style="max-width: 400px;">
+    <h3>تسجيل الدخول</h3>
+    <form asp-action="Login" method="post">
+        <div asp-validation-summary="All" class="text-danger"></div>
+        <div class="mb-3">
+            <label>البريد الإلكتروني</label>
+            <input name="email" class="form-control" type="email" required />
         </div>
-    </div>
+        <div class="mb-3">
+            <label>كلمة المرور</label>
+            <input name="PasswordHash" class="form-control" type="password" required />
+        </div>
+        <button type="submit" class="btn btn-primary w-100">دخول</button>
+    </form>
 </div>

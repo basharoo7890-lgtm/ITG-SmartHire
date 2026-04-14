@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -11,21 +12,18 @@ namespace Employment.Models
         public int UserId { get; set; }
 
         [Required]
-        [StringLength(256)]
         public string Email { get; set; } = string.Empty;
 
         [Required]
-        [Column("PassworedHash")]
+        [Column("PasswordHash")]
         public string PasswordHash { get; set; } = string.Empty;
 
-        [StringLength(100)]
         public string? FullName { get; set; }
 
-        [Required]
-        [StringLength(20)]
-        public string Role { get; set; } = string.Empty;
+        public string Role { get; set; } = "Applicant";
 
-        public DateTime CreatedAt { get; set; }
-        public ICollection<Application>? Applications { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
+
+        public virtual ICollection<Application>? Applications { get; set; }
     }
 }
