@@ -1,0 +1,64 @@
+﻿@{
+    ViewData["Title"] = "Open Positions";
+}
+
+<div class="open-positions-page">
+    <div class="container py-5">
+
+        <div class="positions-header">
+            <h1>Open Positions</h1>
+            <p>Explore career opportunities at ITG Hire and find your perfect match</p>
+        </div>
+
+        <div class="positions-filter-box">
+            <div class="row g-3 align-items-center">
+                <div class="col-md-4">
+                    <input type="text" class="form-control positions-filter-input" placeholder="Job title or keyword">
+                </div>
+                <div class="col-md-4">
+                    <input type="text" class="form-control positions-filter-input" placeholder="Location">
+                </div>
+                <div class="col-md-4">
+                    <button class="btn search-btn w-100">Search Jobs</button>
+                </div>
+            </div>
+
+            <div class="positions-filter-footer">
+                <span>Showing 1 position</span>
+                <a href="#">More Filters</a>
+            </div>
+        </div>
+
+        <div class="positions-list">
+            <div class="position-item-card">
+                <div class="position-left">
+                    <div class="position-icon-box">
+                        <i class="fa-solid fa-briefcase"></i>
+                    </div>
+
+                    <div>
+                        <h3>Senior Software Engineer</h3>
+                        <div class="position-meta">
+                            <span><i class="fa-regular fa-building me-1"></i>Engineering</span>
+                            <span><i class="fa-solid fa-location-dot me-1"></i>Remote</span>
+                            <span><i class="fa-regular fa-clock me-1"></i>2 days ago</span>
+                        </div>
+                        <p>24 applicants</p>
+                    </div>
+                </div>
+
+                <div class="position-right">
+                    <span class="position-badge">Full-time</span>
+                    <div class="position-buttons">
+                        <a asp-controller="Home" asp-action="JobDetails" class="btn position-details-btn">View Details</a>
+                        <a href="#" class="btn position-apply-btn">Apply Now</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="positions-pagination">
+            <a href="#" class="btn page-btn active">1</a>
+        </div>
+    </div>
+</div>

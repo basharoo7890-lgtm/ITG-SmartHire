@@ -1,44 +1,107 @@
 ﻿@model Employment.Models.User
 
 @{
-    ViewData["Title"] = "إنشاء حساب جديد";
+    ViewData["Title"] = "Register";
+    Layout = null;
 }
 
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow">
-                <div class="card-header bg-primary text-white text-center">
-                    <h4>إنشاء حساب جديد</h4>
-                </div>
-                <div class="card-body">
-                    <form asp-action="Register" method="post">
-                        <div class="form-group mb-3">
-                            <label class="control-label">الأسم الكامل</label>
-                            <input asp-for="FullName" class="form-control" placeholder="أدخل اسمك" required />
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Creat Account - ITG Hire</title>
+
+        <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+        <link rel="stylesheet" href="~/lib/Fontawesome/css/all.min.css" />
+        <link rel="stylesheet" href="~/css/site.css" />
+    </head>
+    <body>
+        <div class="signup-page">
+            <div class="container-fluid px-0">
+                <div class="row g-0 min-vh-100">
+
+                    <div class="col signup-left d-none d-lg-flex flex-column justify-content-between">
+                        <div class="signup-brand">
+                            <i class="fa-solid fa-briefcase me-2"></i>
+                            <span>ITG Hire</span>
                         </div>
-                        <div class="form-group mb-3">
-                            <label class="control-label">البريد الإلكتروني</label>
-                            <input asp-for="Email" class="form-control" type="email" placeholder="example@mail.com" required />
+
+                        <div class="signup-left-content">
+                            <h1>Join ITG Hire</h1>
+                            <p>
+                                Create your account and start your career journey with us.
+                                Access exclusive opportunities.
+                            </p>
                         </div>
-                        <div class="form-group mb-3">
-                            <label class="control-label">كلمة المرور</label>
-                            <input asp-for="PasswordHash" class="form-control" type="password" required />
+
+                        <div class="signup-copy">
+                            © 2026 ITG Hire. All rights reserved.
                         </div>
-                        <div class="form-group mb-3">
-                            <label class="control-label">نوع الحساب</label>
-                            <select asp-for="Role" class="form-control">
-                                <option value="Candidate">باحث عن عمل</option>
-                                <option value="Employer">صاحب عمل</option>
-                            </select>
+                    </div>
+
+                    <div class="col signup-right d-flex flex-column align-items-center justify-content-center">
+                        <div class="signup-card">
+                            <h2>Create Account</h2>
+                        <p class="signup-subtitle">Fill in your information to get started</p>
+
+                        <form asp-asp-controller="Account" asp-action="Register" method="post">
+                            <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Full Name</label>
+                                <input asp-for="FullName" class="form-control signup-input" placeholder="Rama Nedal" />
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Your Role</label>
+                                <select asp-for="Role" class="form-select signup-input signup-select">
+                                    <option value="">Select your role</option>
+                                    <option value="Software Engineer">Software Engineer</option>
+                                    <option value="Product Manager">Product Manager</option>
+                                    <option value="Designer">Designer</option>
+                                    <option value="Data Analyst">Data Analyst</option>
+                                    <option value="Marketing Specialist">SMarketing Specialist</option>
+                                    <option value="Sales Representative">Sales Representative</option>
+                                    <option value="HR">HR</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Email Address</label>
+                                <input asp-for="Email" type="email" class="form-control signup-input" placeholder="you@example.com" />
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Password</label>
+                                <input asp-for="PasswordHash" type="password" class="form-control signup-input" placeholder="Create a password" />
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Confirm Password</label>
+                                <input type="password" name="ConfirmPassword" class="form-control signup-input" placeholder="Confirm your password" />
+                            </div>
+
+                            <div class="form-check mb-4">
+                                <input class="form-check-input" type="checkbox" id="agreeTerms" />
+                                <label class="form-check-label signup-check-label" for="agreeTerms">
+                                    I agree to the Terms of Service and Privacy Policy
+                                </label>
+                            </div>
+                            <button type="submit" class="btn signup-btn w-100">Creat Account</button>
+                            <p class="signup-bottom-text">
+                                Already have an account?
+                                <a asp-asp-controller="Account" asp-action="Login">Sign In</a>
+                            </p>
+                        </form>
                         </div>
-                        <button type="submit" class="btn btn-primary w-100">تسجيل</button>
-                    </form>
-                </div>
-                <div class="card-footer text-center">
-                    <a asp-action="Login">لديك حساب بالفعل؟ سجل دخولك</a>
+
+                    <a asp-controller="Home" asp-action="Index" class="back-home-link">← Back to Homepage</a>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-</div>
+        <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    </body>
+</html>

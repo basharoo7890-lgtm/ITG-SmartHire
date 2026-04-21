@@ -39,4 +39,9 @@
     <EmbeddedResource Remove="Migrations\obj\**\*" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Views\Layouts\" />
+    <Folder Include="Views\Styles\" />
+  </ItemGroup>
+
 </Project>

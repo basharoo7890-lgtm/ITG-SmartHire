@@ -1,15 +1,80 @@
-﻿<div class="card p-4 mx-auto" style="max-width: 400px;">
-    <h3>تسجيل الدخول</h3>
-    <form asp-action="Login" method="post">
-        <div asp-validation-summary="All" class="text-danger"></div>
-        <div class="mb-3">
-            <label>البريد الإلكتروني</label>
-            <input name="email" class="form-control" type="email" required />
+﻿@{
+    ViewData["Title"] = "Login";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Sign In - ITG Hire</title>
+
+        <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+        <link rel="stylesheet" href="~/lib/Fontawesome/css/all.min.css" />
+        <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    </head>
+    <body>
+        <div class="signin-page">
+            <div class="container-fluid px-0">
+                <div class="row g-0 min-vh-100">
+
+                    <div class="col-lg-6 signin-left d-none d-lg-flex flex-column justify-content-between">
+                        <div class="signin-brand">
+                            <i class="fa-solid fa-briefcase me-2"></i>
+                            <span>ITG Hire</span>
+                        </div>
+
+                        <div class="signin-left-content">
+                            <h1>Welcome Back</h1>
+                            <p>
+                            Sign in to access your account and continue your career
+                            journey with ITG Hire.
+                            </p>
+                        </div>
+
+                        <div class="signin-copy">
+                            © 2026 ITG Hire. All rights reserved.
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6 signin-right d-flex align-items-center justify-content-center">
+                        <div class="signin-card">
+                            <h2>Sign In</h2>
+                            <p class="signin-subtitle">Enter your credentials to access your account</p>
+                            <form asp-action="Login" asp-controller="Account" method="post">
+                                <div asp-validation-summary="All" class="text-danger mb-3"></div>
+                                <div class="mb-3">
+                                    <label class="form-label">Email Address</label>
+                                    <input type="email" name="email" class="form-control signin-input" placeholder="you@example.com" >
+                                </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Password</label>
+                                <input type="password" name="PasswordHash" class="form-control signin-input" placeholder="Enter your password">
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center mb-4 signin-links-row">
+                                <div>
+                                    <input type="checkbox" id="rememberMe" class="form-check-input me-2" >
+                                    <label for="rememberMe" class="small-text">Remember Me</label>
+                                </div>
+                                <a href="#" class="forgot-link">Forgot password?</a>
+                            </div>
+
+                            <button type="submit" class="btn signin-btn w-100">Sign In</button>
+                            <p class="signin-bottom-text">
+                                Don't have an account?
+                                <a asp-controller="Account" asp-action="Register">Create Account</a>
+                            </p>
+                            </form>
+
+                        </div>
+                    <a asp-controller="Home" asp-action="Index" class="back-home-link">← Back to Homepage</a>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="mb-3">
-            <label>كلمة المرور</label>
-            <input name="PasswordHash" class="form-control" type="password" required />
-        </div>
-        <button type="submit" class="btn btn-primary w-100">دخول</button>
-    </form>
-</div>
+        <script src ="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    </body>
+</html>

@@ -15,6 +15,15 @@ namespace Employment.Controllers
 
         public IActionResult Index()
         {
+            var jobs = new List<dynamic>();
+            return View(jobs);
+        }
+        public IActionResult JobDetails()
+        {
+            return View();
+        }
+        public IActionResult OpenPositions()
+        {
             return View();
         }
 

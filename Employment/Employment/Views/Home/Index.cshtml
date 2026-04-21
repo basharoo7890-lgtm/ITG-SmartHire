@@ -1,8 +1,104 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model List<dynamic>
+@{
+    ViewData["Title"] = "Home";
 }
+<div class="home-page">
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="hero-content">
+                <h1 class="hero-title">Build Your Career with ITG Hire</h1>
+                <p class="hero-text">
+                    Join our team of talented professionals and shape the future together.
+                    Discover opportunities that match your skills and aspirations.
+                </p>
+                <a href="#" class="btn hero-btn">Explore Open Positions</a>
+        </div>
+    </div>
+</section>
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<!-- Search Box-->
+<section class="search-section">
+    <div class="container">
+        <div class="search-box shadow-sm">
+            <div class="row g-3 align-items-center">
+                <div class="col-md-4">
+                     <input type="text" class="form-control search-input" placeholder="Job title or keyword" >
+                </div>
+                    <div class="col-md-4">
+                        <input type="text" class="form-control search-input" placeholder="Location">
+                    </div>
+                <div class="col-md-4">
+                        <button class="btn search-btn w-100"> Search Jobs</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured opportunities -->
+<section class="featured-section">
+    <div class="container">
+        <div class="text-center mb-5">
+                <h2 class="section-title">Featured Opportunities</h2>
+                <p class="section-subtitle">
+                    Explore our current openings and find the perfect role for your next career move
+                </p>
+        </div>
+        @if (Model != null && Model.Count > 0)
+            {
+                <div class="row g-4">
+                    @foreach (var job in Model)
+                    {
+                        <div class="col-md-4">
+                            <div class="job-card h-100">
+                                <div class="d-flex justify-content-between align-items-start mb-4">
+                                    <div class="job-icon">💼</div>
+                                    <span class="job-badge">@job.JobType</span>
+                                </div>
+                                <h4 class="job-title">@job.Title</h4>
+                                <p class="job-department">@job.Department</p>
+                                <p class="job-location"> @job.Location</p>
+                                <a asp-controller="Home" asp-action="JobDetails" class="btn details-btn w-100">View Details</a>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <div class="text-center mt-4">
+                    <a asp-cotroler="Home" asp-action="OpenPositions" class="btn view-all-btn">View All Positions</a>
+                </div>
+            }
+            else
+            {
+                <div class="row justify-content-center">
+                    <div class="col-md-4">
+                        <div class="job-card sample-job-card">
+                            <div class="d-flex justify-content-between align-items-start mb-4">
+                                <div class="job-icon-box">
+                                    <i class="fa-solid fa-briefcase job-main-icon"></i>
+                                </div>
+                                <span class="job-type-badge">Full-time</span>
+                            </div>
+                            <h4 class="job-card-title">Senior Software Engineer</h4>
+                            <p class="job-card-department">Engineering</p>
+                            <p class="job-card-location">
+                                <i class="fa-solid fa-location-dot me-1"></i>
+                                Remote
+                            </p>
+                            <a asp-controller="Home" asp-action="JobDetails" class="btn job-details-btn w-100">View Details</a>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="text-center mt-4">
+                    <a asp-controller="Home" asp-action="OpenPositions" class="btn view-all-btn">
+                        View All Positions
+                    </a>
+                </div>
+            }
+        </div>
+</section>
+
 </div>
+

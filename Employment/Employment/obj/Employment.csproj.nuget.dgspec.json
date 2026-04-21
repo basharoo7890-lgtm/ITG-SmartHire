@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\omara\\source\\repos\\ITG-SmartHire\\Employment\\Employment\\Employment.csproj": {}
+    "C:\\Users\\user\\ITG-SmartHire\\Employment\\Employment\\Employment.csproj": {}
   },
   "projects": {
-    "C:\\Users\\omara\\source\\repos\\ITG-SmartHire\\Employment\\Employment\\Employment.csproj": {
+    "C:\\Users\\user\\ITG-SmartHire\\Employment\\Employment\\Employment.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\omara\\source\\repos\\ITG-SmartHire\\Employment\\Employment\\Employment.csproj",
+        "projectUniqueName": "C:\\Users\\user\\ITG-SmartHire\\Employment\\Employment\\Employment.csproj",
         "projectName": "Employment",
-        "projectPath": "C:\\Users\\omara\\source\\repos\\ITG-SmartHire\\Employment\\Employment\\Employment.csproj",
-        "packagesPath": "C:\\Users\\omara\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\omara\\source\\repos\\ITG-SmartHire\\Employment\\Employment\\obj\\",
+        "projectPath": "C:\\Users\\user\\ITG-SmartHire\\Employment\\Employment\\Employment.csproj",
+        "packagesPath": "C:\\Users\\user\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\user\\ITG-SmartHire\\Employment\\Employment\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\omara\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\user\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -44,7 +44,7 @@
           "auditLevel": "low",
           "auditMode": "direct"
         },
-        "SdkAnalysisLevel": "10.0.200"
+        "SdkAnalysisLevel": "9.0.300"
       },
       "frameworks": {
         "net8.0": {
@@ -94,7 +94,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.201/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.308/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

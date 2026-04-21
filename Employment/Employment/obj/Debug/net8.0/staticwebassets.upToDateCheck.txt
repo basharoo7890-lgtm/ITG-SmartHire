@@ -1,4 +1,3 @@
-wwwroot\css\site.css
 wwwroot\favicon.ico
 wwwroot\js\site.js
 wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css
@@ -46,6 +45,16 @@ wwwroot\lib\bootstrap\dist\js\bootstrap.js.map
 wwwroot\lib\bootstrap\dist\js\bootstrap.min.js
 wwwroot\lib\bootstrap\dist\js\bootstrap.min.js.map
 wwwroot\lib\bootstrap\LICENSE
+wwwroot\lib\Fontawesome\css\all.min.css
+wwwroot\lib\Fontawesome\js\all.min.js
+wwwroot\lib\Fontawesome\webfonts\fa-brands-400.ttf
+wwwroot\lib\Fontawesome\webfonts\fa-brands-400.woff2
+wwwroot\lib\Fontawesome\webfonts\fa-regular-400.ttf
+wwwroot\lib\Fontawesome\webfonts\fa-regular-400.woff2
+wwwroot\lib\Fontawesome\webfonts\fa-solid-900.ttf
+wwwroot\lib\Fontawesome\webfonts\fa-solid-900.woff2
+wwwroot\lib\Fontawesome\webfonts\fa-v4compatibility.ttf
+wwwroot\lib\Fontawesome\webfonts\fa-v4compatibility.woff2
 wwwroot\lib\jquery-validation-unobtrusive\jquery.validate.unobtrusive.js
 wwwroot\lib\jquery-validation-unobtrusive\jquery.validate.unobtrusive.min.js
 wwwroot\lib\jquery-validation-unobtrusive\LICENSE.txt
@@ -58,3 +67,4 @@ wwwroot\lib\jquery\dist\jquery.js
 wwwroot\lib\jquery\dist\jquery.min.js
 wwwroot\lib\jquery\dist\jquery.min.map
 wwwroot\lib\jquery\LICENSE.txt
+wwwroot\css\site.css
