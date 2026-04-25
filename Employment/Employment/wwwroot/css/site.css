@@ -1100,3 +1100,206 @@ body {
         background-color: #1A7193;
         color: white !important;
     }
+
+    /* apply */
+
+.apply-page {
+    background-color: #E0EEF0;
+    min-height: 100vh;
+}
+
+    .apply-page .container {
+        max-width: 1050px;
+    }
+
+.back-link {
+    color: #149DD2;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.apply-header {
+    margin-top: 25px;
+    margin-bottom: 35px;
+}
+
+    .apply-header h1 {
+        color: #1A7193;
+        font-weight: 700;
+        font-size: 38px;
+    }
+
+    .apply-header p {
+        color: #149DD2;
+        font-size: 18px;
+    }
+
+.apply-job-card,
+.application-form-card {
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.apply-job-card {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 28px;
+    margin-bottom: 35px;
+}
+
+.job-icon {
+    width: 58px;
+    height: 58px;
+    border-radius: 12px;
+    background-color: #E0EEF0;
+    color: #1A7193;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+}
+
+.apply-job-card h3 {
+    color: #1A7193;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.job-meta {
+    color: #149DD2;
+    display: flex;
+    gap: 10px;
+}
+
+.application-form-card {
+    padding: 38px;
+}
+
+    .application-form-card h2 {
+        color: #1A7193;
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 28px;
+    }
+
+    .application-form-card h4 {
+        color: #1A7193;
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 20px;
+    }
+
+    .application-form-card label {
+        color: #1A7193;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+
+.apply-input,
+.apply-textarea {
+    background-color: #EEF5F8;
+    border: 1px solid #D4E6EC;
+    border-radius: 9px;
+    min-height: 52px;
+    color: #1A7193;
+}
+
+    .apply-input::placeholder,
+    .apply-textarea::placeholder {
+        color: #8BBFD0;
+    }
+
+    .apply-input:focus,
+    .apply-textarea:focus {
+        border-color: #149DD2;
+        box-shadow: 0 0 0 0.2rem rgba(20, 157, 210, 0.15);
+    }
+
+.application-form-card small {
+    color: #6FAFC5;
+    font-size: 12px;
+}
+
+.application-form-card hr {
+    margin: 32px 0;
+    border-color: #DCEAF0;
+}
+
+.cv-upload-box {
+    border: 2px dashed #B9DCE8;
+    border-radius: 10px;
+    min-height: 180px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #149DD2;
+    cursor: pointer;
+    text-align: center;
+    gap: 8px;
+}
+
+    .cv-upload-box i {
+        font-size: 42px;
+        color: #8BBFD0;
+    }
+
+    .cv-upload-box span {
+        color: #149DD2;
+        font-weight: 600;
+    }
+
+    .cv-upload-box small {
+        color: #6FAFC5;
+    }
+
+.form-check-label {
+    font-size: 14px;
+    color: #1A7193 !important;
+}
+
+.form-actions {
+    display: flex;
+    gap: 18px;
+}
+
+.cancel-btn {
+    background-color: #F0F5F8;
+    color: #1A7193;
+    border-radius: 8px;
+    padding: 12px 28px;
+}
+
+.submit-application-btn {
+    background-color: #1A7193;
+    color: white;
+    border-radius: 8px;
+    padding: 12px 28px;
+    flex: 1;
+}
+
+    .submit-application-btn:hover {
+        background-color: #155d79;
+        color: white;
+    }
+
+.cancel-btn:hover {
+    background-color: #E0EEF0;
+    color: #1A7193;
+}
+
+@media (max-width: 768px) {
+    .application-form-card {
+        padding: 24px;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .apply-header h1 {
+        font-size: 30px;
+    }
+}

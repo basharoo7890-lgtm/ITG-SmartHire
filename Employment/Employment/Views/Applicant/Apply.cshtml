@@ -1,0 +1,132 @@
+﻿
+@{
+    ViewData["Title"] = "Apply for Position";
+
+}
+
+<div class="apply-page">
+    <div class="container py-5">
+        <a asp-controller="Home" asp-action="JobDetails" class="back-link">
+            <i class="fa-solid fa-arrow-left me-2"></i>
+            Back to Job Details
+        </a>
+
+        <div class="apply-header">
+            <h1>Apply for Position</h1>
+            <p>Complete the form below to submit your application</p>
+        </div>
+
+        <div class="apply-job-card">
+            <div class="job-icon">
+                <i class="fa-solid fa-briefcase"></i>
+            </div>
+            <div>
+                <h3>@ViewBag.JobTitle</h3>
+                <div class="job-meta">
+                    <span>@ViewBag.Department</span>
+                    <span>•</span>
+                    <span>@ViewBag.Location</span>
+                    <span>•</span>
+                    <span>@ViewBag.JobType</span>
+                </div>
+            </div>
+        </div>
+        <form class="application-form-card" method="post" enctype="multipart/form-data">
+            <h2>Application Information</h2>
+
+            <h4>Personal Information</h4>
+
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <label>First Name *</label>
+                    <input type="text" class="form-control apply-input" placeholder="Rama" required >
+                </div>
+                <div class="col-md-6">
+                    <label>Last Name *</label>
+                    <input type="text" class="form-control apply-input" placeholder="Abo alsialat" required >
+                </div>
+                <div class="col-md-6">
+                    <label>Email Address *</label>
+                    <input type="email" class="form-control apply-input" placeholder="rama.doe@example.com" required >
+                </div>
+                <div class="col-md-6">
+                    <label>Phone Number *</label>
+                    <input type="text" class="form-control apply-input" placeholder="+962 *********" required >
+                </div>
+                <div class="col-12">
+                    <label>Country *</label>
+                    <input type="text" class="form-control apply-input" required >
+                </div>
+            </div>
+            <hr>
+            <h4>Professional Information</h4>
+
+            <div class="row g-4">
+                <div class="col-12">
+                    <label>LinkedIn Profile (Optional)</label>
+                    <input type="url" class="form-control apply-input" placeholder="https://linkedin.com/in/yourprofile" >
+                </div>
+                
+                <div class="col-12">
+                    <label>Portfolio/Website (Optional)</label>
+                    <input type="url" class="form-control apply-input" placeholder="https://yourportfolio.com" >
+                </div>
+
+                <div class="col-12">
+                    <label>Years of Experience *</label>
+                    <input type="number" class="form-control apply-input" required >
+                </div>
+
+                <div class="col-md-6">
+                    <label>Current Monthly Salary *</label>
+                    <input type="number" class="form-control apply-input" placeholder="5000" required >
+                </div>
+
+                <div class="col-md-6">
+                    <label>Expected Monthly Salary *</label>
+                    <input type="number" class="form-control apply-input" placeholder="6000" required >
+                    <small>Enter amount in USD</small>
+                </div>
+            </div>
+            <hr>
+
+            <div class="mb-4">
+                <label>Resume/CV *</label>
+
+                <label class="cv-upload-box">
+                    <i class="fa-solid fa-upload"></i>
+                    <span>Click to upload or drag and drop</span>
+                    <small>PDF, DOC, DOCX (Max 5MB)</small>
+                    <input type="file" hidden required >
+                </label>
+            </div>
+
+            <div class="mb-4">
+                <label>Cover Letter (Optional)</label>
+                <textarea class="form-control apply-textarea" rows="6" placeholder="Tell us why you're a great fit for this role..."></textarea>
+            </div>
+
+            <hr>
+            <h4>Additional Information</h4>
+
+            <div class="mb-4">
+                <label>When are you available to start? *</label>
+                <input type="date" class="form-control apply-input" required >
+            </div>
+
+            <hr>
+
+            <div class="form-check mb-4">
+                <input class="form-check-input" type="checkbox" id="confirmInfo" required >
+                <lable class="form-check-label" for="confirmInfo">
+                    I confirm that all information provided is accurate and I agree to ITG Hire's Privacy Policy
+                </lable>
+            </div>
+
+            <div class="form-actions">
+                <a asp-controller="Home" asp-action="JobDetails" class="btn cancel-btn">Cancel</a>
+                <button type="submit" class="btn submit-application-btn">Submit Application</button>
+            </div>
+        </form>
+    </div>
+</div>
