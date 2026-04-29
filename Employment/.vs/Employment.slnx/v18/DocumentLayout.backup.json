@@ -49,8 +49,7 @@
               "RelativeToolTip": "Employment\\Program.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAABVAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-29T15:06:23.81Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-04-29T15:06:23.81Z"
             },
             {
               "$type": "Document",
@@ -75,18 +74,16 @@
               "RelativeToolTip": "Employment\\Data\\ApplicationDbContext.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAABiAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-29T15:09:37.901Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-04-29T15:09:37.901Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 3,
-              "Title": "dbo.Users [Data]",
+              "Title": "dbo.Users.sql",
               "DocumentMoniker": "ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/Employment1/True/SqlTable/dbo.Users.sql",
-              "ToolTip": "dbo.Users [Data]",
+              "ToolTip": "ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/Employment1/True/SqlTable/dbo.Users.sql",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000826|",
-              "WhenOpened": "2026-04-29T19:48:12.745Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-04-29T19:48:12.745Z"
             },
             {
               "$type": "Document",
