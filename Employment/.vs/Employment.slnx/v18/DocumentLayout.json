@@ -3,17 +3,22 @@
   "WorkspaceRootPath": "C:\\Users\\omara\\source\\repos\\ITG-SmartHire\\Employment\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{11F71D8D-B73A-5317-E762-1D26544FF019}|Employment\\Employment.csproj|c:\\users\\omara\\source\\repos\\itg-smarthire\\employment\\employment\\data\\applicationdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{11F71D8D-B73A-5317-E762-1D26544FF019}|Employment\\Employment.csproj|solutionrelative:employment\\data\\applicationdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{11F71D8D-B73A-5317-E762-1D26544FF019}|Employment\\Employment.csproj|c:\\users\\omara\\source\\repos\\itg-smarthire\\employment\\employment\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
       "RelativeMoniker": "D:0:0:{11F71D8D-B73A-5317-E762-1D26544FF019}|Employment\\Employment.csproj|solutionrelative:employment\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\omara\\AppData\\Local\\Temp\\dbo.Users.data.sql||{CC5D8DF0-88F4-4BB2-9DBB-B48CEE65C30A}"
+      "AbsoluteMoniker": "D:0:0:{11F71D8D-B73A-5317-E762-1D26544FF019}|Employment\\Employment.csproj|c:\\users\\omara\\source\\repos\\itg-smarthire\\employment\\employment\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{11F71D8D-B73A-5317-E762-1D26544FF019}|Employment\\Employment.csproj|solutionrelative:employment\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/Employment1/True/SqlTable/dbo.Users.sql||{0058A1F7-65F3-4DB9-B3D0-CA7E64DD73CD}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\omara\\AppData\\Local\\Temp\\dbo.Users.data.sql||{CC5D8DF0-88F4-4BB2-9DBB-B48CEE65C30A}|CodeFrame"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/Employment/True/SqlTable/dbo.Users.sql||{0058A1F7-65F3-4DB9-B3D0-CA7E64DD73CD}"
     }
   ],
   "DocumentGroupContainers": [
@@ -28,35 +33,60 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "appsettings.json",
-              "DocumentMoniker": "C:\\Users\\omara\\source\\repos\\ITG-SmartHire\\Employment\\Employment\\appsettings.json",
-              "RelativeDocumentMoniker": "Employment\\appsettings.json",
-              "ToolTip": "C:\\Users\\omara\\source\\repos\\ITG-SmartHire\\Employment\\Employment\\appsettings.json",
-              "RelativeToolTip": "Employment\\appsettings.json",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2026-04-29T20:03:43.932Z",
+              "Title": "ApplicationDbContext.cs",
+              "DocumentMoniker": "C:\\Users\\omara\\source\\repos\\ITG-SmartHire\\Employment\\Employment\\Data\\ApplicationDbContext.cs",
+              "RelativeDocumentMoniker": "Employment\\Data\\ApplicationDbContext.cs",
+              "ToolTip": "C:\\Users\\omara\\source\\repos\\ITG-SmartHire\\Employment\\Employment\\Data\\ApplicationDbContext.cs",
+              "RelativeToolTip": "Employment\\Data\\ApplicationDbContext.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAABKAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-29T20:23:53.483Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "dbo.Users.data ",
-              "DocumentMoniker": "C:\\Users\\omara\\AppData\\Local\\Temp\\dbo.Users.data.sql",
-              "RelativeDocumentMoniker": "..\\..\\..\\..\\AppData\\Local\\Temp\\dbo.Users.data.sql",
-              "ToolTip": "dbo.Users.data *",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000826|",
-              "WhenOpened": "2026-04-29T20:01:50.551Z",
+              "Title": "appsettings.json",
+              "DocumentMoniker": "C:\\Users\\omara\\source\\repos\\ITG-SmartHire\\Employment\\Employment\\appsettings.json",
+              "RelativeDocumentMoniker": "Employment\\appsettings.json",
+              "ToolTip": "C:\\Users\\omara\\source\\repos\\ITG-SmartHire\\Employment\\Employment\\appsettings.json",
+              "RelativeToolTip": "Employment\\appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2026-04-29T20:23:44.844Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 2,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\omara\\source\\repos\\ITG-SmartHire\\Employment\\Employment\\Program.cs",
+              "RelativeDocumentMoniker": "Employment\\Program.cs",
+              "ToolTip": "C:\\Users\\omara\\source\\repos\\ITG-SmartHire\\Employment\\Employment\\Program.cs",
+              "RelativeToolTip": "Employment\\Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-29T20:23:28.253Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "dbo.Users [Data]",
+              "DocumentMoniker": "ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/Employment/True/SqlTable/dbo.Users.sql",
+              "ToolTip": "dbo.Users [Data]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000826|",
+              "WhenOpened": "2026-04-29T20:22:33.069Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
               "Title": "dbo.Users [Data]",
               "DocumentMoniker": "ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/Employment1/True/SqlTable/dbo.Users.sql",
               "ToolTip": "dbo.Users [Data]",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000826|",
-              "WhenOpened": "2026-04-29T20:00:25.936Z",
+              "WhenOpened": "2026-04-29T20:21:35.813Z",
               "EditorCaption": ""
             }
           ]
