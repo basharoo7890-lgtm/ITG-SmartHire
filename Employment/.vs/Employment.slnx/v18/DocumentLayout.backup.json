@@ -3,9 +3,6 @@
   "WorkspaceRootPath": "C:\\Users\\omara\\source\\repos\\ITG-SmartHire\\Employment\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/Employment1/True/SqlTable/dbo.Users.sql||{0058A1F7-65F3-4DB9-B3D0-CA7E64DD73CD}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{11F71D8D-B73A-5317-E762-1D26544FF019}|Employment\\Employment.csproj|c:\\users\\omara\\source\\repos\\itg-smarthire\\employment\\employment\\data\\applicationdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{11F71D8D-B73A-5317-E762-1D26544FF019}|Employment\\Employment.csproj|solutionrelative:employment\\data\\applicationdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -42,29 +39,19 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "dbo.Users [Data]",
-              "DocumentMoniker": "ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/Employment1/True/SqlTable/dbo.Users.sql",
-              "ToolTip": "dbo.Users [Data]",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000826|",
-              "WhenOpened": "2026-04-29T15:15:47.019Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
               "Title": "ApplicationDbContext.cs",
               "DocumentMoniker": "C:\\Users\\omara\\source\\repos\\ITG-SmartHire\\Employment\\Employment\\Data\\ApplicationDbContext.cs",
               "RelativeDocumentMoniker": "Employment\\Data\\ApplicationDbContext.cs",
               "ToolTip": "C:\\Users\\omara\\source\\repos\\ITG-SmartHire\\Employment\\Employment\\Data\\ApplicationDbContext.cs",
               "RelativeToolTip": "Employment\\Data\\ApplicationDbContext.cs",
-              "ViewState": "AgIAAAUAAAAAAAAAAAAuwBcAAAABAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABcAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-04-29T15:09:37.901Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 1,
               "Title": "Application.cs",
               "DocumentMoniker": "C:\\Users\\omara\\source\\repos\\ITG-SmartHire\\Employment\\Employment\\Models\\Application.cs",
               "RelativeDocumentMoniker": "Employment\\Models\\Application.cs",
@@ -72,12 +59,11 @@
               "RelativeToolTip": "Employment\\Models\\Application.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAC4AAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-29T15:09:17.162Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-04-29T15:09:17.162Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 2,
               "Title": "Job.cs",
               "DocumentMoniker": "C:\\Users\\omara\\source\\repos\\ITG-SmartHire\\Employment\\Employment\\Models\\Job.cs",
               "RelativeDocumentMoniker": "Employment\\Models\\Job.cs",
@@ -85,12 +71,11 @@
               "RelativeToolTip": "Employment\\Models\\Job.cs",
               "ViewState": "AgIAABAAAAAAAAAAAAAiwC8AAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-29T15:09:00.797Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-04-29T15:09:00.797Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 3,
               "Title": "User.cs",
               "DocumentMoniker": "C:\\Users\\omara\\source\\repos\\ITG-SmartHire\\Employment\\Employment\\Models\\User.cs",
               "RelativeDocumentMoniker": "Employment\\Models\\User.cs",
@@ -98,12 +83,11 @@
               "RelativeToolTip": "Employment\\Models\\User.cs",
               "ViewState": "AgIAAAMAAAAAAAAAAAAAACEAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-29T15:08:40.373Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-04-29T15:08:40.373Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 4,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\Users\\omara\\source\\repos\\ITG-SmartHire\\Employment\\Employment\\Program.cs",
               "RelativeDocumentMoniker": "Employment\\Program.cs",
@@ -111,12 +95,11 @@
               "RelativeToolTip": "Employment\\Program.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAB8AAAAKAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-29T15:06:23.81Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-04-29T15:06:23.81Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 5,
               "Title": "appsettings.json",
               "DocumentMoniker": "C:\\Users\\omara\\source\\repos\\ITG-SmartHire\\Employment\\Employment\\appsettings.json",
               "RelativeDocumentMoniker": "Employment\\appsettings.json",
@@ -124,8 +107,7 @@
               "RelativeToolTip": "Employment\\appsettings.json",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAACDAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2026-04-29T14:57:53.355Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-04-29T14:57:53.355Z"
             }
           ]
         }
