@@ -1,0 +1,31 @@
+﻿@model IEnumerable<Employment.Models.User>
+
+@{
+    ViewData["Title"] = "Users";
+}
+
+<h2>Users List</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>UserId</th>
+            <th>Email</th>
+            <th>FullName</th>
+            <th>Role</th>
+            <th>CreatedAt</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model)
+        {
+            <tr>
+                <td>@user.UserId</td>
+                <td>@user.Email</td>
+                <td>@user.FullName</td>
+                <td>@user.Role</td>
+                <td>@user.CreatedAt</td>
+            </tr>
+        }
+    </tbody>
+</table>
