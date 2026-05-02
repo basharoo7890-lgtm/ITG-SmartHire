@@ -8,6 +8,7 @@ namespace Employment.Controllers
         {
             return View();
         }
+
         public IActionResult Apply(string title, string department, string location, string type)
         {
             ViewBag.JobTitle = title;

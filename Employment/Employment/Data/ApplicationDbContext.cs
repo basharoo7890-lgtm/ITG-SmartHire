@@ -10,15 +10,20 @@ namespace Employment.Data
         public DbSet<User> Users { get; set; }
         public DbSet<Job> Jobs { get; set; }
         public DbSet<Application> Applications { get; set; }
+        public DbSet<AIAnalysis> AIAnalyses { get; set; }
+        public DbSet<JobSkill> JobSkills { get; set; }
+        public DbSet<SkillSynonym> SkillSynonyms { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-          
             modelBuilder.Entity<Application>().ToTable("Application");
             modelBuilder.Entity<Job>().ToTable("Jobs");
             modelBuilder.Entity<User>().ToTable("Users");
+            modelBuilder.Entity<AIAnalysis>().ToTable("Ai_Analysis");
+            modelBuilder.Entity<JobSkill>().ToTable("Job_Skill");
+            modelBuilder.Entity<SkillSynonym>().ToTable("Skill_Synonyms");
         }
     }
 }

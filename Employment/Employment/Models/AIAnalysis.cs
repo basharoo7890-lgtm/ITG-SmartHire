@@ -19,13 +19,9 @@ namespace Employment.Models
         public decimal? MatchingScore { get; set; }
 
         public string? Summary { get; set; }
-
         public string? Strengths { get; set; }
-
         public string? Weaknesses { get; set; }
-
         public DateTime? AnalysisDate { get; set; }
-
         public string? ParsedSkills { get; set; }
 
         [Column(TypeName = "decimal(5,2)")]
@@ -42,8 +38,12 @@ namespace Employment.Models
         [Column(TypeName = "decimal(5,2)")]
         public decimal? EducationScore { get; set; }
 
+        public string? GapReport { get; set; }
+
+        [StringLength(50)]
+        public string? DetectedLanguage { get; set; }
+
         [ForeignKey("ApplicationId")]
         public Application? Application { get; set; }
-
     }
 }

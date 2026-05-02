@@ -44,5 +44,7 @@ namespace Employment.Models
 
         [ForeignKey("CreatedBy")]
         public virtual User? Creator { get; set; }
+
+        public virtual ICollection<Application>? Applications { get; set; }
     }
 }

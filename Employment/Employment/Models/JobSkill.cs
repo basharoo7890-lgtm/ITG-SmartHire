@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Employment.Models
 {
-    [Table("JobSkill")]
+    [Table("Job_Skill")]
     public class JobSkill
     {
         [Key]
@@ -17,9 +17,11 @@ namespace Employment.Models
         [StringLength(100)]
         public string SkillName { get; set; } = string.Empty;
 
-        [Column("MinYearOfExperince")]
+        [Column("MinYearsOfExperience")]
         public int? MinYearOfExperience { get; set; }
 
         public int? ImportantLevel { get; set; }
+
+        public bool IsRequired { get; set; } = true;
     }
 }

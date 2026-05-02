@@ -24,7 +24,7 @@ namespace Employment.Models
         public string PasswordHash { get; set; } = string.Empty;
 
         [Required]
-        [StringLength(20)] // قيود: Applicant, HR, Admin
+        [StringLength(20)]
         public string Role { get; set; } = "Applicant";
 
         public DateTime CreatedAt { get; set; } = DateTime.Now;

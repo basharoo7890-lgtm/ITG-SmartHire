@@ -3,11 +3,10 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Employment.Models
 {
-    [Table("Skill_Synonym")]
+    [Table("Skill_Synonyms")]
     public class SkillSynonym
     {
         [Key]
-        [Column("Skill_S_id")]
         public int SkillSynonymId { get; set; }
 
         [StringLength(100)]
@@ -15,13 +14,7 @@ namespace Employment.Models
         public string? MainSkillName { get; set; }
 
         [StringLength(100)]
-        [Column("Synonym_Name")]
+        [Column("Synonym_Skill")]
         public string? SynonymName { get; set; }
-
-        [Column("Skill_Id")]
-        public int? SkillId { get; set; }
-
-        [ForeignKey("SkillId")]
-        public JobSkill? JobSkill { get; set; }
     }
 }

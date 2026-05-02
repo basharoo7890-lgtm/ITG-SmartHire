@@ -13,7 +13,6 @@ namespace Employment.Controllers
             _context = context;
         }
 
-        // Show all users
         public async Task<IActionResult> Index()
         {
             var users = await _context.Users.ToListAsync();
