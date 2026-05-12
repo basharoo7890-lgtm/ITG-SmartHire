@@ -28,17 +28,6 @@ namespace Employment.Data
             modelBuilder.Entity<JobSkill>().ToTable("Job_Skill");
             modelBuilder.Entity<SkillSynonym>().ToTable("Skill_Synonyms");
             modelBuilder.Entity<Application>()
-        .HasOne(a => a.User)
-        .WithMany(u => u.Applications)
-        .HasForeignKey(a => a.UserId)
-        .OnDelete(DeleteBehavior.NoAction);
-            modelBuilder.Entity<Application>()
-        .HasOne(a => a.Job)
-        .WithMany(j => j.Applications)
-        .HasForeignKey(a => a.JobId)
-        .OnDelete(DeleteBehavior.NoAction);
-
-            modelBuilder.Entity<Application>()
     .HasOne(a => a.AIAnalysis)
     .WithOne(ai => ai.Application)
     .HasForeignKey<AIAnalysis>(ai => ai.ApplicationId);
