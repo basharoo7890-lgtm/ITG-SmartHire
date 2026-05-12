@@ -1,4 +1,4 @@
-﻿@model List<dynamic>
+﻿@model List<Employment.Models.Job>
 @{
     ViewData["Title"] = "Home";
 }
@@ -54,7 +54,7 @@
                             <div class="job-card h-100">
                                 <div class="d-flex justify-content-between align-items-start mb-4">
                                     <div class="job-icon">💼</div>
-                                    <span class="job-badge">@job.JobType</span>
+                                    <span class="job-badge">@job.Status</span>
                                 </div>
                                 <h4 class="job-title">@job.Title</h4>
                                 <p class="job-department">@job.Department</p>

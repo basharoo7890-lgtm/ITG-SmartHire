@@ -1,4 +1,5 @@
 using Employment.Models;
+using Employment.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
@@ -6,22 +7,37 @@ namespace Employment.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
+        private readonly IJobService _jobService;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(IJobService jobService)
         {
-            _logger = logger;
+            _jobService = jobService;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            var jobs = new List<dynamic>();
+            var jobs = await _jobService.GetAllJobsAsync();
             return View(jobs);
         }
 
-        public IActionResult JobDetails()
+       
+        public async Task<IActionResult> JobDetails(int? id)
         {
-            return View();
+           
+            if (id == null)
+            {
+                return View();
+            }
+
+            
+            var viewModel = await _jobService.GetJobDetailsAsync(id.Value);
+
+            if (viewModel == null)
+            {
+                return NotFound();
+            }
+
+            return View(viewModel);
         }
 
         public IActionResult OpenPositions()
