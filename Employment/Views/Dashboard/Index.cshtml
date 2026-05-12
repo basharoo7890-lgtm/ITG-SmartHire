@@ -42,16 +42,25 @@
 <div class="dashboard-page">
     <div class="container">
 
-        <!-- Header -->
-        <div class="dashboard-header d-flex justify-content-between align-items-center flex-wrap gap-3">
-            <div>
-                <h2><i class="fa-solid fa-users me-2"></i>HR Dashboard</h2>
-                <p>Review candidates and manage applications</p>
-            </div>
-            <a href="/Admin" class="btn" style="background:white; color:#1A7193; border-radius:12px; font-weight:600; padding:12px 24px;">
-                <i class="fa-solid fa-shield-halved me-2"></i>Admin Panel
-            </a>
-        </div>
+      <!-- Header -->
+<!-- Header -->
+<div class="dashboard-header d-flex justify-content-between align-items-center flex-wrap gap-3">
+    <div>
+        <h2><i class="fa-solid fa-users me-2"></i>HR Dashboard</h2>
+        <p>Review candidates and manage applications</p>
+    </div>
+    
+    <!-- We add 'ms-auto' to push this whole group to the right, 
+         and 'flex-nowrap' to ensure they never stack vertically -->
+    <div class="d-flex flex-nowrap gap-3 ms-auto">
+        <a href="/Dashboard/Statistics" class="btn" style="background:white; color:#1A7193; border-radius:12px; font-weight:600; padding:12px 24px; display: flex; align-items: center; width: auto; flex-grow: 0;">
+            <i class="fa-solid fa-chart-pie me-2"></i>Statistics
+        </a>
+        <a href="/Admin" class="btn" style="background:white; color:#1A7193; border-radius:12px; font-weight:600; padding:12px 24px; display: flex; align-items: center; width: auto; flex-grow: 0;">
+            <i class="fa-solid fa-shield-halved me-2"></i>Admin Panel
+        </a>
+    </div>
+</div>
 
         <!-- Job Selector -->
         <div class="job-selector">

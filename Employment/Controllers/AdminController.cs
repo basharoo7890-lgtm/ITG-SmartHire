@@ -128,28 +128,70 @@ var jobSkill = new JobSkill
         }
 
         // GET: /Admin/Settings
-        public async Task<IActionResult> Settings()
+     // GET: /Admin/Settings
+// GET: /Admin/Settings
+public async Task<IActionResult> Settings()
+{
+    var settings = await _context.SystemSettings.ToListAsync();
+
+    var vm = new SettingsViewModel
+    {
+        Settings = settings.Select(s => new SettingItemViewModel
+        {
+            SettingKey   = s.SettingKey,
+            SettingValue = s.SettingValue  ?? "",
+            Description  = s.Description ?? "",
+            IsWeight     = s.SettingKey.ToLower().Contains("weight") ||
+                           s.SettingKey.ToLower().Contains("score")
+        }).ToList()
+    };
+
+    return View(vm);
+}
+
+// POST: /Admin/Settings
+[HttpPost]
+public async Task<IActionResult> Settings(SettingsViewModel vm)
+{
+    // Validate weights sum to 100
+    var weightSettings = vm.Settings
+        .Where(s => s.IsWeight)
+        .ToList();
+
+    if (weightSettings.Any())
+    {
+        var total = weightSettings
+            .Sum(s => double.TryParse(s.SettingValue, out var v) ? v : 0);
+
+        if (Math.Abs(total - 100) > 0.01)
         {
             var settings = await _context.SystemSettings.ToListAsync();
-            return View(settings);
-        }
-
-        // POST: /Admin/Settings
-        [HttpPost]
-        public async Task<IActionResult> Settings(List<SystemSetting> settings)
-        {
-            foreach (var setting in settings)
+            vm.Settings = settings.Select(s => new SettingItemViewModel
             {
-                var existing = await _context.SystemSettings.FindAsync(setting.SettingKey);
-                if (existing != null)
-                {
-                    existing.SettingValue = setting.SettingValue;
-                }
-            }
+               SettingKey   = s.SettingKey,
+               SettingValue = vm.Settings.FirstOrDefault(x => x.SettingKey == s.SettingKey)?.SettingValue ?? s.SettingValue ?? "",
+               Description  = s.Description ?? "",
+                IsWeight     = s.SettingKey.ToLower().Contains("weight") ||
+                               s.SettingKey.ToLower().Contains("score")
+            }).ToList();
 
-            await _context.SaveChangesAsync();
-            TempData["Success"] = "Settings saved successfully!";
-            return RedirectToAction("Settings");
+            vm.ErrorMessage = $"Weight settings must sum to 100. Current total: {total}";
+            return View(vm);
         }
+    }
+
+    foreach (var setting in vm.Settings)
+    {
+        var existing = await _context.SystemSettings.FindAsync(setting.SettingKey);
+        if (existing != null)
+        {
+           existing.SettingValue = setting.SettingValue ?? "";
+        }
+    }
+
+    await _context.SaveChangesAsync();
+    TempData["Success"] = "Settings saved successfully!";
+    return RedirectToAction("Settings");
+}
     }
 }

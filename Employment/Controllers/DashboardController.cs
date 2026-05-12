@@ -128,64 +128,120 @@ namespace Employment.Controllers
             return RedirectToAction("Index", new { jobId = application.JobId });
         }
         // GET: /Dashboard/Compare?jobId=1&ids=1&ids=2
-public async Task<IActionResult> Compare(int jobId, List<int> ids)
-{
-    var job = await _context.Jobs.FindAsync(jobId);
-
-    var allCandidates = await _context.Applications
-        .Where(a => a.JobId == jobId)
-        .Include(a => a.User)
-        .Include(a => a.AIAnalysis)
-        .OrderByDescending(a => a.AIAnalysis != null ? a.AIAnalysis.MatchingScore : -1)
-        .Select(a => new CandidateRowViewModel
+        public async Task<IActionResult> Compare(int jobId, List<int> ids)
         {
-            ApplicationId = a.ApplicationId,
-            CandidateName = a.User != null ? a.User.FullName : "Unknown",
-            CandidateEmail = a.User != null ? a.User.Email : "",
-            MatchingScore = a.AIAnalysis != null ? a.AIAnalysis.MatchingScore : null,
-            Status = a.Status,
-            SubmittedAt = a.SubmittedAt
-        })
-        .ToListAsync();
+            var job = await _context.Jobs.FindAsync(jobId);
 
-    var selected = new List<CandidateCompareRow>();
+            var allCandidates = await _context.Applications
+                .Where(a => a.JobId == jobId)
+                .Include(a => a.User)
+                .Include(a => a.AIAnalysis)
+                .OrderByDescending(a => a.AIAnalysis != null ? a.AIAnalysis.MatchingScore : -1)
+                .Select(a => new CandidateRowViewModel
+                {
+                    ApplicationId = a.ApplicationId,
+                    CandidateName = a.User != null ? a.User.FullName : "Unknown",
+                    CandidateEmail = a.User != null ? a.User.Email : "",
+                    MatchingScore = a.AIAnalysis != null ? a.AIAnalysis.MatchingScore : null,
+                    Status = a.Status,
+                    SubmittedAt = a.SubmittedAt
+                })
+                .ToListAsync();
 
-    if (ids != null && ids.Any())
-    {
-        var applications = await _context.Applications
-            .Where(a => ids.Contains(a.ApplicationId))
-            .Include(a => a.User)
-            .Include(a => a.AIAnalysis)
-            .ToListAsync();
+            var selected = new List<CandidateCompareRow>();
 
-        selected = applications.Select(a => new CandidateCompareRow
+            if (ids != null && ids.Any())
+            {
+                var applications = await _context.Applications
+                    .Where(a => ids.Contains(a.ApplicationId))
+                    .Include(a => a.User)
+                    .Include(a => a.AIAnalysis)
+                    .ToListAsync();
+
+                selected = applications.Select(a => new CandidateCompareRow
+                {
+                    ApplicationId = a.ApplicationId,
+                    Name = a.User?.FullName ?? "Unknown",
+                    Email = a.User?.Email ?? "",
+                    MatchingScore = a.AIAnalysis?.MatchingScore,
+                    ParsedSkills = a.AIAnalysis?.ParsedSkills,
+                    YearsOfExperience = a.YearsOfExperience,
+                    ExpectedSalary = a.ExpectedSalary,
+                    EducationLevel = a.EducationLevel,
+                    Status = a.Status,
+                    SkillsScore = a.AIAnalysis?.SkillsScore,
+                    ExperienceScore = a.AIAnalysis?.ExperienceScore,
+                    SalaryScore = a.AIAnalysis?.SalaryScore,
+                    EducationScore = a.AIAnalysis?.EducationScore,
+                }).ToList();
+            }
+
+            var vm = new CompareViewModel
+            {
+                JobId = jobId,
+                JobTitle = job?.Title ?? "N/A",
+                Candidates = selected,
+                AllCandidates = allCandidates,
+                SelectedIds = ids ?? new List<int>()
+            };
+
+            return View(vm);
+        }
+
+        // GET: /Dashboard/Statistics
+        public async Task<IActionResult> Statistics()
         {
-            ApplicationId    = a.ApplicationId,
-            Name             = a.User?.FullName ?? "Unknown",
-            Email            = a.User?.Email ?? "",
-            MatchingScore    = a.AIAnalysis?.MatchingScore,
-            ParsedSkills     = a.AIAnalysis?.ParsedSkills,
-            YearsOfExperience = a.YearsOfExperience,
-            ExpectedSalary   = a.ExpectedSalary,
-            EducationLevel   = a.EducationLevel,
-            Status           = a.Status,
-            SkillsScore      = a.AIAnalysis?.SkillsScore,
-            ExperienceScore  = a.AIAnalysis?.ExperienceScore,
-            SalaryScore      = a.AIAnalysis?.SalaryScore,
-            EducationScore   = a.AIAnalysis?.EducationScore,
-        }).ToList();
-    }
+            var applications = await _context.Applications
+                .Include(a => a.AIAnalysis)
+                .Include(a => a.Job)
+                .ToListAsync();
 
-    var vm = new CompareViewModel
-    {
-        JobId         = jobId,
-        JobTitle      = job?.Title ?? "N/A",
-        Candidates    = selected,
-        AllCandidates = allCandidates,
-        SelectedIds   = ids ?? new List<int>()
-    };
+            var totalApplications = applications.Count;
+            var autoRejected = applications.Count(a => a.Status == "AutoRejected");
+            var accepted = applications.Count(a => a.Status == "Shortlisted");
+            var rejected = applications.Count(a => a.Status == "Rejected");
+            var pending = applications.Count(a => a.Status == "Pending");
 
-    return View(vm);
-}
+            var scoresQuery = applications
+                .Where(a => a.AIAnalysis != null && a.AIAnalysis.MatchingScore.HasValue)
+                .Select(a => (double)a.AIAnalysis!.MatchingScore!.Value)
+                .ToList();
+
+            var avgScore = scoresQuery.Any() ? scoresQuery.Average() : 0;
+
+            // Top 5 skills
+            var topSkills = await _context.JobSkills
+                .GroupBy(s => s.SkillName)
+                .Select(g => new { Skill = g.Key, Count = g.Count() })
+                .OrderByDescending(g => g.Count)
+                .Take(5)
+                .ToListAsync();
+
+            // Applications per job
+            var appsPerJob = applications
+                .Where(a => a.Job != null)
+                .GroupBy(a => a.Job!.Title)
+                .Select(g => new { Title = g.Key, Count = g.Count() })
+                .ToList();
+
+            var vm = new StatisticsViewModel
+            {
+                TotalApplications = totalApplications,
+                AutoRejectedCount = autoRejected,
+                AutoRejectedPercentage = totalApplications > 0 ? Math.Round((double)autoRejected / totalApplications * 100, 1) : 0,
+                AverageMatchingScore = Math.Round(avgScore, 1),
+                AcceptedCount = accepted,
+                RejectedCount = rejected,
+                PendingCount = pending,
+                AcceptanceRate = totalApplications > 0 ? Math.Round((double)accepted / totalApplications * 100, 1) : 0,
+                TopSkillNames = topSkills.Select(s => s.Skill).ToList(),
+                TopSkillCounts = topSkills.Select(s => s.Count).ToList(),
+                JobTitles = appsPerJob.Select(j => j.Title).ToList(),
+                ApplicationsPerJob = appsPerJob.Select(j => j.Count).ToList()
+            };
+
+            return View(vm);
+        }
+
     }
 }

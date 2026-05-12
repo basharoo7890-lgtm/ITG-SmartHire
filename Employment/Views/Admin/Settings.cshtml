@@ -1,56 +1,130 @@
-@model List<Employment.Models.SystemSetting>
+@model Employment.ViewModels.SettingsViewModel
 
 @{
     ViewData["Title"] = "System Settings";
 }
 
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
+<style>
+    .settings-page { background-color: #E0EEF0; min-height: 100vh; padding: 36px 0 60px; }
+    .page-header { background: linear-gradient(90deg, #1A7193, #149DD2); border-radius: 18px; padding: 28px 36px; margin-bottom: 28px; color: white; }
+    .page-header h2 { font-size: 28px; font-weight: 700; margin-bottom: 4px; }
+    .page-header p { font-size: 15px; opacity: 0.85; margin: 0; }
+    .settings-card { background: white; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.07); overflow: hidden; margin-bottom: 24px; }
+    .settings-card-header { background: linear-gradient(90deg, #1A7193, #149DD2); padding: 14px 24px; }
+    .settings-card-header h5 { color: white; margin: 0; font-size: 16px; font-weight: 600; }
+    .settings-card-body { padding: 24px; }
+    .setting-row { background: #f8fbfc; border-radius: 12px; padding: 18px 20px; margin-bottom: 14px; border: 1px solid #D8E4EA; }
+    .setting-key { color: #1A7193; font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+    .setting-desc { color: #78A6B7; font-size: 13px; margin-bottom: 10px; }
+    .setting-input { border: 1px solid #D8E4EA; border-radius: 10px; padding: 10px 14px; font-size: 15px; color: #334e5a; width: 100%; }
+    .setting-input:focus { border-color: #149DD2; outline: none; }
+    .weight-badge { background: #EAF6FA; color: #1A7193; border-radius: 20px; padding: 3px 12px; font-size: 12px; font-weight: 600; margin-left: 8px; }
+    .save-btn { background-color: #1A7193; color: white; border: none; border-radius: 10px; padding: 12px 32px; font-size: 16px; font-weight: 600; cursor: pointer; }
+    .save-btn:hover { background-color: #155d79; }
+    .weight-total { background: #EAF6FA; border-radius: 10px; padding: 12px 18px; margin-bottom: 16px; color: #1A7193; font-weight: 600; font-size: 15px; display: flex; justify-content: space-between; align-items: center; }
+</style>
 
-            <div class="card shadow-sm border-0 rounded-4">
-                <div class="card-header rounded-top-4 py-3 px-4" style="background: linear-gradient(90deg, #1A7193, #149DD2);">
-                    <h4 class="text-white mb-0"><i class="fa-solid fa-gear me-2"></i>System Settings</h4>
-                </div>
-                <div class="card-body p-4">
+<div class="settings-page">
+    <div class="container">
 
-                    @if (TempData["Success"] != null)
-                    {
-                        <div class="alert alert-success rounded-3">
-                            <i class="fa-solid fa-circle-check me-2"></i>@TempData["Success"]
-                        </div>
-                    }
+        <div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h2><i class="fa-solid fa-gear me-2"></i>System Settings</h2>
+                <p>Configure system preferences and scoring weights</p>
+            </div>
+            <a href="/Admin" class="btn" style="background:white; color:#1A7193; border-radius:12px; font-weight:600; padding:12px 24px;">
+                <i class="fa-solid fa-arrow-left me-2"></i>Back to Admin
+            </a>
+        </div>
 
-                    @if (Model.Count == 0)
-                    {
-                        <div class="alert alert-info">No settings found.</div>
-                    }
-                    else
-                    {
-                        <form asp-action="Settings" method="post">
-                            @for (int i = 0; i < Model.Count; i++)
-                            {
-                                <div class="mb-4">
-                                    <label class="form-label fw-semibold">@Model[i].SettingKey</label>
-                                    @if (!string.IsNullOrEmpty(Model[i].Description))
-                                    {
-                                        <p class="text-muted small mb-1">@Model[i].Description</p>
-                                    }
-                                    <input type="hidden" name="[@i].SettingKey" value="@Model[i].SettingKey" />
-                                    <input type="text" name="[@i].SettingValue" value="@Model[i].SettingValue" class="form-control" />
-                                </div>
-                            }
-                            <div class="d-flex gap-2">
-                                <button type="submit" class="btn text-white px-4" style="background-color:#1A7193">
-                                    <i class="fa-solid fa-floppy-disk me-1"></i> Save Settings
-                                </button>
-                            </div>
-                        </form>
-                    }
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success rounded-3 mb-4">
+                <i class="fa-solid fa-circle-check me-2"></i>@TempData["Success"]
+            </div>
+        }
 
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="alert alert-danger rounded-3 mb-4">
+                <i class="fa-solid fa-circle-xmark me-2"></i>@Model.ErrorMessage
+            </div>
+        }
+
+        @if (!Model.Settings.Any())
+        {
+            <div class="settings-card">
+                <div class="settings-card-body">
+                    <p class="text-muted text-center py-4">No settings found.</p>
                 </div>
             </div>
+        }
+        else
+        {
+            <form method="post" action="/Admin/Settings">
+                @Html.AntiForgeryToken()
 
-        </div>
+                <div class="settings-card">
+                    <div class="settings-card-header">
+                        <h5><i class="fa-solid fa-sliders me-2"></i>General Settings</h5>
+                    </div>
+                    <div class="settings-card-body">
+                        @for (int i = 0; i < Model.Settings.Count; i++)
+                        {
+                            var s = Model.Settings[i];
+                            <input type="hidden" name="Settings[@i].SettingKey" value="@s.SettingKey" />
+                            <input type="hidden" name="Settings[@i].Description" value="@s.Description" />
+                            <input type="hidden" name="Settings[@i].IsWeight" value="@s.IsWeight" />
+                            <div class="setting-row">
+                                <div class="setting-key">
+                                    @s.SettingKey
+                                    @if (s.IsWeight)
+                                    {
+                                        <span class="weight-badge">Weight</span>
+                                    }
+                                </div>
+                                <div class="setting-desc">@s.Description</div>
+                                <input type="text" name="Settings[@i].SettingValue"
+                                    value="@s.SettingValue" class="setting-input"
+                                    placeholder="Enter value..." />
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <div class="weight-total">
+                    <span><i class="fa-solid fa-scale-balanced me-2"></i>Weight settings must sum to 100</span>
+                    <span id="weightTotal">-</span>
+                </div>
+
+                <div class="d-flex gap-3">
+                    <button type="submit" class="save-btn">
+                        <i class="fa-solid fa-floppy-disk me-2"></i>Save Settings
+                    </button>
+                </div>
+
+            </form>
+        }
+
     </div>
 </div>
+
+<script>
+    function updateWeightTotal() {
+        const inputs = document.querySelectorAll('.setting-input');
+        let total = 0;
+        inputs.forEach(input => {
+            const key = input.name.toLowerCase();
+            if (key.includes('weight') || key.includes('score')) {
+                total += parseFloat(input.value) || 0;
+            }
+        });
+        const el = document.getElementById('weightTotal');
+        if (el) {
+            el.textContent = total.toFixed(1);
+            el.style.color = Math.abs(total - 100) < 0.01 ? '#2e7d32' : '#c62828';
+        }
+    }
+    document.querySelectorAll('.setting-input').forEach(i => i.addEventListener('input', updateWeightTotal));
+    updateWeightTotal();
+</script>
