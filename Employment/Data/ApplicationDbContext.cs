@@ -13,6 +13,9 @@ namespace Employment.Data
         public DbSet<AIAnalysis> AIAnalyses { get; set; }
         public DbSet<JobSkill> JobSkills { get; set; }
         public DbSet<SkillSynonym> SkillSynonyms { get; set; }
+        public DbSet<SystemSetting> SystemSettings { get; set; }
+
+        
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -24,6 +27,10 @@ namespace Employment.Data
             modelBuilder.Entity<AIAnalysis>().ToTable("Ai_Analysis");
             modelBuilder.Entity<JobSkill>().ToTable("Job_Skill");
             modelBuilder.Entity<SkillSynonym>().ToTable("Skill_Synonyms");
+            modelBuilder.Entity<Application>()
+    .HasOne(a => a.AIAnalysis)
+    .WithOne(ai => ai.Application)
+    .HasForeignKey<AIAnalysis>(ai => ai.ApplicationId);
         }
     }
 }

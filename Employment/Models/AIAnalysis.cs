@@ -38,9 +38,12 @@ namespace Employment.Models
         [Column(TypeName = "decimal(5,2)")]
         public decimal? EducationScore { get; set; }
 
+        [NotMapped]
         public string? GapReport { get; set; }
 
         [StringLength(50)]
+
+        [NotMapped]
         public string? DetectedLanguage { get; set; }
 
         [ForeignKey("ApplicationId")]

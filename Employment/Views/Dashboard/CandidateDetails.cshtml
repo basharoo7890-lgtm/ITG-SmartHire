@@ -1,0 +1,295 @@
+@model Employment.ViewModels.CandidateDetailsViewModel
+
+@{
+    ViewData["Title"] = "Candidate Details";
+}
+
+<style>
+    .details-page { background-color: #E0EEF0; min-height: 100vh; padding: 36px 0 60px; }
+    .details-header { background: linear-gradient(90deg, #1A7193, #149DD2); border-radius: 18px; padding: 32px 36px; margin-bottom: 28px; color: white; }
+    .details-header h2 { font-size: 28px; font-weight: 700; margin-bottom: 4px; }
+    .details-header p { font-size: 15px; opacity: 0.85; margin: 0; }
+    .card-section { background: white; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.07); margin-bottom: 24px; overflow: hidden; }
+    .card-section-header { background: linear-gradient(90deg, #1A7193, #149DD2); padding: 14px 24px; }
+    .card-section-header h5 { color: white; margin: 0; font-size: 16px; font-weight: 600; }
+    .card-section-body { padding: 24px; }
+    .info-row { display: flex; gap: 8px; margin-bottom: 12px; align-items: flex-start; }
+    .info-label { color: #78A6B7; font-size: 13px; font-weight: 600; text-transform: uppercase; min-width: 140px; padding-top: 2px; }
+    .info-value { color: #334e5a; font-size: 15px; flex: 1; }
+    .score-ring { text-align: center; }
+    .score-number { font-size: 48px; font-weight: 700; color: #1A7193; line-height: 1; }
+    .score-label { font-size: 14px; color: #78A6B7; margin-top: 4px; }
+    .score-bar-row { margin-bottom: 14px; }
+    .score-bar-label { display: flex; justify-content: space-between; margin-bottom: 5px; }
+    .score-bar-label span:first-child { color: #334e5a; font-size: 14px; font-weight: 500; }
+    .score-bar-label span:last-child { color: #1A7193; font-size: 14px; font-weight: 700; }
+    .score-bar { height: 10px; border-radius: 10px; background: #EAF6FA; overflow: hidden; }
+    .score-bar-fill { height: 100%; background: linear-gradient(90deg, #1A7193, #149DD2); border-radius: 10px; transition: width 0.6s ease; }
+    .tag { display: inline-block; background: #EAF6FA; color: #1A7193; border-radius: 20px; padding: 4px 14px; font-size: 13px; font-weight: 500; margin: 3px; }
+    .question-item { background: #f8fbfc; border-left: 3px solid #1A7193; border-radius: 0 8px 8px 0; padding: 12px 16px; margin-bottom: 10px; color: #334e5a; font-size: 15px; }
+    .strength-item { background: #EAF6FA; border-radius: 8px; padding: 10px 16px; margin-bottom: 8px; color: #1A7193; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+    .weakness-item { background: #fdecea; border-radius: 8px; padding: 10px 16px; margin-bottom: 8px; color: #c62828; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+    .status-badge { padding: 6px 16px; border-radius: 20px; font-size: 14px; font-weight: 500; }
+    .status-pending { background-color: #EAF6FA; color: #1A7193; }
+    .status-shortlisted { background-color: #e8f5e9; color: #2e7d32; }
+    .status-rejected { background-color: #fdecea; color: #c62828; }
+    .action-btn-accept { background-color: #1A7193; color: white; border: none; border-radius: 10px; padding: 10px 24px; font-size: 15px; font-weight: 500; cursor: pointer; }
+    .action-btn-accept:hover { background-color: #155d79; }
+    .action-btn-reject { background-color: #fdecea; color: #c62828; border: none; border-radius: 10px; padding: 10px 24px; font-size: 15px; font-weight: 500; cursor: pointer; }
+    .action-btn-reject:hover { background-color: #f5c6c6; }
+</style>
+
+<div class="details-page">
+    <div class="container">
+
+        <!-- Header -->
+        <div class="details-header d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h2><i class="fa-solid fa-user me-2"></i>@Model.CandidateName</h2>
+                <p>Applied for: <strong>@Model.JobTitle</strong> • Submitted: @Model.SubmittedAt.ToShortDateString()</p>
+            </div>
+            <a href="/Dashboard?jobId=@Model.JobId" class="btn" style="background:white; color:#1A7193; border-radius:12px; font-weight:600; padding:12px 24px;">
+                <i class="fa-solid fa-arrow-left me-2"></i>Back to Dashboard
+            </a>
+        </div>
+
+        <div class="row g-4">
+
+            <!-- Left Column -->
+            <div class="col-md-4">
+
+                <!-- Candidate Info -->
+                <div class="card-section mb-4">
+                    <div class="card-section-header">
+                        <h5><i class="fa-solid fa-id-card me-2"></i>Candidate Info</h5>
+                    </div>
+                    <div class="card-section-body">
+                        <div class="info-row">
+                            <span class="info-label">Email</span>
+                            <span class="info-value">@Model.CandidateEmail</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Phone</span>
+                            <span class="info-value">@Model.Phone</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Education</span>
+                            <span class="info-value">@Model.EducationLevel</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Experience</span>
+                            <span class="info-value">@Model.YearsOfExperience years</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Expected Salary</span>
+                            <span class="info-value">$@Model.ExpectedSalary</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Status</span>
+                            <span class="info-value">
+                                @{
+                                    var statusCls = Model.Status == "Shortlisted" ? "status-shortlisted" :
+                                                    Model.Status == "Rejected" ? "status-rejected" : "status-pending";
+                                }
+                                <span class="status-badge @statusCls">@Model.Status</span>
+                            </span>
+                        </div>
+                        @if (!string.IsNullOrEmpty(Model.DetectedLanguage))
+                        {
+                            <div class="info-row">
+                                <span class="info-label">CV Language</span>
+                                <span class="info-value"><i class="fa-solid fa-language me-1" style="color:#1A7193"></i>@Model.DetectedLanguage</span>
+                            </div>
+                        }
+                        <div class="info-row">
+                            <span class="info-label">CV File</span>
+                            <span class="info-value">
+                                <i class="fa-solid fa-file-pdf me-1" style="color:#c62828"></i>
+                                @Model.CVFileName
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Overall Score -->
+                <div class="card-section">
+                    <div class="card-section-header">
+                        <h5><i class="fa-solid fa-star me-2"></i>Overall Match Score</h5>
+                    </div>
+                    <div class="card-section-body text-center">
+                        @if (Model.MatchingScore.HasValue)
+                        {
+                            <div class="score-number">@((int)Model.MatchingScore.Value)%</div>
+                            <div class="score-label">Overall Matching Score</div>
+                            <div class="mt-4">
+                                @{
+                                    void ScoreBar(string label, decimal? val)
+                                    {
+                                        var v = (int)(val ?? 0);
+                                        <div class="score-bar-row">
+                                            <div class="score-bar-label">
+                                                <span>@label</span>
+                                                <span>@v%</span>
+                                            </div>
+                                            <div class="score-bar">
+                                                <div class="score-bar-fill" style="width:@v%"></div>
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                                @{ ScoreBar("Skills", Model.SkillsScore); }
+                                @{ ScoreBar("Experience", Model.ExperienceScore); }
+                                @{ ScoreBar("Education", Model.EducationScore); }
+                                @{ ScoreBar("Salary", Model.SalaryScore); }
+                            </div>
+                        }
+                        else
+                        {
+                            <p class="text-muted">AI analysis not available yet.</p>
+                        }
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right Column -->
+            <div class="col-md-8">
+
+                <!-- AI Summary -->
+                @if (!string.IsNullOrEmpty(Model.Summary))
+                {
+                    <div class="card-section">
+                        <div class="card-section-header">
+                            <h5><i class="fa-solid fa-robot me-2"></i>AI Summary</h5>
+                        </div>
+                        <div class="card-section-body">
+                            <p style="color:#334e5a; font-size:15px; line-height:1.7; margin:0">@Model.Summary</p>
+                        </div>
+                    </div>
+                }
+
+                <!-- Strengths & Weaknesses -->
+                <div class="row g-3 mb-0">
+                    <div class="col-md-6">
+                        <div class="card-section h-100">
+                            <div class="card-section-header">
+                                <h5><i class="fa-solid fa-thumbs-up me-2"></i>Strengths</h5>
+                            </div>
+                            <div class="card-section-body">
+                                @if (Model.StrengthsList.Any())
+                                {
+                                    @foreach (var s in Model.StrengthsList)
+                                    {
+                                        <div class="strength-item">
+                                            <i class="fa-solid fa-check"></i> @s
+                                        </div>
+                                    }
+                                }
+                                else if (!string.IsNullOrEmpty(Model.Strengths))
+                                {
+                                    <div class="strength-item"><i class="fa-solid fa-check"></i> @Model.Strengths</div>
+                                }
+                                else
+                                {
+                                    <p class="text-muted">No data</p>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card-section h-100">
+                            <div class="card-section-header">
+                                <h5><i class="fa-solid fa-thumbs-down me-2"></i>Weaknesses</h5>
+                            </div>
+                            <div class="card-section-body">
+                                @if (Model.WeaknessesList.Any())
+                                {
+                                    @foreach (var w in Model.WeaknessesList)
+                                    {
+                                        <div class="weakness-item">
+                                            <i class="fa-solid fa-xmark"></i> @w
+                                        </div>
+                                    }
+                                }
+                                else if (!string.IsNullOrEmpty(Model.Weaknesses))
+                                {
+                                    <div class="weakness-item"><i class="fa-solid fa-xmark"></i> @Model.Weaknesses</div>
+                                }
+                                else
+                                {
+                                    <p class="text-muted">No data</p>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Parsed Skills -->
+                @if (!string.IsNullOrEmpty(Model.ParsedSkills))
+                {
+                    <div class="card-section">
+                        <div class="card-section-header">
+                            <h5><i class="fa-solid fa-code me-2"></i>Detected Skills</h5>
+                        </div>
+                        <div class="card-section-body">
+                            @foreach (var skill in Model.ParsedSkills.Split(',', StringSplitOptions.RemoveEmptyEntries))
+                            {
+                                <span class="tag">@skill.Trim()</span>
+                            }
+                        </div>
+                    </div>
+                }
+
+                <!-- Interview Questions -->
+                @if (!string.IsNullOrEmpty(Model.InterviewQuestions))
+                {
+                    <div class="card-section">
+                        <div class="card-section-header">
+                            <h5><i class="fa-solid fa-comments me-2"></i>Suggested Interview Questions</h5>
+                        </div>
+                        <div class="card-section-body">
+                            @if (Model.InterviewQuestionsList.Any())
+                            {
+                                var qNum = 1;
+                                @foreach (var q in Model.InterviewQuestionsList)
+                                {
+                                    <div class="question-item">
+                                        <strong style="color:#1A7193">Q@(qNum++).</strong> @q
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <div class="question-item">
+                                    <strong style="color:#1A7193">Q1.</strong> @Model.InterviewQuestions
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+
+                <!-- Actions -->
+                <div class="card-section mt-4">
+                    <div class="card-section-header">
+                        <h5><i class="fa-solid fa-gavel me-2"></i>Decision</h5>
+                    </div>
+                    <div class="card-section-body d-flex gap-3 flex-wrap">
+                        <form method="post" action="/Dashboard/Accept/@Model.ApplicationId">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="action-btn-accept">
+                                <i class="fa-solid fa-check me-2"></i>Accept Candidate
+                            </button>
+                        </form>
+                        <form method="post" action="/Dashboard/Reject/@Model.ApplicationId">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="action-btn-reject">
+                                <i class="fa-solid fa-xmark me-2"></i>Reject Candidate
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

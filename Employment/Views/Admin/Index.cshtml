@@ -1,0 +1,198 @@
+@model List<Employment.Models.Job>
+
+@{
+    ViewData["Title"] = "Admin Panel";
+    var totalJobs = Model.Count;
+    var activeJobs = Model.Count(j => j.Status == "Active");
+    var closedJobs = Model.Count(j => j.Status == "Closed");
+}
+
+<style>
+    .admin-page { background-color: #E0EEF0; min-height: 100vh; padding: 36px 0 60px; }
+    .admin-header { background: linear-gradient(90deg, #1A7193, #149DD2); border-radius: 18px; padding: 32px 36px; margin-bottom: 32px; color: white; }
+    .admin-header h2 { font-size: 32px; font-weight: 700; margin-bottom: 4px; }
+    .admin-header p { font-size: 16px; opacity: 0.85; margin: 0; }
+    .stat-card { background: white; border-radius: 16px; padding: 24px 28px; box-shadow: 0 2px 12px rgba(0,0,0,0.07); display: flex; align-items: center; gap: 18px; height: 100%; }
+    .stat-icon { width: 54px; height: 54px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+    .stat-icon.blue { background-color: #EAF6FA; color: #1A7193; }
+    .stat-icon.green { background-color: #EAF6FA; color: #1A7193; }
+    .stat-icon.red { background-color: #EAF6FA; color: #1A7193; }
+    .stat-value { font-size: 32px; font-weight: 700; color: #1A7193; line-height: 1; }
+    .stat-label { font-size: 14px; color: #78A6B7; margin-top: 4px; }
+    .action-card { background: white; border-radius: 16px; padding: 28px 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.07); text-align: center; height: 100%; transition: transform 0.2s; }
+    .action-card:hover { transform: translateY(-4px); }
+    .action-icon { width: 60px; height: 60px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 26px; margin: 0 auto 16px; background: #EAF6FA; }
+    .action-card h5 { color: #1A7193; font-weight: 700; font-size: 18px; margin-bottom: 8px; }
+    .action-card p { color: #78A6B7; font-size: 14px; margin-bottom: 20px; }
+    .action-btn { display: inline-block; background-color: #1A7193; color: white; border-radius: 10px; padding: 10px 24px; font-size: 15px; font-weight: 500; text-decoration: none; width: 100%; }
+    .action-btn:hover { background-color: #155d79; color: white; text-decoration: none; }
+    .section-title { color: #1A7193; font-size: 20px; font-weight: 700; margin-bottom: 18px; display: flex; align-items: center; gap: 10px; }
+    .jobs-table-card { background: white; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.07); overflow: hidden; }
+    .jobs-table-header { background: linear-gradient(90deg, #1A7193, #149DD2); padding: 18px 24px; }
+    .jobs-table-header h5 { color: white; margin: 0; font-size: 18px; font-weight: 600; }
+    .table th { color: #78A6B7; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #f0f4f6; padding: 14px 20px; }
+    .table td { padding: 14px 20px; color: #334e5a; font-size: 15px; border-bottom: 1px solid #f8fbfc; vertical-align: middle; }
+    .table tr:last-child td { border-bottom: none; }
+    .table tr:hover td { background-color: #f8fbfc; }
+    .status-badge { padding: 5px 14px; border-radius: 20px; font-size: 13px; font-weight: 500; }
+    .status-active { background-color: #EAF6FA; color: #1A7193; }
+    .status-closed { background-color: #fdecea; color: #c62828; }
+    .edit-btn { background-color: #EAF6FA; color: #1A7193; border: none; border-radius: 8px; padding: 7px 16px; font-size: 14px; font-weight: 500; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s; }
+    .edit-btn:hover { background-color: #d0ecf5; color: #1A7193; text-decoration: none; }
+    .empty-state { text-align: center; padding: 48px 24px; color: #78A6B7; }
+    .empty-state i { font-size: 48px; color: #d0e8f0; margin-bottom: 16px; display: block; }
+</style>
+
+<div class="admin-page">
+    <div class="container">
+
+        <!-- Header -->
+        <div class="admin-header d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h2><i class="fa-solid fa-shield-halved me-2"></i>Admin Panel</h2>
+                <p>Welcome back! Here's what's happening with ITG Hire today.</p>
+            </div>
+            <a href="/Admin/CreateJob" class="btn" style="background:white; color:#1A7193; border-radius:12px; font-weight:600; padding:12px 24px;">
+                <i class="fa-solid fa-plus me-2"></i>Post New Job
+            </a>
+        </div>
+
+        <!-- Stats -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <div class="stat-icon blue"><i class="fa-solid fa-briefcase"></i></div>
+                    <div>
+                        <div class="stat-value">@totalJobs</div>
+                        <div class="stat-label">Total Jobs Posted</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <div class="stat-icon green"><i class="fa-solid fa-circle-check"></i></div>
+                    <div>
+                        <div class="stat-value">@activeJobs</div>
+                        <div class="stat-label">Active Jobs</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <div class="stat-icon red"><i class="fa-solid fa-circle-xmark"></i></div>
+                    <div>
+                        <div class="stat-value">@closedJobs</div>
+                        <div class="stat-label">Closed Jobs</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="section-title"><i class="fa-solid fa-bolt"></i> Quick Actions</div>
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="action-card">
+                    <div class="action-icon">
+                        <i class="fa-solid fa-plus" style="color:#1A7193"></i>
+                    </div>
+                    <h5>Create Job</h5>
+                    <p>Post a new job opening for candidates to apply</p>
+                    <a href="/Admin/CreateJob" class="action-btn">Create Job</a>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="action-card">
+                    <div class="action-icon">
+                        <i class="fa-solid fa-users" style="color:#1A7193"></i>
+                    </div>
+                    <h5>HR Dashboard</h5>
+                    <p>View candidates and manage applications</p>
+                    <a href="/Dashboard" class="action-btn">Go to Dashboard</a>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="action-card">
+                    <div class="action-icon">
+                        <i class="fa-solid fa-gear" style="color:#1A7193"></i>
+                    </div>
+                    <h5>System Settings</h5>
+                    <p>Configure system preferences and options</p>
+                    <a href="/Admin/Settings" class="action-btn">Go to Settings</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Jobs Table -->
+        <div class="section-title"><i class="fa-solid fa-list"></i> All Job Postings</div>
+        <div class="jobs-table-card">
+            <div class="jobs-table-header d-flex justify-content-between align-items-center">
+                <h5><i class="fa-solid fa-briefcase me-2"></i>Jobs (@totalJobs)</h5>
+                <a href="/Admin/CreateJob" style="background:white; color:#1A7193; border-radius:8px; padding:7px 16px; font-size:14px; font-weight:600; text-decoration:none;">
+                    <i class="fa-solid fa-plus me-1"></i>Add New
+                </a>
+            </div>
+
+            @if (!Model.Any())
+            {
+                <div class="empty-state">
+                    <i class="fa-solid fa-briefcase"></i>
+                    <h5 style="color:#1A7193">No jobs posted yet</h5>
+                    <p>Click "Post New Job" to create your first job listing.</p>
+                    <a href="/Admin/CreateJob" class="action-btn" style="width:auto; display:inline-block; margin-top:8px">Create First Job</a>
+                </div>
+            }
+            else
+            {
+                <table class="table mb-0">
+                    <thead>
+                        <tr>
+                            <th>Job Title</th>
+                            <th>Department</th>
+                            <th>Location</th>
+                            <th>Min Experience</th>
+                            <th>Salary Range</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var job in Model)
+                        {
+                            <tr>
+                                <td class="fw-semibold" style="color:#1A7193">@job.Title</td>
+                                <td>@job.Department</td>
+                                <td>
+                                    <i class="fa-solid fa-location-dot me-1" style="color:#149DD2"></i>
+                                    @(string.IsNullOrEmpty(job.Location) ? "N/A" : job.Location)
+                                </td>
+                                <td>@job.MinExperience yrs</td>
+                                <td>
+                                    @if (job.SalaryMin.HasValue && job.SalaryMax.HasValue)
+                                    {
+                                        <span>$@job.SalaryMin — $@job.SalaryMax</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Not specified</span>
+                                    }
+                                </td>
+                                <td>
+                                    <span class="status-badge @(job.Status == "Active" ? "status-active" : "status-closed")">
+                                        @job.Status
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="/Admin/EditJob/@job.JobId" class="edit-btn">
+                                        <i class="fa-solid fa-pen"></i> Edit
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+
+    </div>
+</div>

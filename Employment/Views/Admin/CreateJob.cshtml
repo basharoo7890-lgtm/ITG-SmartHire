@@ -1,0 +1,244 @@
+@model Employment.ViewModels.AdminJobViewModel
+
+@{
+    ViewData["Title"] = "Create Job";
+}
+
+<style>
+    .create-job-page { background-color: #E0EEF0; min-height: 100vh; padding: 36px 0 60px; }
+    .page-header { background: linear-gradient(90deg, #1A7193, #149DD2); border-radius: 18px; padding: 28px 36px; margin-bottom: 28px; color: white; }
+    .page-header h2 { font-size: 28px; font-weight: 700; margin-bottom: 4px; }
+    .page-header p { font-size: 15px; opacity: 0.85; margin: 0; }
+    .form-card { background: white; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.07); overflow: hidden; margin-bottom: 24px; }
+    .form-card-header { background: linear-gradient(90deg, #1A7193, #149DD2); padding: 14px 24px; }
+    .form-card-header h5 { color: white; margin: 0; font-size: 16px; font-weight: 600; }
+    .form-card-body { padding: 24px; }
+    .form-label { color: #334e5a; font-weight: 600; font-size: 14px; margin-bottom: 6px; }
+    .form-control, .form-select { border: 1px solid #D8E4EA; border-radius: 10px; padding: 10px 14px; font-size: 15px; color: #334e5a; }
+    .form-control:focus, .form-select:focus { border-color: #149DD2; box-shadow: none; }
+    .ai-btn { background: linear-gradient(90deg, #1A7193, #149DD2); color: white; border: none; border-radius: 10px; padding: 10px 20px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+    .ai-btn:hover { opacity: 0.9; }
+    .ai-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .submit-btn { background-color: #1A7193; color: white; border: none; border-radius: 10px; padding: 12px 32px; font-size: 16px; font-weight: 600; cursor: pointer; }
+    .submit-btn:hover { background-color: #155d79; }
+    .skill-row { background: #f8fbfc; border-radius: 10px; padding: 14px; margin-bottom: 10px; border: 1px solid #D8E4EA; }
+    .remove-skill-btn { background: #fdecea; color: #c62828; border: none; border-radius: 8px; padding: 6px 12px; font-size: 13px; cursor: pointer; }
+    .remove-skill-btn:hover { background: #f5c6c6; }
+    .add-skill-btn { background: #EAF6FA; color: #1A7193; border: none; border-radius: 10px; padding: 10px 20px; font-size: 14px; font-weight: 600; cursor: pointer; }
+    .add-skill-btn:hover { background: #d0ecf5; }
+    .ai-loading { display: none; color: #1A7193; font-size: 14px; align-items: center; gap: 8px; }
+</style>
+
+<div class="create-job-page">
+    <div class="container">
+
+        <!-- Header -->
+        <div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h2><i class="fa-solid fa-plus-circle me-2"></i>Create New Job</h2>
+                <p>Fill in the details below or use AI to generate the description</p>
+            </div>
+            <a href="/Admin" class="btn" style="background:white; color:#1A7193; border-radius:12px; font-weight:600; padding:12px 24px;">
+                <i class="fa-solid fa-arrow-left me-2"></i>Back to Admin
+            </a>
+        </div>
+
+        <form asp-action="CreateJob" method="post" id="createJobForm">
+
+            <!-- Basic Info -->
+            <div class="form-card">
+                <div class="form-card-header">
+                    <h5><i class="fa-solid fa-briefcase me-2"></i>Job Information</h5>
+                </div>
+                <div class="form-card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Job Title <span class="text-danger">*</span></label>
+                            <input asp-for="Title" class="form-control" placeholder="e.g. Senior Backend Developer" />
+                            <span asp-validation-for="Title" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Department <span class="text-danger">*</span></label>
+                            <input asp-for="Department" class="form-control" placeholder="e.g. IT, HR, Finance" />
+                            <span asp-validation-for="Department" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Location <span class="text-danger">*</span></label>
+                            <input asp-for="Location" class="form-control" placeholder="e.g. Amman, Remote" />
+                            <span asp-validation-for="Location" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Required Education <span class="text-danger">*</span></label>
+                            <select asp-for="RequiredEducation" class="form-select">
+                                <option value="">Select education level</option>
+                                <option value="High School">High School</option>
+                                <option value="Diploma">Diploma</option>
+                                <option value="Bachelor">Bachelor</option>
+                                <option value="Master">Master</option>
+                                <option value="PhD">PhD</option>
+                            </select>
+                            <span asp-validation-for="RequiredEducation" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Min Experience (years)</label>
+                            <input asp-for="MinExperience" type="number" min="0" class="form-control" placeholder="0" />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Salary Min ($)</label>
+                            <input asp-for="SalaryMin" type="number" min="0" class="form-control" placeholder="e.g. 800" />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Salary Max ($)</label>
+                            <input asp-for="SalaryMax" type="number" min="0" class="form-control" placeholder="e.g. 2000" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Description with AI -->
+            <div class="form-card">
+                <div class="form-card-header">
+                    <h5><i class="fa-solid fa-file-lines me-2"></i>Job Description</h5>
+                </div>
+                <div class="form-card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                        <label class="form-label mb-0">Description <span class="text-danger">*</span></label>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="ai-loading" id="aiLoading">
+                                <div class="spinner-border spinner-border-sm" role="status"></div>
+                                <span>Generating with AI...</span>
+                            </div>
+                            <button type="button" class="ai-btn" onclick="generateWithAI()" id="aiBtn">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                                Generate with AI
+                            </button>
+                        </div>
+                    </div>
+                    <textarea asp-for="Description" class="form-control" rows="6"
+                        placeholder="Write a job description or click 'Generate with AI' to auto-fill based on the job title..."></textarea>
+                    <span asp-validation-for="Description" class="text-danger small"></span>
+                    <p class="text-muted small mt-2">
+                        <i class="fa-solid fa-circle-info me-1"></i>
+                        Fill in the Job Title first, then click "Generate with AI" to auto-generate a description.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Skills -->
+            <div class="form-card">
+                <div class="form-card-header">
+                    <h5><i class="fa-solid fa-code me-2"></i>Required Skills</h5>
+                </div>
+                <div class="form-card-body">
+                    <div id="skillsContainer">
+                        <!-- skills added dynamically -->
+                    </div>
+                    <button type="button" class="add-skill-btn" onclick="addSkill()">
+                        <i class="fa-solid fa-plus me-1"></i> Add Skill
+                    </button>
+                    <p class="text-muted small mt-2">Add the skills required for this position.</p>
+                </div>
+            </div>
+
+            <!-- Submit -->
+            <div class="d-flex gap-3">
+                <button type="submit" class="submit-btn">
+                    <i class="fa-solid fa-briefcase me-2"></i>Create Job
+                </button>
+                <a href="/Admin" class="btn btn-outline-secondary" style="border-radius:10px; padding:12px 24px; font-size:16px;">
+                    Cancel
+                </a>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<script>
+    let skillCount = 0;
+
+    function addSkill() {
+        const container = document.getElementById('skillsContainer');
+        const index = skillCount++;
+        const div = document.createElement('div');
+        div.className = 'skill-row';
+        div.id = 'skill-' + index;
+        div.innerHTML = `
+            <div class="row g-2 align-items-center">
+                <div class="col-md-4">
+                    <label class="form-label">Skill Name</label>
+                    <input type="text" name="Skills[${index}].SkillName" class="form-control" placeholder="e.g. C#, React, SQL" />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Min Years</label>
+                    <input type="number" name="Skills[${index}].MinYearsOfExperience" class="form-control" value="0" min="0" />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Level</label>
+                    <select name="Skills[${index}].ImportantLevel" class="form-select">
+                        <option value="Required">Required</option>
+                        <option value="Preferred">Preferred</option>
+                        <option value="Nice to have">Nice to have</option>
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="button" class="remove-skill-btn w-100" onclick="removeSkill(${index})">
+                        <i class="fa-solid fa-trash"></i> Remove
+                    </button>
+                </div>
+            </div>
+        `;
+        container.appendChild(div);
+    }
+
+    function removeSkill(index) {
+        const el = document.getElementById('skill-' + index);
+        if (el) el.remove();
+    }
+
+    async function generateWithAI() {
+        const title = document.getElementById('Title').value.trim();
+        if (!title) {
+            alert('Please enter a Job Title first!');
+            return;
+        }
+
+        const btn = document.getElementById('aiBtn');
+        const loading = document.getElementById('aiLoading');
+        btn.disabled = true;
+        loading.style.display = 'flex';
+
+        try {
+            const apiKey = 'YOUR_GEMINI_API_KEY'; // replace with real key later
+
+            const prompt = `Write a professional job description for a "${title}" position. 
+            Include: role overview, key responsibilities (5-6 points), and what makes a great candidate. 
+            Keep it concise, professional, and engaging. Plain text only, no markdown.`;
+
+            const response = await fetch(
+                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+                {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: prompt }] }]
+                    })
+                }
+            );
+
+            const data = await response.json();
+            const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+            if (text) {
+                document.getElementById('Description').value = text;
+            } else {
+                alert('AI could not generate a description. Please write it manually.');
+            }
+        } catch (err) {
+            alert('AI generation failed. Please check your API key or write manually.');
+        } finally {
+            btn.disabled = false;
+            loading.style.display = 'none';
+        }
+    }
+</script>

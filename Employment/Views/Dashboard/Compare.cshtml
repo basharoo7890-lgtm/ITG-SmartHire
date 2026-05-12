@@ -1,0 +1,255 @@
+@model Employment.ViewModels.CompareViewModel
+
+@{
+    ViewData["Title"] = "Compare Candidates";
+}
+
+<style>
+    .compare-page { background-color: #E0EEF0; min-height: 100vh; padding: 36px 0 60px; }
+    .page-header { background: linear-gradient(90deg, #1A7193, #149DD2); border-radius: 18px; padding: 28px 36px; margin-bottom: 28px; color: white; }
+    .page-header h2 { font-size: 28px; font-weight: 700; margin-bottom: 4px; }
+    .page-header p { font-size: 15px; opacity: 0.85; margin: 0; }
+    .selector-card { background: white; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.07); margin-bottom: 24px; overflow: hidden; }
+    .card-header-blue { background: linear-gradient(90deg, #1A7193, #149DD2); padding: 14px 24px; }
+    .card-header-blue h5 { color: white; margin: 0; font-size: 16px; font-weight: 600; }
+    .card-body-p { padding: 24px; }
+    .candidate-checkbox { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 10px; border: 1px solid #D8E4EA; margin-bottom: 8px; cursor: pointer; transition: 0.2s; }
+    .candidate-checkbox:hover { background: #EAF6FA; border-color: #149DD2; }
+    .candidate-checkbox input { width: 18px; height: 18px; accent-color: #1A7193; cursor: pointer; }
+    .candidate-checkbox label { color: #334e5a; font-size: 15px; cursor: pointer; margin: 0; flex: 1; }
+    .compare-btn { background-color: #1A7193; color: white; border: none; border-radius: 10px; padding: 12px 32px; font-size: 15px; font-weight: 600; cursor: pointer; }
+    .compare-btn:hover { background-color: #155d79; }
+    .compare-table { background: white; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.07); overflow: hidden; }
+    .compare-table table { width: 100%; border-collapse: collapse; }
+    .compare-table th { background: linear-gradient(90deg, #1A7193, #149DD2); color: white; padding: 14px 20px; font-size: 14px; font-weight: 600; text-align: center; }
+    .compare-table th:first-child { text-align: left; background: #155d79; }
+    .compare-table td { padding: 14px 20px; font-size: 15px; color: #334e5a; border-bottom: 1px solid #f0f4f6; text-align: center; }
+    .compare-table td:first-child { text-align: left; font-weight: 600; color: #78A6B7; font-size: 13px; text-transform: uppercase; background: #f8fbfc; }
+    .compare-table tr:last-child td { border-bottom: none; }
+    .best-value { background-color: #EAF6FA; color: #1A7193; font-weight: 700; border-radius: 8px; padding: 4px 10px; display: inline-block; }
+    .score-badge { padding: 5px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; background: #EAF6FA; color: #1A7193; }
+    .tag { display: inline-block; background: #EAF6FA; color: #1A7193; border-radius: 20px; padding: 3px 10px; font-size: 12px; margin: 2px; }
+    .status-pending { background-color: #EAF6FA; color: #1A7193; border-radius: 20px; padding: 4px 12px; font-size: 13px; }
+    .status-shortlisted { background-color: #e8f5e9; color: #2e7d32; border-radius: 20px; padding: 4px 12px; font-size: 13px; }
+    .status-rejected { background-color: #fdecea; color: #c62828; border-radius: 20px; padding: 4px 12px; font-size: 13px; }
+</style>
+
+<div class="compare-page">
+    <div class="container">
+
+        <!-- Header -->
+        <div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h2><i class="fa-solid fa-scale-balanced me-2"></i>Compare Candidates</h2>
+                <p>Job: <strong>@Model.JobTitle</strong> — Select 2 or 3 candidates to compare</p>
+            </div>
+            <a href="/Dashboard?jobId=@Model.JobId" class="btn" style="background:white; color:#1A7193; border-radius:12px; font-weight:600; padding:12px 24px;">
+                <i class="fa-solid fa-arrow-left me-2"></i>Back to Dashboard
+            </a>
+        </div>
+
+        <!-- Candidate Selector -->
+        <div class="selector-card">
+            <div class="card-header-blue">
+                <h5><i class="fa-solid fa-users me-2"></i>Select Candidates (2-3)</h5>
+            </div>
+            <div class="card-body-p">
+                <form method="get" action="/Dashboard/Compare">
+                    <input type="hidden" name="jobId" value="@Model.JobId" />
+
+                    @if (!Model.AllCandidates.Any())
+                    {
+                        <p class="text-muted">No candidates found for this job.</p>
+                    }
+                    else
+                    {
+                        @foreach (var c in Model.AllCandidates)
+                        {
+                            var isChecked = Model.SelectedIds.Contains(c.ApplicationId);
+                            <div class="candidate-checkbox">
+                                <input type="checkbox" name="ids" value="@c.ApplicationId"
+                                    id="chk_@c.ApplicationId" @(isChecked ? "checked" : "") />
+                                <label for="chk_@c.ApplicationId">
+                                    <strong>@c.CandidateName</strong>
+                                    <span class="text-muted ms-2" style="font-size:13px">@c.CandidateEmail</span>
+                                    @if (c.MatchingScore.HasValue)
+                                    {
+                                        <span class="score-badge ms-2">@((int)c.MatchingScore.Value)%</span>
+                                    }
+                                </label>
+                            </div>
+                        }
+                        <div class="mt-3">
+                            <button type="submit" class="compare-btn">
+                                <i class="fa-solid fa-scale-balanced me-2"></i>Compare Selected
+                            </button>
+                        </div>
+                    }
+                </form>
+            </div>
+        </div>
+
+        <!-- Comparison Table -->
+        @if (Model.Candidates.Any())
+        {
+           
+                var best = new Dictionary<string, int>();
+                if (Model.Candidates.Any(c => c.MatchingScore.HasValue))
+                    best["score"] = Model.Candidates.OrderByDescending(c => c.MatchingScore ?? 0).First().ApplicationId;
+                if (Model.Candidates.Any())
+                    best["exp"] = Model.Candidates.OrderByDescending(c => c.YearsOfExperience).First().ApplicationId;
+                if (Model.Candidates.Any())
+                    best["salary"] = Model.Candidates.OrderBy(c => c.ExpectedSalary).First().ApplicationId;
+         
+
+            <div class="compare-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="min-width:160px">Criteria</th>
+                            @foreach (var c in Model.Candidates)
+                            {
+                                <th>@c.Name</th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        <!-- Match Score -->
+                        <tr>
+                            <td><i class="fa-solid fa-star me-2" style="color:#149DD2"></i>Match Score</td>
+                            @foreach (var c in Model.Candidates)
+                            {
+                                var isBest = best.ContainsKey("score") && best["score"] == c.ApplicationId;
+                                <td>
+                                    @if (c.MatchingScore.HasValue)
+                                    {
+                                        if (isBest)
+                                        {
+                                            <span class="best-value">@((int)c.MatchingScore.Value)% ⭐</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="score-badge">@((int)c.MatchingScore.Value)%</span>
+                                        }
+                                    }
+                                    else { <span class="text-muted">N/A</span> }
+                                </td>
+                            }
+                        </tr>
+
+                        <!-- Skills -->
+                        <tr>
+                            <td><i class="fa-solid fa-code me-2" style="color:#149DD2"></i>Skills</td>
+                            @foreach (var c in Model.Candidates)
+                            {
+                                <td>
+                                    @if (!string.IsNullOrEmpty(c.ParsedSkills))
+                                    {
+                                        @foreach (var s in c.ParsedSkills.Split(',', StringSplitOptions.RemoveEmptyEntries))
+                                        {
+                                            <span class="tag">@s.Trim()</span>
+                                        }
+                                    }
+                                    else { <span class="text-muted">N/A</span> }
+                                </td>
+                            }
+                        </tr>
+
+                        <!-- Experience -->
+                        <tr>
+                            <td><i class="fa-solid fa-clock me-2" style="color:#149DD2"></i>Experience</td>
+                            @foreach (var c in Model.Candidates)
+                            {
+                                var isBest = best.ContainsKey("exp") && best["exp"] == c.ApplicationId;
+                                <td>
+                                    @if (isBest)
+                                    {
+                                        <span class="best-value">@c.YearsOfExperience yrs ⭐</span>
+                                    }
+                                    else
+                                    {
+                                        <span>@c.YearsOfExperience yrs</span>
+                                    }
+                                </td>
+                            }
+                        </tr>
+
+                        <!-- Expected Salary -->
+                        <tr>
+                            <td><i class="fa-solid fa-dollar-sign me-2" style="color:#149DD2"></i>Expected Salary</td>
+                            @foreach (var c in Model.Candidates)
+                            {
+                                var isBest = best.ContainsKey("salary") && best["salary"] == c.ApplicationId;
+                                <td>
+                                    @if (isBest)
+                                    {
+                                        <span class="best-value">$@c.ExpectedSalary ⭐</span>
+                                    }
+                                    else
+                                    {
+                                        <span>$@c.ExpectedSalary</span>
+                                    }
+                                </td>
+                            }
+                        </tr>
+
+                        <!-- Education -->
+                        <tr>
+                            <td><i class="fa-solid fa-graduation-cap me-2" style="color:#149DD2"></i>Education</td>
+                            @foreach (var c in Model.Candidates)
+                            {
+                                <td>@c.EducationLevel</td>
+                            }
+                        </tr>
+
+                        <!-- Status -->
+                        <tr>
+                            <td><i class="fa-solid fa-circle-info me-2" style="color:#149DD2"></i>Status</td>
+                            @foreach (var c in Model.Candidates)
+                            {
+                                var cls = c.Status == "Shortlisted" ? "status-shortlisted" :
+                                          c.Status == "Rejected" ? "status-rejected" : "status-pending";
+                                <td><span class="@cls">@c.Status</span></td>
+                            }
+                        </tr>
+
+                        <!-- Skills Score -->
+                        <tr>
+                            <td><i class="fa-solid fa-chart-bar me-2" style="color:#149DD2"></i>Skills Score</td>
+                            @foreach (var c in Model.Candidates)
+                            {
+                                <td>@(c.SkillsScore.HasValue ? $"{(int)c.SkillsScore.Value}%" : "N/A")</td>
+                            }
+                        </tr>
+
+                        <!-- Experience Score -->
+                        <tr>
+                            <td><i class="fa-solid fa-chart-bar me-2" style="color:#149DD2"></i>Experience Score</td>
+                            @foreach (var c in Model.Candidates)
+                            {
+                                <td>@(c.ExperienceScore.HasValue ? $"{(int)c.ExperienceScore.Value}%" : "N/A")</td>
+                            }
+                        </tr>
+
+                        <!-- View Details -->
+                        <tr>
+                            <td><i class="fa-solid fa-eye me-2" style="color:#149DD2"></i>Details</td>
+                            @foreach (var c in Model.Candidates)
+                            {
+                                <td>
+                                    <a href="/Dashboard/CandidateDetails/@c.ApplicationId"
+                                        style="background:#EAF6FA; color:#1A7193; border-radius:8px; padding:6px 14px; font-size:13px; text-decoration:none; font-weight:500;">
+                                        <i class="fa-solid fa-eye me-1"></i>View
+                                    </a>
+                                </td>
+                            }
+                        </tr>
+
+                    </tbody>
+                </table>
+            </div>
+        }
+
+    </div>
+</div>

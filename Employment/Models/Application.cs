@@ -11,6 +11,8 @@ namespace Employment.Models
         [Column("AppId")]
         public int ApplicationId { get; set; }
 
+        public AIAnalysis? AIAnalysis { get; set; }
+
         public int JobId { get; set; }
         public int UserId { get; set; }
 
@@ -24,10 +26,12 @@ namespace Employment.Models
         [Required]
         [StringLength(100)]
         public string EducationLevel { get; set; } = string.Empty;
-
+        
+        [Column("CVFillName")]
         [Required]
         [StringLength(256)]
         public string CVFileName { get; set; } = string.Empty;
+        
 
         [Required]
         public string CVText { get; set; } = string.Empty;
