@@ -1,6 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using Employment.Models;
+using Employment.ViewModels;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using Employment.Models;
 
 namespace Employment.Interfaces
 {
@@ -15,5 +16,9 @@ namespace Employment.Interfaces
         Task<decimal?> CalculateMatchingScoreAsync(int applicationId);
 
         Task<List<string>?> GenerateInterviewQuestionsAsync(int applicationId);
+
+        Task<bool> SubmitApplicationAsync(ApplyViewModel model, string cvFileName); 
+        Task<IEnumerable<Application>> GetUserApplicationsAsync(int userId);
+        Task<bool> ProcessAutoFilterAsync(int applicationId); 
     }
 }
