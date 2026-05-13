@@ -26,8 +26,8 @@ namespace Employment.Models
         [Required]
         [StringLength(100)]
         public string EducationLevel { get; set; } = string.Empty;
-        
-        [Column("CVFillName")]
+
+        [Column("CVFileName")]
         [Required]
         [StringLength(256)]
         public string CVFileName { get; set; } = string.Empty;

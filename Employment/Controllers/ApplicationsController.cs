@@ -45,7 +45,7 @@ namespace Employment.Controllers
                 UserId = 1,
                 Phone = phone,
                 ExpectedSalary = expectedSalary,
-                YearsOfExperience = experience,
+                YearsOfExperience = experience, 
                 EducationLevel = education,
                 CVFileName = uniqueFileName,
                 SubmittedAt = DateTime.Now,
