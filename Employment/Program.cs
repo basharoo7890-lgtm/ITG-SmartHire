@@ -19,7 +19,13 @@ builder.Services.AddScoped<IJobService, JobService>();
 
 builder.Services.AddScoped<IApplicationService, ApplicationService>();
 builder.Services.AddControllersWithViews();
-
+builder.Services.AddHttpClient<GeminiService>();
+builder.Services.AddSingleton<CVParserService>();
+builder.Services.AddSingleton<LanguageDetectorService>();
+builder.Services.AddSingleton<CVCompletenessService>();
+builder.Services.AddScoped<JobDescriptionService>();
+builder.Services.AddScoped<AIAnalysisService>();
+builder.Services.AddScoped<SkillsGapService>();
 var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())

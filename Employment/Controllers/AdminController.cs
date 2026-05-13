@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Employment.Data;
 using Employment.Models;
 using Employment.ViewModels;
+using Employment.Services;
 using Microsoft.AspNetCore.Authorization;
 
 namespace Employment.Controllers
@@ -31,52 +32,52 @@ namespace Employment.Controllers
         }
 
         // POST: /Admin/CreateJob
-   [HttpPost]
-public async Task<IActionResult> CreateJob(AdminJobViewModel vm)
-{
-    if (!ModelState.IsValid)
-        return View(vm);
-
-    var job = new Job
-    {
-        Title             = vm.Title,
-        Description       = vm.Description,
-        Department        = vm.Department,
-        Location          = vm.Location,
-        SalaryMin         = vm.SalaryMin,
-        SalaryMax         = vm.SalaryMax,
-        MinExperience     = vm.MinExperience,
-        RequiredEducation = vm.RequiredEducation,
-        Status            = "Active",
-        CreatedBy         = 1
-    };
-
-    _context.Jobs.Add(job);
-    await _context.SaveChangesAsync();
-
-    // Save skills
-    if (vm.Skills != null && vm.Skills.Any())
-    {
-        foreach (var skill in vm.Skills.Where(s => !string.IsNullOrEmpty(s.SkillName)))
+        [HttpPost]
+        public async Task<IActionResult> CreateJob(AdminJobViewModel vm)
         {
-    // Inside the foreach loop in CreateJob POST action
-var jobSkill = new JobSkill
-{
-    JobId = job.JobId,
-    SkillName = skill.SkillName,
-    MinYearOfExperience = skill.MinYearsOfExperience,
-    // Example mapping if ImportantLevel is an int in the database:
-    ImportantLevel = skill.ImportantLevel == "Required" ? 1 : 
-                     skill.ImportantLevel == "Preferred" ? 2 : 3,
-    IsRequired = skill.IsRequired
-};
-            _context.JobSkills.Add(jobSkill);
-        }
-        await _context.SaveChangesAsync();
-    }
+            if (!ModelState.IsValid)
+                return View(vm);
 
-    return RedirectToAction("Index");
-}
+            var job = new Job
+            {
+                Title = vm.Title,
+                Description = vm.Description,
+                Department = vm.Department,
+                Location = vm.Location,
+                SalaryMin = vm.SalaryMin,
+                SalaryMax = vm.SalaryMax,
+                MinExperience = vm.MinExperience,
+                RequiredEducation = vm.RequiredEducation,
+                Status = "Active",
+                CreatedBy = 1
+            };
+
+            _context.Jobs.Add(job);
+            await _context.SaveChangesAsync();
+
+            // Save skills
+            if (vm.Skills != null && vm.Skills.Any())
+            {
+                foreach (var skill in vm.Skills.Where(s => !string.IsNullOrEmpty(s.SkillName)))
+                {
+                    // Inside the foreach loop in CreateJob POST action
+                    var jobSkill = new JobSkill
+                    {
+                        JobId = job.JobId,
+                        SkillName = skill.SkillName,
+                        MinYearOfExperience = skill.MinYearsOfExperience,
+                        // Example mapping if ImportantLevel is an int in the database:
+                        ImportantLevel = skill.ImportantLevel == "Required" ? 1 :
+                                         skill.ImportantLevel == "Preferred" ? 2 : 3,
+                        IsRequired = skill.IsRequired
+                    };
+                    _context.JobSkills.Add(jobSkill);
+                }
+                await _context.SaveChangesAsync();
+            }
+
+            return RedirectToAction("Index");
+        }
 
         // GET: /Admin/EditJob/5
         public async Task<IActionResult> EditJob(int id)
@@ -128,70 +129,99 @@ var jobSkill = new JobSkill
         }
 
         // GET: /Admin/Settings
-     // GET: /Admin/Settings
-// GET: /Admin/Settings
-public async Task<IActionResult> Settings()
-{
-    var settings = await _context.SystemSettings.ToListAsync();
-
-    var vm = new SettingsViewModel
-    {
-        Settings = settings.Select(s => new SettingItemViewModel
-        {
-            SettingKey   = s.SettingKey,
-            SettingValue = s.SettingValue  ?? "",
-            Description  = s.Description ?? "",
-            IsWeight     = s.SettingKey.ToLower().Contains("weight") ||
-                           s.SettingKey.ToLower().Contains("score")
-        }).ToList()
-    };
-
-    return View(vm);
-}
-
-// POST: /Admin/Settings
-[HttpPost]
-public async Task<IActionResult> Settings(SettingsViewModel vm)
-{
-    // Validate weights sum to 100
-    var weightSettings = vm.Settings
-        .Where(s => s.IsWeight)
-        .ToList();
-
-    if (weightSettings.Any())
-    {
-        var total = weightSettings
-            .Sum(s => double.TryParse(s.SettingValue, out var v) ? v : 0);
-
-        if (Math.Abs(total - 100) > 0.01)
+        // GET: /Admin/Settings
+        // GET: /Admin/Settings
+        public async Task<IActionResult> Settings()
         {
             var settings = await _context.SystemSettings.ToListAsync();
-            vm.Settings = settings.Select(s => new SettingItemViewModel
-            {
-               SettingKey   = s.SettingKey,
-               SettingValue = vm.Settings.FirstOrDefault(x => x.SettingKey == s.SettingKey)?.SettingValue ?? s.SettingValue ?? "",
-               Description  = s.Description ?? "",
-                IsWeight     = s.SettingKey.ToLower().Contains("weight") ||
-                               s.SettingKey.ToLower().Contains("score")
-            }).ToList();
 
-            vm.ErrorMessage = $"Weight settings must sum to 100. Current total: {total}";
+            var vm = new SettingsViewModel
+            {
+                Settings = settings.Select(s => new SettingItemViewModel
+                {
+                    SettingKey = s.SettingKey,
+                    SettingValue = s.SettingValue ?? "",
+                    Description = s.Description ?? "",
+                    IsWeight = s.SettingKey.ToLower().Contains("weight") ||
+                                   s.SettingKey.ToLower().Contains("score")
+                }).ToList()
+            };
+
             return View(vm);
         }
-    }
 
-    foreach (var setting in vm.Settings)
-    {
-        var existing = await _context.SystemSettings.FindAsync(setting.SettingKey);
-        if (existing != null)
+        // POST: /Admin/Settings
+        [HttpPost]
+        public async Task<IActionResult> Settings(SettingsViewModel vm)
         {
-           existing.SettingValue = setting.SettingValue ?? "";
-        }
-    }
+            // Validate weights sum to 100
+            var weightSettings = vm.Settings
+                .Where(s => s.IsWeight)
+                .ToList();
 
-    await _context.SaveChangesAsync();
-    TempData["Success"] = "Settings saved successfully!";
-    return RedirectToAction("Settings");
+            if (weightSettings.Any())
+            {
+                var total = weightSettings
+                    .Sum(s => double.TryParse(s.SettingValue, out var v) ? v : 0);
+
+                if (Math.Abs(total - 100) > 0.01)
+                {
+                    var settings = await _context.SystemSettings.ToListAsync();
+                    vm.Settings = settings.Select(s => new SettingItemViewModel
+                    {
+                        SettingKey = s.SettingKey,
+                        SettingValue = vm.Settings.FirstOrDefault(x => x.SettingKey == s.SettingKey)?.SettingValue ?? s.SettingValue ?? "",
+                        Description = s.Description ?? "",
+                        IsWeight = s.SettingKey.ToLower().Contains("weight") ||
+                                       s.SettingKey.ToLower().Contains("score")
+                    }).ToList();
+
+                    vm.ErrorMessage = $"Weight settings must sum to 100. Current total: {total}";
+                    return View(vm);
+                }
+            }
+
+            foreach (var setting in vm.Settings)
+            {
+                var existing = await _context.SystemSettings.FindAsync(setting.SettingKey);
+                if (existing != null)
+                {
+                    existing.SettingValue = setting.SettingValue ?? "";
+                }
+            }
+
+            await _context.SaveChangesAsync();
+            TempData["Success"] = "Settings saved successfully!";
+            return RedirectToAction("Settings");
+        }
+
+// POST: /Admin/GenerateDescription
+[HttpPost]
+public async Task<IActionResult> GenerateDescription(
+    [FromBody] GenerateDescriptionRequest request,
+    [FromServices] JobDescriptionService jobDescService)
+{
+    if (string.IsNullOrEmpty(request.Title))
+        return BadRequest("Job title is required");
+
+    var description = await jobDescService.GenerateJobDescriptionAsync(
+        request.Title,
+        request.Department ?? "General",
+        request.Skills ?? new List<string>()
+    );
+
+    if (description == null)
+        return StatusCode(500, "AI generation failed");
+
+    return Ok(new { description });
 }
+
+public class GenerateDescriptionRequest
+{
+    public string Title { get; set; } = string.Empty;
+    public string? Department { get; set; }
+    public List<string>? Skills { get; set; }
+}
+
     }
 }

@@ -267,6 +267,18 @@
                         </div>
                     </div>
                 }
+                <!-- Gap Report -->
+@if (!string.IsNullOrEmpty(Model.GapReport))
+{
+    <div class="card-section mt-4">
+        <div class="card-section-header">
+            <h5><i class="fa-solid fa-envelope me-2"></i>Gap Report — Message to Candidate</h5>
+        </div>
+        <div class="card-section-body">
+            <p style="color:#334e5a; font-size:15px; line-height:1.7; white-space:pre-line; margin:0">@Model.GapReport</p>
+        </div>
+    </div>
+}
 
                 <!-- Actions -->
                 <div class="card-section mt-4">
