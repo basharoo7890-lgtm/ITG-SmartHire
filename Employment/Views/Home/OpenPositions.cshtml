@@ -1,4 +1,6 @@
-﻿@{
+﻿@model List<Employment.Models.Job>
+
+@{
     ViewData["Title"] = "Open Positions";
 }
 
@@ -15,50 +17,105 @@
                 <div class="col-md-4">
                     <input type="text" class="form-control positions-filter-input" placeholder="Job title or keyword">
                 </div>
+
                 <div class="col-md-4">
                     <input type="text" class="form-control positions-filter-input" placeholder="Location">
                 </div>
+
                 <div class="col-md-4">
                     <button class="btn search-btn w-100">Search Jobs</button>
                 </div>
             </div>
 
             <div class="positions-filter-footer">
-                <span>Showing 1 position</span>
+                <span>Showing @(Model != null ? Model.Count : 0) position(s)</span>
                 <a href="#">More Filters</a>
             </div>
         </div>
 
         <div class="positions-list">
-            <div class="position-item-card">
-                <div class="position-left">
-                    <div class="position-icon-box">
-                        <i class="fa-solid fa-briefcase"></i>
-                    </div>
 
-                    <div>
-                        <h3>Senior Software Engineer</h3>
-                        <div class="position-meta">
-                            <span><i class="fa-regular fa-building me-1"></i>Engineering</span>
-                            <span><i class="fa-solid fa-location-dot me-1"></i>Remote</span>
-                            <span><i class="fa-regular fa-clock me-1"></i>2 days ago</span>
+            @if (Model != null && Model.Any())
+            {
+                @foreach (var job in Model)
+                {
+                    <div class="position-item-card">
+                        <div class="position-left">
+                            <div class="position-icon-box">
+                                <i class="fa-solid fa-briefcase"></i>
+                            </div>
+
+                            <div>
+                                <h3>@job.Title</h3>
+
+                                <div class="position-meta">
+                                    <span>
+                                        <i class="fa-regular fa-building me-1"></i>
+                                        @job.Department
+                                    </span>
+
+                                    <span>
+                                        <i class="fa-solid fa-location-dot me-1"></i>
+                                        @job.Location
+                                    </span>
+
+                                    <span>
+                                        <i class="fa-regular fa-clock me-1"></i>
+                                        Posted on @job.CreatedAt.ToString("MMM dd, yyyy")
+                                    </span>
+                                </div>
+
+                                <p>
+                                    Minimum Experience: @job.MinExperience years
+                                </p>
+                            </div>
                         </div>
-                        <p>24 Applications</p>
-                    </div>
-                </div>
 
-                <div class="position-right">
-                    <span class="position-badge">Full-time</span>
-                    <div class="position-buttons">
-                        <a asp-controller="Home" asp-action="JobDetails" class="btn position-details-btn">View Details</a>
-                        <a asp-controller="Applications" asp-action="Apply" asp-route-title="Senior Software Engineer" asp-route-department="Engineering" asp-route-location="Remote" asp-route-type="Full-time" class="btn position-apply-btn">Apply Now</a>
+                        <div class="position-right">
+                            <span class="position-badge">@job.Status</span>
+
+                            <div class="position-buttons">
+                                <a asp-controller="Home"
+                                   asp-action="JobDetails"
+                                   asp-route-id="@job.JobId"
+                                   class="btn position-details-btn">
+                                    View Details
+                                </a>
+
+                                <a asp-controller="Applicant"
+                                   asp-action="Apply"
+                                   asp-route-jobId="@job.JobId"
+                                   class="btn position-apply-btn">
+                                    Apply Now
+                                </a>
+                            </div>
+                        </div>
                     </div>
+                }
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="fa-regular fa-folder-open" style="font-size: 50px; color: #149DD2;"></i>
+
+                    <h3 class="mt-3" style="color: #1A7193;">
+                        No open positions yet
+                    </h3>
+
+                    <p style="color: #149DD2;">
+                        New job postings will appear here once the HR team creates them.
+                    </p>
                 </div>
+            }
+
+        </div>
+
+        @if (Model != null && Model.Any())
+        {
+            <div class="positions-pagination">
+                <a href="#" class="btn page-btn active">1</a>
             </div>
-        </div>
+        }
 
-        <div class="positions-pagination">
-            <a href="#" class="btn page-btn active">1</a>
-        </div>
     </div>
 </div>

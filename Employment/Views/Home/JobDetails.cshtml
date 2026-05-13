@@ -1,4 +1,5 @@
-﻿
+﻿@model Employment.Models.Job
+
 @{
     ViewData["Title"] = "Job Details";
 }
@@ -7,16 +8,18 @@
     <div class="container py-5">
 
         <div class="mb-4">
-            <a asp-controller="Home" asp-action="Index" class="back-jobs-link">
+            <a asp-controller="Home" asp-action="OpenPositions" class="back-jobs-link">
                 <i class="fa-solid fa-arrow-left me-2"></i>
                 Back to Jobs
             </a>
         </div>
 
         <div class="row g-4 align-items-start">
-            <!--left-->
+
+            <!-- Left Side -->
             <div class="col-lg-8">
-                <!--top card-->
+
+                <!-- Top Card -->
                 <div class="details-card top-job-card">
                     <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
                         <div class="d-flex align-items-start gap-3">
@@ -25,99 +28,119 @@
                             </div>
 
                             <div>
-                                <h1 class="details-job-title">Senior Software Engineer</h1>
+                                <h1 class="details-job-title">@Model.Title</h1>
+
                                 <div class="details-meta">
-                                    <span><i class="fa-regular fa-building me-1"></i>Engineering</span>
-                                    <span><i class="fa-solid fa-location-dot me-1"></i>Remote</span>
-                                    <span><i class="fa-regular fa-clock me-1"></i>2 days ago</span>
+                                    <span>
+                                        <i class="fa-regular fa-building me-1"></i>
+                                        @Model.Department
+                                    </span>
+
+                                    <span>
+                                        <i class="fa-solid fa-location-dot me-1"></i>
+                                        @Model.Location
+                                    </span>
+
+                                    <span>
+                                        <i class="fa-regular fa-clock me-1"></i>
+                                        Posted on @Model.CreatedAt.ToString("MMM dd, yyyy")
+                                    </span>
                                 </div>
                             </div>
                         </div>
-                        <span class="job-type-badge">Full-time</span>
+
+                        <span class="job-type-badge">@Model.Status</span>
                     </div>
 
                     <div class="details-extra-info mt-4">
-                        <span><i class="fa-solid fa-dollar-sign me-1"></i>$120,000 - $160,000</span>
-                        <span><i class="fa-solid fa-users me-1"></i>24 applicants</span>
+                        <span>
+                            <i class="fa-solid fa-dollar-sign me-1"></i>
+                            @if (Model.SalaryMin.HasValue && Model.SalaryMax.HasValue)
+                            {
+                                @($"{Model.SalaryMin.Value:0} - {Model.SalaryMax.Value:0}")
+                            }
+                            else
+                            {
+                                @("Salary not specified")
+                            }
+                        </span>
+
+                        <span>
+                            <i class="fa-solid fa-user-clock me-1"></i>
+                            @Model.MinExperience years experience
+                        </span>
                     </div>
 
-                    <a asp-controller="Applications"
-                           asp-action="Apply"
-                           asp-route-jobId="1"
-                           asp-route-title="Senior Software Engineer"
-                           asp-route-department="Engineering"
-                           asp-route-location="Remote"
-                           asp-route-type="Full-time"
-                           class="btn apply-position-btn w-100 mt-4">
+                    <a asp-controller="Applicant"
+                       asp-action="Apply"
+                       asp-route-jobId="@Model.JobId"
+                       class="btn apply-position-btn w-100 mt-4">
                         Apply for This Position
                     </a>
                 </div>
-                <!--description-->
+
+                <!-- Description -->
                 <div class="details-card mt-4">
                     <h2 class="details-section-title">Job Description</h2>
                     <p class="details-text">
-                        We're looking for an experienced Senior Software Engineer to join our growing Engineering team.
-                        You'll be working on cutting-edge technologies and contributing to products used by millions of users worldwide.
+                        @Model.Description
                     </p>
                 </div>
-                <!--responsibilities-->
-                <div class="details-card mt-4">
-                    <h2 class="details-section-title">Responsibilities</h2>
-                    <ul class="details-list">
-                        <li><i class="fa-solid fa-check"></i>Design, develop, and maintain scalable web applications</li>
-                        <li><i class="fa-solid fa-check"></i>Collaborate with cross-functional teams to define and ship new features</li>
-                        <li><i class="fa-solid fa-check"></i>Write clean, maintainable, and well-documented code</li>
-                        <li><i class="fa-solid fa-check"></i>Participate in code reviews and mentor junior developers</li>
-                        <li><i class="fa-solid fa-check"></i>Contribute to technical architecture decisions</li>
-                        <li><i class="fa-solid fa-check"></i>Optimize application performance and user experience</li>
-                    </ul>
-                </div>
 
-                <!--requirements-->
+                <!-- Requirements -->
                 <div class="details-card mt-4">
                     <h2 class="details-section-title">Requirements</h2>
-                    <ul class="details-list">
-                        <li><i class="fa-solid fa-circle"></i>5+ years of professional software development experience</li>
-                        <li><i class="fa-solid fa-circle"></i>Strong proficiency in JavaScript/TypeScript and React</li>
-                        <li><i class="fa-solid fa-circle"></i>Experience with modern web development frameworks and tools</li>
-                        <li><i class="fa-solid fa-circle"></i>Solid understanding of RESTful APIs and microservices architecture</li>
-                        <li><i class="fa-solid fa-circle"></i>Excellent problem-solving and communication skills</li>
-                        <li><i class="fa-solid fa-circle"></i>Bachelor's degree in Computer Science or related field</li>
-                    </ul>
+                    <p class="details-text">
+                        @Model.RequiredEducation
+                    </p>
                 </div>
 
-                <!--qualifications-->
+                <!-- Extra Info -->
                 <div class="details-card mt-4">
-                    <h2 class="details-section-title">Preferred Qualifications</h2>
-                    <ul class="details-list light-list">
-                        <li><i class="fa-solid fa-plus"></i>Experience with cloud platforms (AWS, Azure, or GCP)</li>
-                        <li><i class="fa-solid fa-plus"></i>Knowledge of CI/CD pipelines and DevOps practices</li>
-                        <li><i class="fa-solid fa-plus"></i>Familiarity with agile development methodologies</li>
-                        <li><i class="fa-solid fa-plus"></i>Open source contributions</li>
-                        <li><i class="fa-solid fa-plus"></i>Experience leading technical projects</li>
+                    <h2 class="details-section-title">Job Information</h2>
+
+                    <ul class="details-list">
+                        <li>
+                            <i class="fa-solid fa-check"></i>
+                            Department: @Model.Department
+                        </li>
+
+                        <li>
+                            <i class="fa-solid fa-check"></i>
+                            Location: @Model.Location
+                        </li>
+
+                        <li>
+                            <i class="fa-solid fa-check"></i>
+                            Minimum Experience: @Model.MinExperience years
+                        </li>
+
+                        <li>
+                            <i class="fa-solid fa-check"></i>
+                            Status: @Model.Status
+                        </li>
                     </ul>
                 </div>
 
             </div>
 
-            <!--right-->
+            <!-- Right Side -->
             <div class="col-lg-4 sticky-parent">
                 <div class="apply-sticky-card">
                     <h3>Ready to Apply?</h3>
                     <p>
                         Submit your application and join our team of talented professionals.
                     </p>
-                    <a asp-controller="Applications"
+
+                    <a asp-controller="Applicant"
                        asp-action="Apply"
-                       asp-route-title="Senior Software Engineer"
-                       asp-route-department="Engineering"
-                       asp-route-location="Remote"
-                       asp-route-type="Full-time"
+                       asp-route-jobId="@Model.JobId"
                        class="btn apply-position-btn w-100 mt-4">
                         Apply Now
                     </a>
                 </div>
             </div>
+
         </div>
     </div>
 </div>

@@ -4,12 +4,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Employment</title>
+
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Employment.styles.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/lib/Fontawesome/css/all.min.css" />
- 
 </head>
+
 <body>
     <header>
         <!-- navbar -->
@@ -30,32 +31,50 @@
                         <li class="nav-item">
                             <a class="nav-link active" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
+
                         <li class="nav-item">
-                            <a class="nav-link" href="#">Open Positions</a>
+                            <a class="nav-link" asp-controller="Home" asp-action="OpenPositions">Open Positions</a>
                         </li>
+
                         <li class="nav-item">
-                            <a class="nav-link" href="#">My Applications</a>
+                            <a asp-controller="Applicant" asp-action="MyApplications" class="nav-link">My Applications</a>
                         </li>
                     </ul>
 
                     <div class="d-flex align-items-center nav-right-side">
-                        <a asp-controller="Account" asp-action="Login" class="nav-icon-link me-4">
-                            <i class="fa-regular fa-user nav-user-icon"></i>
-                        </a>
+                        @if (User.Identity != null && User.Identity.IsAuthenticated)
+                        {
+                            <a asp-controller="Users" asp-action="Profile" class="nav-link">
+                                <i class="fa-regular fa-user nav-user-icon"></i>
+                            </a>
 
-                        <a asp-controller="Account" asp-action="Login" class="sign-in-link me-4">Sign In</a>
+                            <a asp-controller="Account" asp-action="Logout" class="btn get-started-btn">
+                                Sign Out
+                            </a>
+                        }
+                        else
+                        {
+                            <a asp-controller="Account" asp-action="Login" class="nav-link">
+                                <i class="fa-regular fa-user nav-user-icon"></i>
+                            </a>
 
-                        <a asp-controller="Account" asp-action="Register" class="btn get-started-btn">Get Started</a>
+                            <a asp-controller="Account" asp-action="Login" class="sign-in-link me-4">
+                                Sign In
+                            </a>
+
+                            <a asp-controller="Account" asp-action="Register" class="btn get-started-btn">
+                                Get Started
+                            </a>
+                        }
                     </div>
                 </div>
             </div>
         </nav>
     </header>
-    
-        <main role="main">
-            @RenderBody()
-        </main>
-    
+
+    <main role="main">
+        @RenderBody()
+    </main>
 
     <!-- Footer -->
     <footer class="footer-section">
@@ -71,9 +90,15 @@
                 <div class="col-md-3">
                     <h6 class="footer-heading">For Candidates</h6>
                     <ul class="footer-links">
-                        <li><a href="#">Browse Jobs</a></li>
-                        <li><a href="#">My Applications</a></li>
-                        <li><a href="#">Profile</a></li>
+                        <li>
+                            <a asp-controller="Home" asp-action="OpenPositions">Browse Jobs</a>
+                        </li>
+                        <li>
+                            <a asp-controller="Applicant" asp-action="MyApplications">My Applications</a>
+                        </li>
+                        <li>
+                            <a asp-controller="Users" asp-action="Profile">Profile</a>
+                        </li>
                     </ul>
                 </div>
 
@@ -81,7 +106,7 @@
                     <h6 class="footer-heading">Company</h6>
                     <ul class="footer-links">
                         <li><a href="#">About Us</a></li>
-                        <li><a href="#">Careers</a></li>
+                        <li><a asp-controller="Home" asp-action="OpenPositions">Careers</a></li>
                         <li><a href="#">Contact</a></li>
                     </ul>
                 </div>
@@ -94,13 +119,16 @@
                     </ul>
                 </div>
             </div>
+
             <hr class="footer-line" />
             <p class="footer-copy text-center">© 2026 ITG Hire. All rights reserved.</p>
         </div>
     </footer>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

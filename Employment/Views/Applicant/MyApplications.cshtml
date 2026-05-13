@@ -1,0 +1,154 @@
+﻿@model List<Employment.Models.Application>
+
+@{
+    ViewData["Title"] = "My Applications";
+
+    var totalApplications = Model.Count;
+    var pendingCount = Model.Count(a => a.Status == "Pending");
+    var underReviewCount = Model.Count(a => a.Status == "Under Review");
+    var interviewCount = Model.Count(a => a.Status == "Interview Scheduled");
+}
+
+<div class="applications-page">
+    <div class="container py-5">
+
+        <div class="applications-heading mb-4">
+            <h1>My Applications</h1>
+            <p>Track the status of your job applications</p>
+        </div>
+
+        <div class="row g-4 mb-4">
+
+            <div class="col-md-3">
+                <div class="application-stat-card">
+                    <div>
+                        <p>Total Applications</p>
+                        <h2>@totalApplications</h2>
+                    </div>
+                    <i class="fa-solid fa-briefcase"></i>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="application-stat-card">
+                    <div>
+                        <p>Pending</p>
+                        <h2>@pendingCount</h2>
+                    </div>
+                    <i class="fa-regular fa-clock"></i>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="application-stat-card">
+                    <div>
+                        <p>Under Review</p>
+                        <h2>@underReviewCount</h2>
+                    </div>
+                    <i class="fa-regular fa-eye"></i>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="application-stat-card">
+                    <div>
+                        <p>Interviews</p>
+                        <h2>@interviewCount</h2>
+                    </div>
+                    <i class="fa-regular fa-circle-check"></i>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="applications-table-card">
+
+            @if (Model.Any())
+            {
+                <table class="table applications-table mb-0">
+                    <thead>
+                        <tr>
+                            <th>Job Title</th>
+                            <th>Applied Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var application in Model)
+                        {
+                            var statusClass = application.Status switch
+                            {
+                                "Pending" => "status-pending",
+                                "Under Review" => "status-under-review",
+                                "Interview Scheduled" => "status-interview",
+                                "Rejected" => "status-rejected",
+                                "Accepted" => "status-accepted",
+                                _ => "status-pending"
+                            };
+
+                            var statusIcon = application.Status switch
+                            {
+                                "Pending" => "fa-regular fa-clock",
+                                "Under Review" => "fa-regular fa-eye",
+                                "Interview Scheduled" => "fa-regular fa-circle-check",
+                                "Rejected" => "fa-regular fa-circle-xmark",
+                                "Accepted" => "fa-regular fa-circle-check",
+                                _ => "fa-regular fa-clock"
+                            };
+
+                            <tr>
+                                <td>
+                                    <div class="job-title-cell">
+                                        <div class="job-icon">
+                                            <i class="fa-solid fa-briefcase"></i>
+                                        </div>
+
+                                        <span>
+                                            @(application.Job != null ? application.Job.Title : "Job not found")
+                                        </span>
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <i class="fa-regular fa-calendar me-2"></i>
+                                    @application.SubmittedAt.ToString("MMMM dd, yyyy")
+                                </td>
+
+                                <td>
+                                    <span class="application-status @statusClass">
+                                        <i class="@statusIcon me-1"></i>
+                                        @application.Status
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <a asp-controller="Home"
+                                       asp-action="JobDetails"
+                                       asp-route-id="@application.JobId"
+                                       class="view-job-link">
+                                        View Job
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <div class="empty-applications">
+                    <i class="fa-regular fa-folder-open"></i>
+                    <h3>No applications yet</h3>
+                    <p>You have not applied to any job yet.</p>
+
+                    <a asp-controller="Home" asp-action="OpenPositions" class="btn browse-jobs-btn">
+                        Browse Jobs
+                    </a>
+                </div>
+            }
+
+        </div>
+    </div>
+</div>

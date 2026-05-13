@@ -1,48 +1,54 @@
+using Employment.Data;
 using Employment.Models;
-using Employment.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 
 namespace Employment.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly IJobService _jobService;
+        private readonly ILogger<HomeController> _logger;
+        private readonly ApplicationDbContext _context;
 
-        public HomeController(IJobService jobService)
+        public HomeController(ILogger<HomeController> logger, ApplicationDbContext context)
         {
-            _jobService = jobService;
+            _logger = logger;
+            _context = context;
         }
 
         public async Task<IActionResult> Index()
         {
-            var jobs = await _jobService.GetAllJobsAsync();
+            var jobs = await _context.Jobs
+                .Where(j => j.Status == "Open")
+                .OrderByDescending(j => j.CreatedAt)
+                .Take(3)
+                .ToListAsync();
+
             return View(jobs);
         }
 
-       
-        public async Task<IActionResult> JobDetails(int? id)
+        public async Task<IActionResult> OpenPositions()
         {
-           
-            if (id == null)
-            {
-                return View();
-            }
+            var jobs = await _context.Jobs
+                .Where(j => j.Status == "Open")
+                .OrderByDescending(j => j.CreatedAt)
+                .ToListAsync();
 
-            
-            var viewModel = await _jobService.GetJobDetailsAsync(id.Value);
+            return View(jobs);
+        }
 
-            if (viewModel == null)
+        public async Task<IActionResult> JobDetails(int id)
+        {
+            var job = await _context.Jobs
+                .FirstOrDefaultAsync(j => j.JobId == id);
+
+            if (job == null)
             {
                 return NotFound();
             }
 
-            return View(viewModel);
-        }
-
-        public IActionResult OpenPositions()
-        {
-            return View();
+            return View(job);
         }
 
         public IActionResult Privacy()
