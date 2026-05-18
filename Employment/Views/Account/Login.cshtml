@@ -13,6 +13,40 @@
         <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
         <link rel="stylesheet" href="~/lib/Fontawesome/css/all.min.css" />
         <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <style>
+        
+        .password-wrapper {
+            position: relative;
+        }
+
+        .password-toggle {
+            position: absolute;
+            top: 50%;
+            right: 10px;
+            transform: translateY(-50%);
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 1.1rem;
+            color: #149DD2;
+            padding: 0;
+        }
+
+            .password-toggle:focus {
+                outline: none;
+            }
+
+        /* Hide default browser password reveal icon */
+        input[type="password"]::-ms-reveal,
+        input[type="password"]::-ms-clear {
+            display: none;
+        }
+
+        input[type="password"]::-webkit-credentials-auto-fill-button,
+        input[type="password"]::-webkit-textfield-decoration-container {
+            display: none !important;
+        }
+    </style>
     </head>
     <body>
         <div class="signin-page">
@@ -51,7 +85,17 @@
 
                             <div class="mb-3">
                                 <label class="form-label">Password</label>
-                                <input type="password" name="PasswordHash" class="form-control signin-input" placeholder="Enter your password">
+                                <div class="password-wrapper">
+                                    <input type="password"
+                                           name="PasswordHash"
+                                           id="password"
+                                           class="form-control signin-input"
+                                           placeholder="Enter your password" />
+
+                                    <button type="button" class="password-toggle" onclick="togglePassword('password', 'passwordIcon')">
+                                        <i id="passwordIcon" class="fa-solid fa-eye"></i>
+                                    </button>
+                                </div>
                             </div>
 
                             <div class="d-flex justify-content-between align-items-center mb-4 signin-links-row">
@@ -76,5 +120,21 @@
             </div>
         </div>
         <script src ="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function togglePassword(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.remove("fa-eye");
+                icon.classList.add("fa-eye-slash");
+            } else {
+                input.type = "password";
+                icon.classList.remove("fa-eye-slash");
+                icon.classList.add("fa-eye");
+            }
+        }
+    </script>
     </body>
 </html>
