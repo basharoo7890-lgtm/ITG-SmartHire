@@ -11,7 +11,39 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Create Account - ITG Hire</title>
+    <style>
+        /* CSS لأيقونة العين */
+        .password-toggle {
+            position: absolute;
+            top: 50%;
+            right: 12px;
+            transform: translateY(-50%);
+            cursor: pointer;
+            background: transparent;
+            border: none;
+            color: #1A7193;
+            font-size: 18px;
+        }
 
+            .password-toggle:focus {
+                outline: none;
+            }
+
+        .password-wrapper {
+            position: relative;
+        }
+
+        /* Hide default browser password reveal icons */
+        input[type="password"]::-ms-reveal,
+        input[type="password"]::-ms-clear {
+            display: none;
+        }
+
+        input[type="password"]::-webkit-credentials-auto-fill-button,
+        input[type="password"]::-webkit-textfield-decoration-container {
+            display: none !important;
+        }
+    </style>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/lib/Fontawesome/css/all.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />

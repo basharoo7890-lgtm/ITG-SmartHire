@@ -28,14 +28,26 @@ namespace Employment.Controllers
             return View(jobs);
         }
 
-        public async Task<IActionResult> OpenPositions()
+        public async Task<IActionResult> OpenPositions(string title, string location)
         {
-            var jobs = await _context.Jobs
+            var jobs = _context.Jobs.AsQueryable();
+
+            if (!string.IsNullOrEmpty(title))
+            {
+                jobs = jobs.Where(j => j.Title.Contains(title));
+            }
+
+            if (!string.IsNullOrEmpty(location))
+            {
+                jobs = jobs.Where(j => j.Location.Contains(location));
+            }
+
+            var jobList = await jobs
                 .Where(j => j.Status == "Open")
                 .OrderByDescending(j => j.CreatedAt)
                 .ToListAsync();
 
-            return View(jobs);
+            return View(jobList);
         }
 
         public async Task<IActionResult> JobDetails(int id)

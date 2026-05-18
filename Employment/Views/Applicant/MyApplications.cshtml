@@ -9,146 +9,340 @@
     var interviewCount = Model.Count(a => a.Status == "Interview Scheduled");
 }
 
-<div class="applications-page">
-    <div class="container py-5">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - ITG Hire</title>
 
-        <div class="applications-heading mb-4">
-            <h1>My Applications</h1>
-            <p>Track the status of your job applications</p>
-        </div>
+    <!-- CSS داخلي -->
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #E0EEF0;
+            margin: 0;
+            padding: 0;
+        }
 
-        <div class="row g-4 mb-4">
+        .applications-page {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
 
-            <div class="col-md-3">
-                <div class="application-stat-card">
-                    <div>
-                        <p>Total Applications</p>
-                        <h2>@totalApplications</h2>
-                    </div>
-                    <i class="fa-solid fa-briefcase"></i>
-                </div>
+        .applications-heading h1 {
+            color: #1A7193;
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .applications-heading p {
+            color: #149DD2;
+            margin-bottom: 30px;
+        }
+
+        .application-stat-card {
+            background-color: #F0F5F8;
+            border-radius: 16px;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(26, 113, 147, 0.15);
+        }
+
+            .application-stat-card h2 {
+                color: #1A7193;
+                font-size: 28px;
+                margin: 0;
+            }
+
+            .application-stat-card p {
+                color: #149DD2;
+                margin: 0;
+            }
+
+            .application-stat-card i {
+                font-size: 32px;
+                color: #1A7193;
+            }
+
+        .applications-table-card {
+            background-color: #F0F5F8;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(26, 113, 147, 0.15);
+        }
+
+        .applications-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+            .applications-table th,
+            .applications-table td {
+                padding: 12px 15px;
+                text-align: left;
+                border-bottom: 1px solid #d6e6ec;
+            }
+
+            .applications-table th {
+                background-color: #E0EEF0;
+                color: #1A7193;
+                font-weight: 700;
+            }
+
+        .application-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .status-pending {
+            background-color: #dceafe;
+            color: #1d4ed8;
+        }
+
+        .status-under-review {
+            background-color: #dff4f7;
+            color: #1A7193;
+        }
+
+        .status-interview {
+            background-color: #d9f7e5;
+            color: #087b35;
+        }
+
+        .status-accepted {
+            background-color: #d9f7e5;
+            color: #087b35;
+        }
+
+        .status-rejected {
+            background-color: #fde2e2;
+            color: #b00020;
+        }
+
+        .view-job-link {
+            background-color: #1A7193;
+            color: white;
+            padding: 6px 14px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+            .view-job-link:hover {
+                background-color: #149DD2;
+                color: white;
+            }
+
+        .empty-applications {
+            text-align: center;
+            margin-top: 80px;
+            color: #149DD2;
+        }
+
+            .empty-applications i {
+                font-size: 60px;
+                margin-bottom: 20px;
+                display: block;
+                color: #1A7193;
+            }
+
+            .empty-applications h3 {
+                font-size: 22px;
+                color: #1A7193;
+                margin-bottom: 10px;
+            }
+
+            .empty-applications p {
+                color: #149DD2;
+                margin-bottom: 20px;
+            }
+
+        .browse-jobs-btn {
+            background-color: #1A7193;
+            color: white;
+            padding: 10px 18px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+            .browse-jobs-btn:hover {
+                background-color: #149DD2;
+            }
+
+        .job-title-cell {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .job-icon {
+            background-color: #E0EEF0;
+            color: #1A7193;
+            border-radius: 6px;
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+
+    <!-- FontAwesome for icons -->
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <div class="applications-page">
+        <div class="container py-5">
+
+            <div class="applications-heading mb-4">
+                <h1>My Applications</h1>
+                <p>Track the status of your job applications</p>
             </div>
 
-            <div class="col-md-3">
-                <div class="application-stat-card">
-                    <div>
-                        <p>Pending</p>
-                        <h2>@pendingCount</h2>
+            <div class="row g-4 mb-4">
+
+                <div class="col-md-3">
+                    <div class="application-stat-card">
+                        <div>
+                            <p>Total Applications</p>
+                            <h2>@totalApplications</h2>
+                        </div>
+                        <i class="fa-solid fa-briefcase"></i>
                     </div>
-                    <i class="fa-regular fa-clock"></i>
                 </div>
+
+                <div class="col-md-3">
+                    <div class="application-stat-card">
+                        <div>
+                            <p>Pending</p>
+                            <h2>@pendingCount</h2>
+                        </div>
+                        <i class="fa-regular fa-clock"></i>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="application-stat-card">
+                        <div>
+                            <p>Under Review</p>
+                            <h2>@underReviewCount</h2>
+                        </div>
+                        <i class="fa-regular fa-eye"></i>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="application-stat-card">
+                        <div>
+                            <p>Interviews</p>
+                            <h2>@interviewCount</h2>
+                        </div>
+                        <i class="fa-regular fa-circle-check"></i>
+                    </div>
+                </div>
+
             </div>
 
-            <div class="col-md-3">
-                <div class="application-stat-card">
-                    <div>
-                        <p>Under Review</p>
-                        <h2>@underReviewCount</h2>
-                    </div>
-                    <i class="fa-regular fa-eye"></i>
-                </div>
-            </div>
+            <div class="applications-table-card">
 
-            <div class="col-md-3">
-                <div class="application-stat-card">
-                    <div>
-                        <p>Interviews</p>
-                        <h2>@interviewCount</h2>
-                    </div>
-                    <i class="fa-regular fa-circle-check"></i>
-                </div>
-            </div>
-
-        </div>
-
-        <div class="applications-table-card">
-
-            @if (Model.Any())
-            {
-                <table class="table applications-table mb-0">
-                    <thead>
-                        <tr>
-                            <th>Job Title</th>
-                            <th>Applied Date</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        @foreach (var application in Model)
-                        {
-                            var statusClass = application.Status switch
-                            {
-                                "Pending" => "status-pending",
-                                "Under Review" => "status-under-review",
-                                "Interview Scheduled" => "status-interview",
-                                "Rejected" => "status-rejected",
-                                "Accepted" => "status-accepted",
-                                _ => "status-pending"
-                            };
-
-                            var statusIcon = application.Status switch
-                            {
-                                "Pending" => "fa-regular fa-clock",
-                                "Under Review" => "fa-regular fa-eye",
-                                "Interview Scheduled" => "fa-regular fa-circle-check",
-                                "Rejected" => "fa-regular fa-circle-xmark",
-                                "Accepted" => "fa-regular fa-circle-check",
-                                _ => "fa-regular fa-clock"
-                            };
-
+                @if (Model.Any())
+                {
+                    <table class="table applications-table mb-0">
+                        <thead>
                             <tr>
-                                <td>
-                                    <div class="job-title-cell">
-                                        <div class="job-icon">
-                                            <i class="fa-solid fa-briefcase"></i>
-                                        </div>
-
-                                        <span>
-                                            @(application.Job != null ? application.Job.Title : "Job not found")
-                                        </span>
-                                    </div>
-                                </td>
-
-                                <td>
-                                    <i class="fa-regular fa-calendar me-2"></i>
-                                    @application.SubmittedAt.ToString("MMMM dd, yyyy")
-                                </td>
-
-                                <td>
-                                    <span class="application-status @statusClass">
-                                        <i class="@statusIcon me-1"></i>
-                                        @application.Status
-                                    </span>
-                                </td>
-
-                                <td>
-                                    <a asp-controller="Home"
-                                       asp-action="JobDetails"
-                                       asp-route-id="@application.JobId"
-                                       class="view-job-link">
-                                        View Job
-                                    </a>
-                                </td>
+                                <th>Job Title</th>
+                                <th>Applied Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
                             </tr>
-                        }
-                    </tbody>
-                </table>
-            }
-            else
-            {
-                <div class="empty-applications">
-                    <i class="fa-regular fa-folder-open"></i>
-                    <h3>No applications yet</h3>
-                    <p>You have not applied to any job yet.</p>
+                        </thead>
 
-                    <a asp-controller="Home" asp-action="OpenPositions" class="btn browse-jobs-btn">
-                        Browse Jobs
-                    </a>
-                </div>
-            }
+                        <tbody>
+                            @foreach (var application in Model)
+                            {
+                                var statusClass = application.Status switch
+                                {
+                                    "Pending" => "status-pending",
+                                    "Under Review" => "status-under-review",
+                                    "Interview Scheduled" => "status-interview",
+                                    "Rejected" => "status-rejected",
+                                    "Accepted" => "status-accepted",
+                                    _ => "status-pending"
+                                };
 
+                                var statusIcon = application.Status switch
+                                {
+                                    "Pending" => "fa-regular fa-clock",
+                                    "Under Review" => "fa-regular fa-eye",
+                                    "Interview Scheduled" => "fa-regular fa-circle-check",
+                                    "Rejected" => "fa-regular fa-circle-xmark",
+                                    "Accepted" => "fa-regular fa-circle-check",
+                                    _ => "fa-regular fa-clock"
+                                };
+
+                                <tr>
+                                    <td>
+                                        <div class="job-title-cell">
+                                            <div class="job-icon">
+                                                <i class="fa-solid fa-briefcase"></i>
+                                            </div>
+
+                                            <span>
+                                                @(application.Job != null ? application.Job.Title : "Job not found")
+                                            </span>
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        <i class="fa-regular fa-calendar me-2"></i>
+                                        @application.SubmittedAt.ToString("MMMM dd, yyyy")
+                                    </td>
+
+                                    <td>
+                                        <span class="application-status @statusClass">
+                                            <i class="@statusIcon me-1"></i>
+                                            @application.Status
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <a asp-controller="Home"
+                                           asp-action="JobDetails"
+                                           asp-route-id="@application.JobId"
+                                           class="view-job-link">
+                                            View Job
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <div class="empty-applications">
+                        <i class="fa-regular fa-folder-open"></i>
+                        <h3>No applications yet</h3>
+                        <p>You have not applied to any job yet.</p>
+
+                        <a asp-controller="Home" asp-action="OpenPositions" class="btn browse-jobs-btn">
+                            Browse Jobs
+                        </a>
+                    </div>
+                }
+
+            </div>
         </div>
     </div>
-</div>
+</body>
+</html>
