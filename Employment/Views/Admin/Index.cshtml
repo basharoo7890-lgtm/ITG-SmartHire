@@ -108,7 +108,7 @@
                     </div>
                     <h5>HR Dashboard</h5>
                     <p>View candidates and manage applications</p>
-                    <a href="/Dashboard" class="action-btn">Go to Dashboard</a>
+                    <span style="color:#78A6B7; font-size:14px">HR access only</span>
                 </div>
             </div>
             <div class="col-md-4">
@@ -183,9 +183,15 @@
                                     </span>
                                 </td>
                                 <td>
-                                    <a href="/Admin/EditJob/@job.JobId" class="edit-btn">
-                                        <i class="fa-solid fa-pen"></i> Edit
-                                    </a>
+                                  <a href="/Admin/EditJob/@job.JobId" class="edit-btn">
+    <i class="fa-solid fa-pen"></i> Edit
+</a>
+<form method="post" action="/Admin/DeleteJob/@job.JobId" style="display:inline">
+    @Html.AntiForgeryToken()
+    <button type="submit" style="background:#fdecea; color:#c62828; border:none; border-radius:8px; padding:7px 16px; font-size:14px; font-weight:500; margin-left:8px; cursor:pointer;">
+        <i class="fa-solid fa-trash"></i> Delete
+    </button>
+</form>
                                 </td>
                             </tr>
                         }

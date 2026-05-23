@@ -1,6 +1,18 @@
-﻿@{
+﻿@model List<Employment.Models.Job>
+
+@{
     ViewData["Title"] = "Open Positions";
 }
+<style>
+    .position-item-card {
+        transition: transform 0.25s ease, box-shadow 0.25s ease !important;
+        cursor: pointer;
+    }
+    .position-item-card:hover {
+        transform: translateY(-8px) !important;
+        box-shadow: 0 12px 32px rgba(26, 113, 147, 0.25) !important;
+    }
+</style>
 
 <div class="open-positions-page">
     <div class="container py-5">
@@ -13,48 +25,69 @@
         <div class="positions-filter-box">
             <div class="row g-3 align-items-center">
                 <div class="col-md-4">
-                    <input type="text" class="form-control positions-filter-input" placeholder="Job title or keyword">
+                    <input type="text" class="form-control positions-filter-input" placeholder="Job title or keyword" id="searchInput">
                 </div>
                 <div class="col-md-4">
-                    <input type="text" class="form-control positions-filter-input" placeholder="Location">
+                    <input type="text" class="form-control positions-filter-input" placeholder="Location" id="locationInput">
                 </div>
                 <div class="col-md-4">
-                    <button class="btn search-btn w-100">Search Jobs</button>
+                    <button class="btn search-btn w-100" onclick="filterJobs()">Search Jobs</button>
                 </div>
             </div>
-
             <div class="positions-filter-footer">
-                <span>Showing 1 position</span>
+                <span>Showing @Model.Count position(s)</span>
                 <a href="#">More Filters</a>
             </div>
         </div>
 
-        <div class="positions-list">
-            <div class="position-item-card">
-                <div class="position-left">
-                    <div class="position-icon-box">
-                        <i class="fa-solid fa-briefcase"></i>
-                    </div>
-
-                    <div>
-                        <h3>Senior Software Engineer</h3>
-                        <div class="position-meta">
-                            <span><i class="fa-regular fa-building me-1"></i>Engineering</span>
-                            <span><i class="fa-solid fa-location-dot me-1"></i>Remote</span>
-                            <span><i class="fa-regular fa-clock me-1"></i>2 days ago</span>
+        <div class="positions-list" id="jobsList">
+            @if (!Model.Any())
+            {
+                <div class="text-center py-5">
+                    <i class="fa-solid fa-briefcase" style="font-size:48px; color:#D8E4EA"></i>
+                    <h4 class="mt-3" style="color:#78A6B7">No open positions at the moment</h4>
+                    <p class="text-muted">Check back later for new opportunities</p>
+                </div>
+            }
+            else
+            {
+                @foreach (var job in Model)
+                {
+                    <div class="position-item-card" data-title="@job.Title.ToLower()" data-location="@job.Location.ToLower()">
+                        <div class="position-left">
+                            <div class="position-icon-box">
+                                <i class="fa-solid fa-briefcase"></i>
+                            </div>
+                            <div>
+                                <h3>@job.Title</h3>
+                                <div class="position-meta">
+                                    <span><i class="fa-regular fa-building me-1"></i>@job.Department</span>
+                                    <span><i class="fa-solid fa-location-dot me-1"></i>@job.Location</span>
+                                    <span><i class="fa-regular fa-clock me-1"></i>@job.CreatedAt.ToShortDateString()</span>
+                                    @if (job.SalaryMin.HasValue && job.SalaryMax.HasValue)
+                                    {
+                                        <span><i class="fa-solid fa-dollar-sign me-1"></i>@job.SalaryMin — @job.SalaryMax</span>
+                                    }
+                                </div>
+                                <p class="mt-1" style="color:#78A6B7; font-size:14px">Min Experience: @job.MinExperience years • Education: @job.RequiredEducation</p>
+                            </div>
                         </div>
-                        <p>24 Applications</p>
+                        <div class="position-right">
+                            <span class="position-badge">@job.Status</span>
+                            <div class="position-buttons">
+                                <a asp-controller="Home" asp-action="JobDetails" asp-route-id="@job.JobId" class="btn position-details-btn">View Details</a>
+                                <a asp-controller="Applications" asp-action="Apply"
+                                    asp-route-jobId="@job.JobId"
+                                    asp-route-title="@job.Title"
+                                    asp-route-department="@job.Department"
+                                    asp-route-location="@job.Location"
+                                    asp-route-type="Full-time"
+                                    class="btn position-apply-btn">Apply Now</a>
+                            </div>
+                        </div>
                     </div>
-                </div>
-
-                <div class="position-right">
-                    <span class="position-badge">Full-time</span>
-                    <div class="position-buttons">
-                        <a asp-controller="Home" asp-action="JobDetails" class="btn position-details-btn">View Details</a>
-                        <a asp-controller="Applications" asp-action="Apply" asp-route-title="Senior Software Engineer" asp-route-department="Engineering" asp-route-location="Remote" asp-route-type="Full-time" class="btn position-apply-btn">Apply Now</a>
-                    </div>
-                </div>
-            </div>
+                }
+            }
         </div>
 
         <div class="positions-pagination">
@@ -62,3 +95,19 @@
         </div>
     </div>
 </div>
+
+<script>
+function filterJobs() {
+    const search = document.getElementById('searchInput').value.toLowerCase();
+    const location = document.getElementById('locationInput').value.toLowerCase();
+    const cards = document.querySelectorAll('.position-item-card');
+
+    cards.forEach(card => {
+        const title = card.dataset.title;
+        const loc = card.dataset.location;
+        const matchesSearch = !search || title.includes(search);
+        const matchesLocation = !location || loc.includes(location);
+        card.style.display = matchesSearch && matchesLocation ? 'flex' : 'none';
+    });
+}
+</script>

@@ -2,8 +2,15 @@ using Employment.Data;
 using Employment.Interfaces;
 using Employment.Services;
 using Microsoft.EntityFrameworkCore;
+using DotNetEnv;
+
+// 1. Load the variables from your local .env file into the system environment
+DotNetEnv.Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
+
+// 2. Tell .NET to inject environment variables into builder.Configuration
+builder.Configuration.AddEnvironmentVariables();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -16,7 +23,6 @@ builder.Services.AddAuthentication("Cookies")
     });
 
 builder.Services.AddScoped<IJobService, JobService>();
-
 builder.Services.AddScoped<IApplicationService, ApplicationService>();
 builder.Services.AddControllersWithViews();
 builder.Services.AddHttpClient<GeminiService>();
@@ -26,6 +32,7 @@ builder.Services.AddSingleton<CVCompletenessService>();
 builder.Services.AddScoped<JobDescriptionService>();
 builder.Services.AddScoped<AIAnalysisService>();
 builder.Services.AddScoped<SkillsGapService>();
+
 var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())
@@ -37,8 +44,8 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
-app.UseAuthorization();
 app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",

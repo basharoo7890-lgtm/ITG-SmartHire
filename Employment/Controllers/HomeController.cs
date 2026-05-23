@@ -40,10 +40,11 @@ namespace Employment.Controllers
             return View(viewModel);
         }
 
-        public IActionResult OpenPositions()
-        {
-            return View();
-        }
+      public async Task<IActionResult> OpenPositions()
+{
+    var jobs = await _jobService.GetAllJobsAsync();
+    return View(jobs);
+}
 
         public IActionResult Privacy()
         {

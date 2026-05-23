@@ -1,0 +1,103 @@
+@model Employment.ViewModels.AIRecommendationViewModel
+
+@{
+    ViewData["Title"] = "AI Recommendation";
+}
+
+<style>
+    .ai-page { background-color: #E0EEF0; min-height: 100vh; padding: 36px 0 60px; }
+    .page-header { background: linear-gradient(90deg, #1A7193, #149DD2); border-radius: 18px; padding: 28px 36px; margin-bottom: 28px; color: white; }
+    .page-header h2 { font-size: 28px; font-weight: 700; margin-bottom: 4px; }
+    .page-header p { font-size: 15px; opacity: 0.85; margin: 0; }
+    .card-section { background: white; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.07); margin-bottom: 24px; overflow: hidden; }
+    .card-header-blue { background: linear-gradient(90deg, #1A7193, #149DD2); padding: 14px 24px; }
+    .card-header-blue h5 { color: white; margin: 0; font-size: 16px; font-weight: 600; }
+    .card-body-p { padding: 24px; }
+    .recommendation-text { color: #334e5a; font-size: 15px; line-height: 1.8; white-space: pre-line; }
+    .table th { color: #78A6B7; font-size: 13px; font-weight: 600; text-transform: uppercase; padding: 14px 20px; border-bottom: 1px solid #f0f4f6; }
+    .table td { padding: 14px 20px; color: #334e5a; font-size: 15px; border-bottom: 1px solid #f8fbfc; vertical-align: middle; }
+    .score-badge { padding: 5px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; background: #EAF6FA; color: #1A7193; }
+    .rank-1 { background: linear-gradient(90deg, #1A7193, #149DD2); color: white; border-radius: 50%; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; }
+    .rank-other { background: #EAF6FA; color: #1A7193; border-radius: 50%; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; }
+</style>
+
+<div class="ai-page">
+    <div class="container">
+
+        <div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h2><i class="fa-solid fa-robot me-2"></i>AI Recommendation</h2>
+                <p>Job: <strong>@Model.JobTitle</strong> — AI analysis of all candidates</p>
+            </div>
+            <a href="/Dashboard?jobId=@Model.JobId" class="btn" style="background:white; color:#1A7193; border-radius:12px; font-weight:600; padding:12px 24px;">
+                <i class="fa-solid fa-arrow-left me-2"></i>Back to Dashboard
+            </a>
+        </div>
+
+        <!-- Candidates Ranking -->
+        <div class="card-section">
+            <div class="card-header-blue">
+                <h5><i class="fa-solid fa-trophy me-2"></i>Candidates Ranked by Match Score</h5>
+            </div>
+            <table class="table mb-0">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Name</th>
+                        <th>Match Score</th>
+                        <th>Status</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{var rank = 1;}
+                    @foreach (var c in Model.Candidates)
+                    {
+                        <tr>
+                            <td>
+                                @if (rank == 1)
+                                {
+                                    <span class="rank-1">@rank</span>
+                                    <span class="ms-2" style="color:#1A7193; font-weight:600;">⭐ Best</span>
+                                }
+                                else
+                                {
+                                    <span class="rank-other">@rank</span>
+                                }
+                            </td>
+                            <td class="fw-semibold" style="color:#1A7193">@c.CandidateName</td>
+                            <td>
+                                @if (c.MatchingScore.HasValue)
+                                {
+                                    <span class="score-badge">@((int)c.MatchingScore.Value)%</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">N/A</span>
+                                }
+                            </td>
+                            <td>@c.Status</td>
+                            <td>
+                                <a href="/Dashboard/CandidateDetails/@c.ApplicationId" style="background:#EAF6FA; color:#1A7193; border-radius:8px; padding:6px 14px; font-size:13px; text-decoration:none; font-weight:500;">
+                                    <i class="fa-solid fa-eye me-1"></i>View
+                                </a>
+                            </td>
+                        </tr>
+                        rank++;
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- AI Recommendation -->
+        <div class="card-section">
+            <div class="card-header-blue">
+                <h5><i class="fa-solid fa-wand-magic-sparkles me-2"></i>AI Analysis & Recommendation</h5>
+            </div>
+            <div class="card-body-p">
+                <p class="recommendation-text">@Model.Recommendation</p>
+            </div>
+        </div>
+
+    </div>
+</div>

@@ -51,16 +51,18 @@
                     @foreach (var job in Model)
                     {
                         <div class="col-md-4">
-                            <div class="job-card h-100">
-                                <div class="d-flex justify-content-between align-items-start mb-4">
-                                    <div class="job-icon">💼</div>
-                                    <span class="job-badge">@job.Status</span>
-                                </div>
-                                <h4 class="job-title">@job.Title</h4>
-                                <p class="job-department">@job.Department</p>
-                                <p class="job-location"> @job.Location</p>
-                                <a asp-controller="Home" asp-action="JobDetails" class="btn details-btn w-100">View Details</a>
-                            </div>
+                      <div class="job-card h-100">
+    <div class="d-flex justify-content-between align-items-start mb-4">
+        <div class="job-icon">💼</div>
+        <span class="job-badge">@job.Status</span>
+    </div>
+    <div>
+        <h4 class="job-title">@job.Title</h4>
+        <p class="job-department">@job.Department</p>
+        <p class="job-location">@job.Location</p>
+    </div>
+    <a asp-controller="Home" asp-action="JobDetails" asp-route-id="@job.JobId" class="btn details-btn w-100 mt-3">View Details</a>
+</div>
                         </div>
                     }
                 </div>

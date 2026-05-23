@@ -18,7 +18,7 @@ namespace Employment.Services
         public async Task<List<Job>> GetAllJobsAsync()
         {
             return await _context.Jobs
-                .Where(j => j.Status == "Open")
+            .Where(j => j.Status == "Active" || j.Status == "Open")
                 .OrderByDescending(j => j.CreatedAt)
                 .ToListAsync();
         }

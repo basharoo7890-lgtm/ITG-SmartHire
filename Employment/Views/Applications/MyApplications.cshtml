@@ -1,0 +1,69 @@
+@model List<Employment.Models.Application>
+
+@{
+    ViewData["Title"] = "My Applications";
+}
+
+<style>
+    .my-apps-page { background-color: #E0EEF0; min-height: 100vh; padding: 36px 0 60px; }
+    .page-header { background: linear-gradient(90deg, #1A7193, #149DD2); border-radius: 18px; padding: 28px 36px; margin-bottom: 28px; color: white; }
+    .page-header h2 { font-size: 28px; font-weight: 700; margin-bottom: 4px; }
+    .app-card { background: white; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.07); padding: 24px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+    .app-title { color: #1A7193; font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+    .app-meta { color: #78A6B7; font-size: 14px; }
+    .status-badge { padding: 6px 16px; border-radius: 20px; font-size: 14px; font-weight: 500; }
+    .status-pending { background-color: #EAF6FA; color: #1A7193; }
+    .status-screening { background-color: #fff8e1; color: #f57f17; }
+    .status-shortlisted { background-color: #e8f5e9; color: #2e7d32; }
+    .status-rejected { background-color: #fdecea; color: #c62828; }
+    .status-autorejected { background-color: #fdecea; color: #c62828; }
+</style>
+
+<div class="my-apps-page">
+    <div class="container">
+
+        <div class="page-header">
+            <h2><i class="fa-solid fa-file-lines me-2"></i>My Applications</h2>
+            <p>Track the status of your job applications</p>
+        </div>
+
+        @if (!Model.Any())
+        {
+            <div class="text-center py-5" style="background:white; border-radius:16px;">
+                <i class="fa-solid fa-file-circle-xmark" style="font-size:48px; color:#D8E4EA"></i>
+                <h4 class="mt-3" style="color:#78A6B7">No applications yet</h4>
+                <p class="text-muted">Browse open positions and apply!</p>
+                <a href="/Home/OpenPositions" class="btn mt-2" style="background:#1A7193; color:white; border-radius:10px; padding:10px 24px;">Browse Jobs</a>
+            </div>
+        }
+        else
+        {
+            @foreach (var app in Model)
+            {
+                <div class="app-card">
+                    <div>
+                        <div class="app-title">@(app.Job?.Title ?? "Unknown Job")</div>
+                        <div class="app-meta">
+                            <i class="fa-solid fa-location-dot me-1"></i>@(app.Job?.Location ?? "N/A") •
+                            <i class="fa-regular fa-calendar me-1"></i>Applied: @app.SubmittedAt.ToShortDateString() •
+                            <i class="fa-solid fa-dollar-sign me-1"></i>Expected: $@app.ExpectedSalary
+                        </div>
+                    </div>
+                    <div>
+                        @{
+                            var cls = app.Status switch {
+                                "Shortlisted" => "status-shortlisted",
+                                "Rejected" => "status-rejected",
+                                "AutoRejected" => "status-autorejected",
+                                "Screening" => "status-screening",
+                                _ => "status-pending"
+                            };
+                        }
+                        <span class="status-badge @cls">@app.Status</span>
+                    </div>
+                </div>
+            }
+        }
+
+    </div>
+</div>

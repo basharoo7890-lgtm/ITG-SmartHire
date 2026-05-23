@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Employment.Data;
 using Employment.ViewModels;
 using Employment.Services;
+using Microsoft.AspNetCore.Authorization;
 
 
 
@@ -10,6 +11,8 @@ namespace Employment.Controllers
 {
 
     // [Authorize(Roles = "HR")]  // uncomment when Identity is set up by Omar
+[Authorize(Roles = "HR,Admin")]
+
     public class DashboardController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -29,7 +32,7 @@ namespace Employment.Controllers
             var selectedJobId = jobId ?? jobs.FirstOrDefault()?.JobId ?? 0;
 
             var candidates = await _context.Applications
-                .Where(a => a.JobId == selectedJobId)
+               .Where(a => a.JobId == selectedJobId && a.Status != "AutoRejected")
                 .Include(a => a.User)
                 .Include(a => a.AIAnalysis)
                 .OrderByDescending(a => a.AIAnalysis != null ? a.AIAnalysis.MatchingScore : -1)
@@ -64,11 +67,14 @@ namespace Employment.Controllers
             var application = await _context.Applications
                 .Include(a => a.User)
                 .Include(a => a.Job)
-                .Include(a => a.AIAnalysis)
                 .FirstOrDefaultAsync(a => a.ApplicationId == id);
 
             if (application == null)
                 return NotFound();
+
+            // Load AI analysis separately using App_Id
+            var aiAnalysis = await _context.AIAnalyses
+                .FirstOrDefaultAsync(a => a.ApplicationId == id);
 
             var vm = new CandidateDetailsViewModel
             {
@@ -84,23 +90,22 @@ namespace Employment.Controllers
                 CVFileName = application.CVFileName,
                 JobTitle = application.Job?.Title ?? "N/A",
                 JobId = application.JobId,
-                MatchingScore = application.AIAnalysis?.MatchingScore,
-                Summary = application.AIAnalysis?.Summary,
-                Strengths = application.AIAnalysis?.Strengths,
-                Weaknesses = application.AIAnalysis?.Weaknesses,
-                InterviewQuestions = application.AIAnalysis?.InterviewQuestions,
-                ParsedSkills = application.AIAnalysis?.ParsedSkills,
-                DetectedLanguage = application.AIAnalysis?.DetectedLanguage,
-                GapReport = application.AIAnalysis?.GapReport,
-                ExperienceScore = application.AIAnalysis?.ExperienceScore,
-                SkillsScore = application.AIAnalysis?.SkillsScore,
-                SalaryScore = application.AIAnalysis?.SalaryScore,
-                EducationScore = application.AIAnalysis?.EducationScore,
+                MatchingScore = aiAnalysis?.MatchingScore,
+                Summary = aiAnalysis?.Summary,
+                Strengths = aiAnalysis?.Strengths,
+                Weaknesses = aiAnalysis?.Weaknesses,
+                InterviewQuestions = aiAnalysis?.InterviewQuestions,
+                ParsedSkills = aiAnalysis?.ParsedSkills,
+                DetectedLanguage = aiAnalysis?.DetectedLanguage,
+                GapReport = aiAnalysis?.GapReport,
+                ExperienceScore = aiAnalysis?.ExperienceScore,
+                SkillsScore = aiAnalysis?.SkillsScore,
+                SalaryScore = aiAnalysis?.SalaryScore,
+                EducationScore = aiAnalysis?.EducationScore,
             };
 
             return View(vm);
         }
-
         // POST: /Dashboard/Accept/5
         [HttpPost]
         public async Task<IActionResult> Accept(int id)
@@ -296,14 +301,84 @@ namespace Employment.Controllers
             return Content($"✅ AI Analysis Complete!\n\nMatching Score: {result.MatchingScore}%\nSkills Score: {result.SkillsScore}%\nExperience Score: {result.ExperienceScore}%\nSalary Score: {result.SalaryScore}%\nEducation Score: {result.EducationScore}%\n\nParsed Skills: {result.ParsedSkills}\n\nSummary: {result.Summary}\n\nStrengths:\n{result.Strengths}\n\nWeaknesses:\n{result.Weaknesses}\n\nInterview Questions:\n{result.InterviewQuestions}");
         }
 
-// GET: /Dashboard/TestGapReport/1003
-public async Task<IActionResult> TestGapReport(int id, [FromServices] SkillsGapService gapService)
-{
-    var result = await gapService.GenerateGapReportAsync(id);
-    if (result == null)
-        return Content("Gap report generation failed");
-    return Content(result);
-}
+        // GET: /Dashboard/TestGapReport/1003
+        public async Task<IActionResult> TestGapReport(int id, [FromServices] SkillsGapService gapService)
+        {
+            var result = await gapService.GenerateGapReportAsync(id);
+            if (result == null)
+                return Content("Gap report generation failed");
+            return Content(result);
+        }
+
+
+        // GET: /Dashboard/AIRecommendation?jobId=6
+        public async Task<IActionResult> AIRecommendation(int jobId, [FromServices] GeminiService gemini)
+        {
+            var job = await _context.Jobs.FindAsync(jobId);
+            if (job == null) return NotFound();
+
+            var candidates = await _context.Applications
+                .Where(a => a.JobId == jobId && a.Status != "AutoRejected")
+                .Include(a => a.User)
+                .Include(a => a.AIAnalysis)
+                .ToListAsync();
+
+            if (!candidates.Any())
+                return Content("No candidates found for this job.");
+
+            // Build comparison prompt
+            var candidatesSummary = string.Join("\n\n", candidates.Select((c, i) =>
+                $"Candidate {i + 1}: {c.User?.FullName}\n" +
+                $"- Matching Score: {c.AIAnalysis?.MatchingScore}%\n" +
+                $"- Skills: {c.AIAnalysis?.ParsedSkills}\n" +
+                $"- Experience: {c.YearsOfExperience} years\n" +
+                $"- Education: {c.EducationLevel}\n" +
+                $"- Expected Salary: ${c.ExpectedSalary}\n" +
+                $"- Strengths: {c.AIAnalysis?.Strengths}\n" +
+                $"- Weaknesses: {c.AIAnalysis?.Weaknesses}"
+            ));
+
+            var prompt = $"""
+        You are an expert HR assistant. Analyze these candidates for the position of {job.Title} and recommend the best one.
+
+        Job Requirements:
+        - Required Education: {job.RequiredEducation}
+        - Min Experience: {job.MinExperience} years
+        - Salary Range: ${job.SalaryMin} - ${job.SalaryMax}
+        - Department: {job.Department}
+
+        Candidates:
+        {candidatesSummary}
+
+        Please:
+        1. Rank all candidates from best to worst
+        2. Explain why the top candidate is the best fit
+        3. Mention any concerns about each candidate
+        4. Give a final recommendation
+
+        Be professional and specific.
+        """;
+
+            var aiRecommendation = await gemini.GenerateAsync(prompt);
+
+            var vm = new AIRecommendationViewModel
+            {
+                JobId = jobId,
+                JobTitle = job.Title,
+                Recommendation = aiRecommendation ?? "AI recommendation failed. Please try again.",
+                Candidates = candidates.Select(c => new CandidateRowViewModel
+                {
+                    ApplicationId = c.ApplicationId,
+                    CandidateName = c.User?.FullName ?? "Unknown",
+                    CandidateEmail = c.User?.Email ?? "",
+                    MatchingScore = c.AIAnalysis?.MatchingScore,
+                    Status = c.Status,
+                    SubmittedAt = c.SubmittedAt
+                }).OrderByDescending(c => c.MatchingScore).ToList()
+            };
+
+            return View(vm);
+        }
 
     }
 }

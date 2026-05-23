@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 namespace Employment.Controllers
 {
     // [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin")]
     public class AdminController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -195,33 +196,71 @@ namespace Employment.Controllers
             return RedirectToAction("Settings");
         }
 
-// POST: /Admin/GenerateDescription
-[HttpPost]
-public async Task<IActionResult> GenerateDescription(
-    [FromBody] GenerateDescriptionRequest request,
-    [FromServices] JobDescriptionService jobDescService)
-{
-    if (string.IsNullOrEmpty(request.Title))
-        return BadRequest("Job title is required");
+        // POST: /Admin/GenerateDescription
+        [HttpPost]
+        public async Task<IActionResult> GenerateDescription(
+            [FromBody] GenerateDescriptionRequest request,
+            [FromServices] JobDescriptionService jobDescService)
+        {
+            if (string.IsNullOrEmpty(request.Title))
+                return BadRequest("Job title is required");
 
-    var description = await jobDescService.GenerateJobDescriptionAsync(
-        request.Title,
-        request.Department ?? "General",
-        request.Skills ?? new List<string>()
-    );
+            var description = await jobDescService.GenerateJobDescriptionAsync(
+                request.Title,
+                request.Department ?? "General",
+                request.Skills ?? new List<string>()
+            );
 
-    if (description == null)
-        return StatusCode(500, "AI generation failed");
+            if (description == null)
+                return StatusCode(500, "AI generation failed");
 
-    return Ok(new { description });
-}
+            return Ok(new { description });
+        }
 
-public class GenerateDescriptionRequest
-{
-    public string Title { get; set; } = string.Empty;
-    public string? Department { get; set; }
-    public List<string>? Skills { get; set; }
-}
+        public class GenerateDescriptionRequest
+        {
+            public string Title { get; set; } = string.Empty;
+            public string? Department { get; set; }
+            public List<string>? Skills { get; set; }
+        }
 
+        // POST: /Admin/DeleteJob/5
+        [HttpPost]
+        [HttpPost]
+        public async Task<IActionResult> DeleteJob(int id)
+        {
+            var job = await _context.Jobs.FindAsync(id);
+            if (job == null)
+                return NotFound();
+
+            // Delete related AI analyses first
+            var appIds = await _context.Applications
+                .Where(a => a.JobId == id)
+                .Select(a => a.ApplicationId)
+                .ToListAsync();
+
+            var analyses = await _context.AIAnalyses
+                .Where(a => appIds.Contains(a.ApplicationId))
+                .ToListAsync();
+            _context.AIAnalyses.RemoveRange(analyses);
+
+            // Delete related applications
+            var applications = await _context.Applications
+                .Where(a => a.JobId == id)
+                .ToListAsync();
+            _context.Applications.RemoveRange(applications);
+
+            // Delete related job skills
+            var skills = await _context.JobSkills
+                .Where(s => s.JobId == id)
+                .ToListAsync();
+            _context.JobSkills.RemoveRange(skills);
+
+            // Now delete the job
+            _context.Jobs.Remove(job);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Index");
+        }
     }
 }

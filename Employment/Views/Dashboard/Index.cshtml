@@ -42,7 +42,7 @@
 <div class="dashboard-page">
     <div class="container">
 
-      <!-- Header -->
+    
 <!-- Header -->
 <div class="dashboard-header d-flex justify-content-between align-items-center flex-wrap gap-3">
     <div>
@@ -56,9 +56,7 @@
         <a href="/Dashboard/Statistics" class="btn" style="background:white; color:#1A7193; border-radius:12px; font-weight:600; padding:12px 24px; display: flex; align-items: center; width: auto; flex-grow: 0;">
             <i class="fa-solid fa-chart-pie me-2"></i>Statistics
         </a>
-        <a href="/Admin" class="btn" style="background:white; color:#1A7193; border-radius:12px; font-weight:600; padding:12px 24px; display: flex; align-items: center; width: auto; flex-grow: 0;">
-            <i class="fa-solid fa-shield-halved me-2"></i>Admin Panel
-        </a>
+      
     </div>
 </div>
 
@@ -85,6 +83,28 @@
             </span>
         </div>
 
+        <!-- Status Summary -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div style="background:white; border-radius:14px; padding:18px 24px; box-shadow:0 2px 12px rgba(0,0,0,0.07); text-align:center; cursor:pointer;" onclick="filterByStatus('Shortlisted')">
+            <div style="font-size:28px; font-weight:700; color:#1A7193">@Model.Candidates.Count(c => c.Status == "Shortlisted")</div>
+            <div style="color:#78A6B7; font-size:14px">AI Shortlisted ↓</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div style="background:white; border-radius:14px; padding:18px 24px; box-shadow:0 2px 12px rgba(0,0,0,0.07); text-align:center; cursor:pointer;" onclick="filterByStatus('Screening')">
+            <div style="font-size:28px; font-weight:700; color:#f57f17">@Model.Candidates.Count(c => c.Status == "Screening")</div>
+            <div style="color:#78A6B7; font-size:14px">Needs Review ↓</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div style="background:white; border-radius:14px; padding:18px 24px; box-shadow:0 2px 12px rgba(0,0,0,0.07); text-align:center; cursor:pointer;" onclick="filterByStatus('all')">
+            <div style="font-size:28px; font-weight:700; color:#2e7d32">@Model.Candidates.Count</div>
+            <div style="color:#78A6B7; font-size:14px">All Candidates ↓</div>
+        </div>
+    </div>
+</div>
+
         <!-- Candidates Table -->
         <div class="candidates-card">
             <div class="candidates-header">
@@ -95,6 +115,10 @@
         style="background:white; color:#1A7193; border-radius:8px; padding:7px 16px; font-size:14px; font-weight:600; text-decoration:none;">
         <i class="fa-solid fa-scale-balanced me-1"></i>Compare
     </a>
+    <a href="/Dashboard/AIRecommendation?jobId=@Model.JobId"
+    style="background:#149DD2; color:white; border-radius:8px; padding:7px 16px; font-size:14px; font-weight:600; text-decoration:none;">
+    <i class="fa-solid fa-robot me-1"></i>AI Pick
+</a>
 </div>
             </div>
 
@@ -179,4 +203,22 @@
         </div>
 
     </div>
+    
 </div>
+<script>
+function filterByStatus(status) {
+    const rows = document.querySelectorAll('tbody tr');
+    rows.forEach(row => {
+        if (status === 'all') {
+            row.style.display = '';
+        } else {
+            const statusCell = row.querySelector('.status-badge');
+            if (statusCell && statusCell.textContent.trim() === status) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        }
+    });
+}
+</script>

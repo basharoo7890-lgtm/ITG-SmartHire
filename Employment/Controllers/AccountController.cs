@@ -36,11 +36,11 @@ namespace Employment.Controllers
                 return View(user);
             }
 
-          
+
             user.PasswordHash = HashPassword(user.PasswordHash);
             user.CreatedAt = DateTime.Now;
 
-         
+
             if (user.Role != "Applicant" && user.Role != "HR" && user.Role != "Admin")
                 user.Role = "Applicant";
 
@@ -64,7 +64,7 @@ namespace Employment.Controllers
                 return View();
             }
 
-           
+
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
@@ -78,10 +78,10 @@ namespace Employment.Controllers
 
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
 
-           
+
             return user.Role switch
             {
-                "Admin" => RedirectToAction("Index", "Dashboard"),
+                "Admin" => RedirectToAction("Index", "Admin"),
                 "HR" => RedirectToAction("Index", "Dashboard"),
                 _ => RedirectToAction("Index", "Home")
             };
@@ -99,5 +99,6 @@ namespace Employment.Controllers
             var bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
             return Convert.ToBase64String(bytes);
         }
+        
     }
 }
