@@ -1,4 +1,4 @@
-body {
+﻿body {
     background-color: #E0EEF0;
     font-family: Arial, sans-serif;
     margin: 0;
@@ -1320,4 +1320,170 @@ body {
     .apply-header h1 {
         font-size: 30px;
     }
+
+    .applications-page {
+        background-color: #E0EEF0;
+        min-height: 100vh;
+    }
+
+    .applications-heading h1 {
+        color: #1A7193;
+        font-weight: 700;
+        margin-bottom: 8px;
+    }
+
+    .applications-heading p {
+        color: #149DD2;
+        margin: 0;
+    }
+
+    .application-stat-card {
+        background-color: #ffffff;
+        border-radius: 14px;
+        padding: 24px;
+        box-shadow: 0 2px 8px rgba(26, 113, 147, 0.15);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        min-height: 120px;
+    }
+
+        .application-stat-card p {
+            color: #5fa3bf;
+            margin: 0 0 8px;
+            font-size: 15px;
+        }
+
+        .application-stat-card h2 {
+            color: #1A7193;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .application-stat-card i {
+            color: #149DD2;
+            font-size: 28px;
+        }
+
+    .applications-table-card {
+        background-color: #ffffff;
+        border-radius: 14px;
+        box-shadow: 0 2px 8px rgba(26, 113, 147, 0.15);
+        overflow: hidden;
+    }
+
+    .applications-table thead {
+        background-color: #F0F5F8;
+    }
+
+    .applications-table th {
+        color: #1A7193;
+        font-weight: 700;
+        padding: 18px 24px;
+        border: none;
+    }
+
+    .applications-table td {
+        color: #1A7193;
+        padding: 18px 24px;
+        vertical-align: middle;
+        border-color: #e5f0f4;
+    }
+
+    .job-title-cell {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        font-weight: 600;
+    }
+
+    .job-icon {
+        width: 42px;
+        height: 42px;
+        background-color: #E0EEF0;
+        color: #1A7193;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .application-status {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 20px;
+        padding: 6px 12px;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .status-pending {
+        background-color: #dceafe;
+        color: #1d4ed8;
+    }
+
+    .status-under-review {
+        background-color: #E0EEF0;
+        color: #1A7193;
+    }
+
+    .status-interview {
+        background-color: #d9f7e5;
+        color: #087b35;
+    }
+
+    .status-rejected {
+        background-color: #fde2e2;
+        color: #b00020;
+    }
+
+    .status-accepted {
+        background-color: #d9f7e5;
+        color: #087b35;
+    }
+
+    .view-job-link {
+        color: #149DD2;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+        .view-job-link:hover {
+            color: #1A7193;
+            text-decoration: underline;
+        }
+
+    .empty-applications {
+        text-align: center;
+        padding: 60px 20px;
+    }
+
+        .empty-applications i {
+            font-size: 50px;
+            color: #149DD2;
+            margin-bottom: 16px;
+        }
+
+        .empty-applications h3 {
+            color: #1A7193;
+            font-weight: 700;
+        }
+
+        .empty-applications p {
+            color: #5fa3bf;
+        }
+
+    .browse-jobs-btn {
+        background-color: #1A7193;
+        color: white;
+        border-radius: 8px;
+        padding: 10px 20px;
+    }
+
+        .browse-jobs-btn:hover {
+            background-color: #149DD2;
+            color: white;
+        }
 }
+
+

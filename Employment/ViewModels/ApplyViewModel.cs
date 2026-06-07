@@ -4,23 +4,27 @@ namespace Employment.ViewModels
 {
     public class ApplyViewModel
     {
+        [Required]
         public int JobId { get; set; }
-        public string JobTitle { get; set; } = string.Empty;
-        public string JobDepartment { get; set; } = string.Empty;
-        public string JobLocation { get; set; } = string.Empty;
 
         [Required]
-        public string Phone { get; set; } = string.Empty;
+        public int UserId { get; set; }
 
-        [Required]
-        public decimal ExpectedSalary { get; set; }
+        [StringLength(20)]
+        public string? Phone { get; set; }
 
-        [Required]
-        public int YearsOfExperience { get; set; }
+        [Range(0, 1000000)]
+        public decimal? ExpectedSalary { get; set; }
 
-        [Required]
-        public string EducationLevel { get; set; } = string.Empty;
+        [Range(0, 50)]
+        public int? YearsOfExperience { get; set; }
 
-        public IFormFile? CVFile { get; set; }
+        [StringLength(100)]
+        public string? EducationLevel { get; set; }
+
+        [StringLength(255)]
+        public string? CVFileName { get; set; }
+
+        public string? CVText { get; set; }
     }
 }

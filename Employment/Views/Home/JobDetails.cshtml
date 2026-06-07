@@ -18,7 +18,8 @@ else
 
             <div class="mb-4">
                 <a asp-controller="Home" asp-action="OpenPositions" class="back-jobs-link">
-                    <i class="fa-solid fa-arrow-left me-2"></i>Back to Jobs
+                    <i class="fa-solid fa-arrow-left me-2"></i>
+                    Back to Jobs
                 </a>
             </div>
 
@@ -39,7 +40,7 @@ else
                                     <div class="details-meta">
                                         <span><i class="fa-regular fa-building me-1"></i>@Model.Job.Department</span>
                                         <span><i class="fa-solid fa-location-dot me-1"></i>@Model.Job.Location</span>
-                                        <span><i class="fa-regular fa-clock me-1"></i>@Model.Job.CreatedAt.ToShortDateString()</span>
+                                        <span><i class="fa-regular fa-clock me-1"></i>Posted on @Model.Job.CreatedAt.ToString("MMM dd, yyyy")</span>
                                     </div>
                                 </div>
                             </div>
@@ -49,7 +50,11 @@ else
                         <div class="details-extra-info mt-4">
                             @if (Model.Job.SalaryMin.HasValue && Model.Job.SalaryMax.HasValue)
                             {
-                                <span><i class="fa-solid fa-dollar-sign me-1"></i>$@Model.Job.SalaryMin — $@Model.Job.SalaryMax</span>
+                                <span><i class="fa-solid fa-dollar-sign me-1"></i>@($"{Model.Job.SalaryMin.Value:0} - {Model.Job.SalaryMax.Value:0}")</span>
+                            }
+                            else
+                            {
+                                <span><i class="fa-solid fa-dollar-sign me-1"></i>Salary not specified</span>
                             }
                             <span><i class="fa-solid fa-graduation-cap me-1"></i>@Model.Job.RequiredEducation</span>
                             <span><i class="fa-solid fa-clock me-1"></i>@Model.Job.MinExperience+ years experience</span>
@@ -58,7 +63,7 @@ else
                         @if (ViewBag.AlreadyApplied == true)
                         {
                             <button class="btn w-100 mt-4" disabled
-                                style="background:#EAF6FA; color:#1A7193; border-radius:10px; padding:12px; font-weight:600; cursor:not-allowed;">
+                                    style="background:#EAF6FA; color:#1A7193; border-radius:10px; padding:12px; font-weight:600; cursor:not-allowed;">
                                 <i class="fa-solid fa-circle-check me-2"></i>Already Applied
                             </button>
                         }
@@ -83,6 +88,12 @@ else
                         <p class="details-text" style="white-space: pre-line">@Model.Job.Description</p>
                     </div>
 
+                    <!-- Requirements -->
+                    <div class="details-card mt-4">
+                        <h2 class="details-section-title">Requirements</h2>
+                        <p class="details-text">@Model.Job.RequiredEducation</p>
+                    </div>
+
                     <!-- Required Skills -->
                     @if (Model.JobSkills != null && Model.JobSkills.Any())
                     {
@@ -105,6 +116,16 @@ else
                         </div>
                     }
 
+                    <!-- Extra Info -->
+                    <div class="details-card mt-4">
+                        <h2 class="details-section-title">Job Information</h2>
+                        <ul class="details-list">
+                            <li><i class="fa-solid fa-check"></i>Department: @Model.Job.Department</li>
+                            <li><i class="fa-solid fa-check"></i>Location: @Model.Job.Location</li>
+                            <li><i class="fa-solid fa-check"></i>Minimum Experience: @Model.Job.MinExperience years</li>
+                            <li><i class="fa-solid fa-check"></i>Status: @Model.Job.Status</li>
+                        </ul>
+                    </div>
                 </div>
 
                 <!-- Right Column -->
@@ -119,7 +140,7 @@ else
                         @if (ViewBag.AlreadyApplied == true)
                         {
                             <button class="btn w-100" disabled
-                                style="background:#EAF6FA; color:#1A7193; border-radius:10px; padding:10px; font-weight:600;">
+                                    style="background:#EAF6FA; color:#1A7193; border-radius:10px; padding:10px; font-weight:600;">
                                 <i class="fa-solid fa-circle-check me-2"></i>Already Applied
                             </button>
                         }
@@ -140,6 +161,7 @@ else
                 </div>
 
             </div>
+
         </div>
     </div>
 }

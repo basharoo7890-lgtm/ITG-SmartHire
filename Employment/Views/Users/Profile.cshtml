@@ -1,0 +1,204 @@
+﻿@model Employment.Models.User
+
+@{
+    ViewData["Title"] = "My Profile";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - ITG Hire</title>
+
+    <!-- CSS داخلي -->
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #E0EEF0;
+            margin: 0;
+            padding: 0;
+        }
+
+        .profile-page {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .profile-heading h1 {
+            color: #1A7193;
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .profile-heading p {
+            color: #149DD2;
+            margin-bottom: 30px;
+        }
+
+        .alert-success {
+            background-color: #d9f7e5;
+            color: #087b35;
+            border-radius: 8px;
+            padding: 12px 20px;
+            margin-bottom: 20px;
+        }
+
+        .profile-card {
+            background-color: #F0F5F8;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 2px 8px rgba(26, 113, 147, 0.15);
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            margin-bottom: 30px;
+        }
+
+        .profile-avatar {
+            width: 70px;
+            height: 70px;
+            background-color: #E0EEF0;
+            color: #1A7193;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+        }
+
+        .profile-header h2 {
+            color: #1A7193;
+            font-size: 26px;
+            margin: 0;
+        }
+
+        .profile-header p {
+            color: #149DD2;
+            margin: 4px 0 0;
+        }
+
+        .profile-body h3 {
+            color: #1A7193;
+            font-size: 20px;
+            margin-bottom: 15px;
+        }
+
+        .profile-input {
+            border-radius: 12px;
+            background-color: #FFFFFF;
+            border: 1px solid #d6e6ec;
+            padding: 10px 12px;
+            color: #1A7193;
+        }
+
+        .profile-save-btn {
+            background-color: #1A7193;
+            color: white;
+            border-radius: 10px;
+            padding: 8px 16px;
+            font-weight: 600;
+            border: none;
+        }
+
+            .profile-save-btn:hover {
+                background-color: #149DD2;
+                color: white;
+            }
+
+        label.form-label {
+            font-weight: 600;
+            color: #1A7193;
+        }
+
+        .row.g-4 {
+            margin-top: 10px;
+        }
+
+        .col-md-6 {
+            display: flex;
+            flex-direction: column;
+        }
+    </style>
+
+    <!-- FontAwesome for icons -->
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <div class="profile-page">
+        <div class="container py-5">
+
+            <div class="profile-heading mb-4">
+                <h1>My Profile</h1>
+                <p>Manage your account information</p>
+            </div>
+
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success">
+                    @TempData["SuccessMessage"]
+                </div>
+            }
+
+            <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+            <div class="profile-card">
+
+                <div class="profile-header">
+                    <div class="profile-avatar">
+                        <i class="fa-regular fa-user"></i>
+                    </div>
+
+                    <div>
+                        <h2>@Model.FullName</h2>
+                        <p>@Model.Role</p>
+                    </div>
+                </div>
+
+                <div class="profile-body">
+                    <form asp-controller="Users" asp-action="Profile" method="post">
+                        @Html.AntiForgeryToken()
+
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h3>Personal Information</h3>
+
+                            <button type="submit" class="btn profile-save-btn">
+                                <i class="fa-regular fa-pen-to-square me-1"></i>
+                                Save Changes
+                            </button>
+                        </div>
+
+                        <div class="row g-4">
+
+                            <div class="col-md-6">
+                                <label class="form-label">Full Name</label>
+                                <input type="text"
+                                       name="fullName"
+                                       value="@Model.FullName"
+                                       class="form-control profile-input"
+                                       placeholder="Full Name" />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Email Address</label>
+                                <input type="email"
+                                       name="email"
+                                       value="@Model.Email"
+                                       class="form-control profile-input"
+                                       placeholder="Email Address" />
+                            </div>
+
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</body>
+</html>

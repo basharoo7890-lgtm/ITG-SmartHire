@@ -7,60 +7,88 @@
 
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Creat Account - ITG Hire</title>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Create Account - ITG Hire</title>
+    <style>
+        /* CSS لأيقونة العين */
+        .password-toggle {
+            position: absolute;
+            top: 50%;
+            right: 12px;
+            transform: translateY(-50%);
+            cursor: pointer;
+            background: transparent;
+            border: none;
+            color: #1A7193;
+            font-size: 18px;
+        }
 
-        <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-        <link rel="stylesheet" href="~/lib/Fontawesome/css/all.min.css" />
-        <link rel="stylesheet" href="~/css/site.css" />
-    </head>
-    <body>
-        <div class="signup-page">
-            <div class="container-fluid px-0">
-                <div class="row g-0 min-vh-100">
+            .password-toggle:focus {
+                outline: none;
+            }
 
-                    <div class="col signup-left d-none d-lg-flex flex-column justify-content-between">
-                        <div class="signup-brand">
-                            <i class="fa-solid fa-briefcase me-2"></i>
-                            <span>ITG Hire</span>
-                        </div>
+        .password-wrapper {
+            position: relative;
+        }
 
-                        <div class="signup-left-content">
-                            <h1>Join ITG Hire</h1>
-                            <p>
-                                Create your account and start your career journey with us.
-                                Access exclusive opportunities.
-                            </p>
-                        </div>
+        /* Hide default browser password reveal icons */
+        input[type="password"]::-ms-reveal,
+        input[type="password"]::-ms-clear {
+            display: none;
+        }
 
-                        <div class="signup-copy">
-                            © 2026 ITG Hire. All rights reserved.
-                        </div>
+        input[type="password"]::-webkit-credentials-auto-fill-button,
+        input[type="password"]::-webkit-textfield-decoration-container {
+            display: none !important;
+        }
+    </style>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/lib/Fontawesome/css/all.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+
+<body>
+    <div class="signup-page">
+        <div class="container-fluid px-0">
+            <div class="row g-0 min-vh-100">
+
+                <!-- Left Side -->
+                <div class="col signup-left d-none d-lg-flex flex-column justify-content-between">
+                    <div class="signup-brand">
+                        <i class="fa-solid fa-briefcase me-2"></i>
+                        <span>ITG Hire</span>
                     </div>
 
-                    <div class="col signup-right d-flex flex-column align-items-center justify-content-center">
-                        <div class="signup-card">
-                            <h2>Create Account</h2>
+                    <div class="signup-left-content">
+                        <h1>Join ITG Hire</h1>
+                        <p>
+                            Create your account and start your career journey with us.
+                            Access exclusive opportunities.
+                        </p>
+                    </div>
+
+                    <div class="signup-copy">
+                        © 2026 ITG Hire. All rights reserved.
+                    </div>
+                </div>
+
+                <!-- Right Side -->
+                <div class="col signup-right d-flex flex-column align-items-center justify-content-center">
+                    <div class="signup-card">
+                        <h2>Create Account</h2>
                         <p class="signup-subtitle">Fill in your information to get started</p>
 
                         <form asp-controller="Account" asp-action="Register" method="post">
                             <div asp-validation-summary="All" class="text-danger mb-3"></div>
 
-                            <div class="mb-3">
-                                <label class="form-label">Full Name</label>
-                                <input asp-for="FullName" class="form-control signup-input" placeholder="USER NAME" />
-                            </div>
+                            <!-- The public registration page always creates Applicant accounts -->
+                            <input type="hidden" asp-for="Role" value="Applicant" />
 
                             <div class="mb-3">
-                                <label class="form-label">Your Role</label>
-                              <select asp-for="Role" class="form-select signup-input signup-select">
-    <option value="">Select your role</option>
-    <option value="Applicant">Applicant</option>
-    <option value="HR">HR</option>
-    <option value="Admin">Admin</option>
-</select>
+                                <label class="form-label">Full Name</label>
+                                <input asp-for="FullName" class="form-control signup-input" placeholder="Full Name" />
                             </div>
 
                             <div class="mb-3">
@@ -70,33 +98,74 @@
 
                             <div class="mb-3">
                                 <label class="form-label">Password</label>
-                                <input asp-for="PasswordHash" type="password" class="form-control signup-input" placeholder="Create a password" />
+
+                                <div class="password-wrapper">
+                                    <input asp-for="PasswordHash"
+                                           type="password"
+                                           id="password"
+                                           class="form-control signup-input password-field"
+                                           placeholder="Create a password" />
+
+                                    <button type="button" class="password-toggle" onclick="togglePassword('password', 'passwordIcon')">
+                                        <i id="passwordIcon" class="fa-solid fa-eye"></i>
+                                    </button>
+                                </div>
                             </div>
 
                             <div class="mb-3">
                                 <label class="form-label">Confirm Password</label>
-                                <input type="password" name="ConfirmPassword" class="form-control signup-input" placeholder="Confirm your password" />
+
+                                <div class="password-wrapper">
+                                    <input type="password"
+                                           name="ConfirmPassword"
+                                           id="confirmPassword"
+                                           class="form-control signup-input password-field"
+                                           placeholder="Confirm your password" />
+
+                                    <button type="button" class="password-toggle" onclick="togglePassword('confirmPassword', 'confirmPasswordIcon')">
+                                        <i id="confirmPasswordIcon" class="fa-solid fa-eye"></i>
+                                    </button>
+                                </div>
                             </div>
 
                             <div class="form-check mb-4">
-                                <input class="form-check-input" type="checkbox" id="agreeTerms" />
+                                <input class="form-check-input" type="checkbox" id="agreeTerms" required />
                                 <label class="form-check-label signup-check-label" for="agreeTerms">
                                     I agree to the Terms of Service and Privacy Policy
                                 </label>
                             </div>
-                            <button type="submit" class="btn signup-btn w-100">Creat Account</button>
+
+                            <button type="submit" class="btn signup-btn w-100">Create Account</button>
+
                             <p class="signup-bottom-text">
                                 Already have an account?
                                 <a asp-controller="Account" asp-action="Login">Sign In</a>
                             </p>
                         </form>
-                        </div>
+                    </div>
 
                     <a asp-controller="Home" asp-action="Index" class="back-home-link">← Back to Homepage</a>
-                    </div>
                 </div>
+
             </div>
         </div>
-        <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    </body>
+    </div>
+    <script>
+        function togglePassword(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.remove("fa-eye");
+                icon.classList.add("fa-eye-slash");
+            } else {
+                input.type = "password";
+                icon.classList.remove("fa-eye-slash");
+                icon.classList.add("fa-eye");
+            }
+        }
+    </script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+</body>
 </html>

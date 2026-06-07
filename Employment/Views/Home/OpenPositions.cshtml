@@ -27,29 +27,24 @@
                 <div class="col-md-4">
                     <input type="text" class="form-control positions-filter-input" placeholder="Job title or keyword" id="searchInput">
                 </div>
+
                 <div class="col-md-4">
                     <input type="text" class="form-control positions-filter-input" placeholder="Location" id="locationInput">
                 </div>
+
                 <div class="col-md-4">
                     <button class="btn search-btn w-100" onclick="filterJobs()">Search Jobs</button>
                 </div>
             </div>
             <div class="positions-filter-footer">
-                <span>Showing @Model.Count position(s)</span>
+                <span>Showing @(Model != null ? Model.Count : 0) position(s)</span>
                 <a href="#">More Filters</a>
             </div>
         </div>
 
         <div class="positions-list" id="jobsList">
-            @if (!Model.Any())
-            {
-                <div class="text-center py-5">
-                    <i class="fa-solid fa-briefcase" style="font-size:48px; color:#D8E4EA"></i>
-                    <h4 class="mt-3" style="color:#78A6B7">No open positions at the moment</h4>
-                    <p class="text-muted">Check back later for new opportunities</p>
-                </div>
-            }
-            else
+
+            @if (Model != null && Model.Any())
             {
                 @foreach (var job in Model)
                 {
@@ -58,77 +53,127 @@
                             <div class="position-icon-box">
                                 <i class="fa-solid fa-briefcase"></i>
                             </div>
+
                             <div>
                                 <h3>@job.Title</h3>
+
                                 <div class="position-meta">
-                                    <span><i class="fa-regular fa-building me-1"></i>@job.Department</span>
-                                    <span><i class="fa-solid fa-location-dot me-1"></i>@job.Location</span>
-                                    <span><i class="fa-regular fa-clock me-1"></i>@job.CreatedAt.ToShortDateString()</span>
+                                    <span>
+                                        <i class="fa-regular fa-building me-1"></i>
+                                        @job.Department
+                                    </span>
+
+                                    <span>
+                                        <i class="fa-solid fa-location-dot me-1"></i>
+                                        @job.Location
+                                    </span>
+
+                                    <span>
+                                        <i class="fa-regular fa-clock me-1"></i>
+                                        Posted on @job.CreatedAt.ToString("MMM dd, yyyy")
+                                    </span>
+                                </div>
+
+                                <div class="mt-1" style="color:#78A6B7; font-size:14px">
+                                    <span>Min Experience: @job.MinExperience years</span>
+                                    @if (!string.IsNullOrEmpty(job.RequiredEducation))
+                                    {
+                                        <span class="ms-3">• Education: @job.RequiredEducation</span>
+                                    }
                                     @if (job.SalaryMin.HasValue && job.SalaryMax.HasValue)
                                     {
-                                        <span><i class="fa-solid fa-dollar-sign me-1"></i>@job.SalaryMin — @job.SalaryMax</span>
+                                        <span class="ms-3">• Salary: @job.SalaryMin — @job.SalaryMax</span>
                                     }
                                 </div>
-                                <p class="mt-1" style="color:#78A6B7; font-size:14px">Min Experience: @job.MinExperience years • Education: @job.RequiredEducation</p>
                             </div>
                         </div>
+
                         <div class="position-right">
                             <span class="position-badge">@job.Status</span>
+
                             <div class="position-buttons">
-                                <a asp-controller="Home" asp-action="JobDetails" asp-route-id="@job.JobId" class="btn position-details-btn">View Details</a>
-                                <a asp-controller="Applications" asp-action="Apply"
-                                    asp-route-jobId="@job.JobId"
-                                    asp-route-title="@job.Title"
-                                    asp-route-department="@job.Department"
-                                    asp-route-location="@job.Location"
-                                    asp-route-type="Full-time"
-                                    class="btn position-apply-btn">Apply Now</a>
+                                <a asp-controller="Home"
+                                   asp-action="JobDetails"
+                                   asp-route-id="@job.JobId"
+                                   class="btn position-details-btn">
+                                    View Details
+                                </a>
+
+                                <a asp-controller="Applications"
+                                   asp-action="Apply"
+                                   asp-route-jobId="@job.JobId"
+                                   asp-route-title="@job.Title"
+                                   asp-route-department="@job.Department"
+                                   asp-route-location="@job.Location"
+                                   asp-route-type="Full-time"
+                                   class="btn position-apply-btn">
+                                    Apply Now
+                                </a>
                             </div>
                         </div>
                     </div>
                 }
             }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="fa-solid fa-briefcase" style="font-size:48px; color:#D8E4EA"></i>
+                    <h4 class="mt-3" style="color:#78A6B7">No open positions at the moment</h4>
+                    <p class="text-muted">Check back later for new opportunities</p>
+                </div>
+            }
+
         </div>
 
-        <div class="positions-pagination">
-            <a href="#" class="btn page-btn active">1</a>
-        </div>
+        @if (Model != null && Model.Any())
+        {
+            <div class="positions-pagination">
+                <a href="#" class="btn page-btn active">1</a>
+            </div>
+        }
+
     </div>
 </div>
 
 <script>
-document.getElementById('searchInput').addEventListener('input', filterJobs);
-document.getElementById('locationInput').addEventListener('input', filterJobs);
+    function filterJobs() {
+        const search = document.getElementById('searchInput').value.toLowerCase().trim();
+        const location = document.getElementById('locationInput').value.toLowerCase().trim();
+        const cards = document.querySelectorAll('.position-item-card');
+        let visible = 0;
 
-function filterJobs() {
-    const search = document.getElementById('searchInput').value.toLowerCase().trim();
-    const location = document.getElementById('locationInput').value.toLowerCase().trim();
-    const cards = document.querySelectorAll('.position-item-card');
-    let visible = 0;
+        cards.forEach(card => {
+            const title = card.dataset.title || '';
+            const loc = card.dataset.location || '';
+            const matchSearch = !search || title.includes(search);
+            const matchLocation = !location || loc.includes(location);
+            card.style.display = matchSearch && matchLocation ? 'flex' : 'none';
+            if (matchSearch && matchLocation) visible++;
+        });
 
-    cards.forEach(card => {
-        const title = card.dataset.title || '';
-        const loc = card.dataset.location || '';
-        const matchSearch = !search || title.includes(search);
-        const matchLocation = !location || loc.includes(location);
-        card.style.display = matchSearch && matchLocation ? 'flex' : 'none';
-        if (matchSearch && matchLocation) visible++;
-    });
+        // Update count
+        const countEl = document.querySelector('.positions-filter-footer span');
+        if (countEl) countEl.textContent = 'Showing ' + visible + ' position(s)';
+    }
 
-    // Update count
-    const countEl = document.querySelector('.positions-filter-footer span');
-    if (countEl) countEl.textContent = 'Showing ' + visible + ' position(s)';
-}
-// Auto-filter from URL params
-const urlParams = new URLSearchParams(window.location.search);
-const keywordParam = urlParams.get('keyword');
-const locationParam = urlParams.get('location');
-if (keywordParam) {
-    document.getElementById('searchInput').value = keywordParam;
-    filterJobs();
-}
-if (locationParam) {
-    document.getElementById('locationInput').value = locationParam;
-    filterJobs();
-}
+    // Add event listeners for real-time filtering
+    document.getElementById('searchInput').addEventListener('input', filterJobs);
+    document.getElementById('locationInput').addEventListener('input', filterJobs);
+
+    // Auto-filter from URL params
+    const urlParams = new URLSearchParams(window.location.search);
+    const titleParam = urlParams.get('title');
+    const locationParam = urlParams.get('location');
+    
+    if (titleParam) {
+        document.getElementById('searchInput').value = titleParam;
+    }
+    if (locationParam) {
+        document.getElementById('locationInput').value = locationParam;
+    }
+    
+    // Trigger initial filter if there are URL params
+    if (titleParam || locationParam) {
+        filterJobs();
+    }
 </script>

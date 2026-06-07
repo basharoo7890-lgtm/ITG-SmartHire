@@ -11,8 +11,6 @@ namespace Employment.Models
         [Column("AppId")]
         public int ApplicationId { get; set; }
 
-        public AIAnalysis? AIAnalysis { get; set; }
-
         public int JobId { get; set; }
         public int UserId { get; set; }
 
@@ -27,11 +25,9 @@ namespace Employment.Models
         [StringLength(100)]
         public string EducationLevel { get; set; } = string.Empty;
 
-        [Column("CVFileName")]
         [Required]
         [StringLength(256)]
         public string CVFileName { get; set; } = string.Empty;
-        
 
         [Required]
         public string CVText { get; set; } = string.Empty;
@@ -47,5 +43,8 @@ namespace Employment.Models
 
         [ForeignKey("JobId")]
         public virtual Job? Job { get; set; }
+
+        // ✅ أضف هذا السطر
+        public virtual AIAnalysis? AIAnalysis { get; set; }
     }
 }
