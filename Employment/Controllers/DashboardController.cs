@@ -11,7 +11,7 @@ namespace Employment.Controllers
 {
 
     // [Authorize(Roles = "HR")]  // uncomment when Identity is set up by Omar
-[Authorize(Roles = "HR,Admin")]
+    [Authorize(Roles = "HR,Admin")]
 
     public class DashboardController : Controller
     {
@@ -43,7 +43,8 @@ namespace Employment.Controllers
                     CandidateEmail = a.User != null ? a.User.Email : "",
                     MatchingScore = a.AIAnalysis != null ? a.AIAnalysis.MatchingScore : null,
                     Status = a.Status,
-                    SubmittedAt = a.SubmittedAt
+                    SubmittedAt = a.SubmittedAt,
+                    ParsedSkills = a.AIAnalysis != null ? a.AIAnalysis.ParsedSkills : null
                 })
                 .ToListAsync();
 
@@ -102,6 +103,7 @@ namespace Employment.Controllers
                 SkillsScore = aiAnalysis?.SkillsScore,
                 SalaryScore = aiAnalysis?.SalaryScore,
                 EducationScore = aiAnalysis?.EducationScore,
+
             };
 
             return View(vm);
@@ -179,6 +181,7 @@ namespace Employment.Controllers
                     ExperienceScore = a.AIAnalysis?.ExperienceScore,
                     SalaryScore = a.AIAnalysis?.SalaryScore,
                     EducationScore = a.AIAnalysis?.EducationScore,
+
                 }).ToList();
             }
 
@@ -255,60 +258,12 @@ namespace Employment.Controllers
 
 
 
-        // GET: /Dashboard/TestParser
-        public IActionResult TestParser([FromServices] CVParserService parser)
-        {
-            var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
-
-            var pdfPath = Path.Combine(uploadsPath, "15966968-32a0-48a3-a774-5c670446ab2d_doora.pdf");
-            var docxPath = Path.Combine(uploadsPath, "9ffe5a5f-968e-4b2f-a487-8618932c4035_OmarAlbayyari.docx");
-
-            var pdfText = parser.ExtractText(pdfPath);
-            var docxText = parser.ExtractText(docxPath);
-
-            return Content($"PDF ({pdfText.Length} chars):\n{pdfText.Substring(0, Math.Min(500, pdfText.Length))}\n\n---\n\nDOCX ({docxText.Length} chars):\n{docxText.Substring(0, Math.Min(500, docxText.Length))}");
-        }
+        
 
 
-        // GET: /Dashboard/TestLanguage
-        public IActionResult TestLanguage(
-            [FromServices] CVParserService parser,
-            [FromServices] LanguageDetectorService langDetector,
-            [FromServices] CVCompletenessService completeness)
-        {
-            var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
-            var docxPath = Path.Combine(uploadsPath, "9ffe5a5f-968e-4b2f-a487-8618932c4035_OmarAlbayyari.docx");
-
-            var text = parser.ExtractText(docxPath);
-            var language = langDetector.DetectLanguage(text);
-            var missing = completeness.GetMissingItems(text);
-            var isComplete = completeness.IsComplete(text);
-
-            var result = $"Language: {language}\n\nComplete: {isComplete}\n\nMissing Items:\n";
-            result += missing.Any() ? string.Join("\n", missing.Select(m => "- " + m)) : "Nothing missing!";
-
-            return Content(result);
-        }
+      
 
 
-        // GET: /Dashboard/TestAI/1003
-        public async Task<IActionResult> TestAI(int id, [FromServices] AIAnalysisService aiService)
-        {
-            var result = await aiService.AnalyzeApplicationAsync(id);
-            if (result == null)
-                return Content("AI Analysis failed — check terminal for errors");
-
-            return Content($"✅ AI Analysis Complete!\n\nMatching Score: {result.MatchingScore}%\nSkills Score: {result.SkillsScore}%\nExperience Score: {result.ExperienceScore}%\nSalary Score: {result.SalaryScore}%\nEducation Score: {result.EducationScore}%\n\nParsed Skills: {result.ParsedSkills}\n\nSummary: {result.Summary}\n\nStrengths:\n{result.Strengths}\n\nWeaknesses:\n{result.Weaknesses}\n\nInterview Questions:\n{result.InterviewQuestions}");
-        }
-
-        // GET: /Dashboard/TestGapReport/1003
-        public async Task<IActionResult> TestGapReport(int id, [FromServices] SkillsGapService gapService)
-        {
-            var result = await gapService.GenerateGapReportAsync(id);
-            if (result == null)
-                return Content("Gap report generation failed");
-            return Content(result);
-        }
 
 
         // GET: /Dashboard/AIRecommendation?jobId=6
@@ -379,6 +334,21 @@ namespace Employment.Controllers
 
             return View(vm);
         }
+        
+        // GET: /Dashboard/RunAI/1008
+public async Task<IActionResult> RunAI(int id, [FromServices] AIAnalysisService aiService)
+{
+    var application = await _context.Applications
+        .Include(a => a.Job)
+        .FirstOrDefaultAsync(a => a.ApplicationId == id);
+
+    if (application == null)
+        return NotFound();
+
+    await aiService.AnalyzeApplicationAsync(id);
+
+    return RedirectToAction("Index", new { jobId = application.JobId });
+}
 
     }
 }

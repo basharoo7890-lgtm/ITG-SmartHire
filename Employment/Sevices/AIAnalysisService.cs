@@ -87,7 +87,7 @@ if (aiResponse == null)
                 var interviewQuestions = root.GetProperty("interviewQuestions").GetString() ?? "";
 
                 // Step 6 - Calculate scores
-                var scores = CalculateScores(application, parsedSkills, jobSkills);
+                var scores = await CalculateScoresAsync(application, parsedSkills, jobSkills);
 
                 // Step 7 - Save to database
                 var existing = await _context.AIAnalyses
@@ -147,100 +147,144 @@ if (aiResponse == null)
             }
         }
 
-        private (decimal MatchingScore, decimal SkillsScore, decimal ExperienceScore, decimal SalaryScore, decimal EducationScore)
-            CalculateScores(Application app, string parsedSkills, List<string> jobSkills)
-        {
-                Console.WriteLine($"[CalculateScores] ParsedSkills: {parsedSkills}");
-    Console.WriteLine($"[CalculateScores] JobSkills: {string.Join(", ", jobSkills)}");
-
-        
-// Skills score (40%)
-decimal skillsScore = 0;
-if (jobSkills.Any() && !string.IsNullOrEmpty(parsedSkills))
+    private async Task<(decimal MatchingScore, decimal SkillsScore, decimal ExperienceScore, decimal SalaryScore, decimal EducationScore)>
+    CalculateScoresAsync(Application app, string parsedSkills, List<string> jobSkills)
 {
-    var candidateSkills = parsedSkills.ToLower()
-        .Split(',')
-        .Select(s => s.Trim())
-        .ToList();
+    // Read weights from System_Setting table
+    var settings = await _context.SystemSettings.ToListAsync();
 
-    int matched = 0;
-    foreach (var jobSkill in jobSkills)
+    decimal skillsWeight = GetSettingValue(settings, "SkillsWeight", 40) / 100m;
+    decimal experienceWeight = GetSettingValue(settings, "ExperienceWeight", 25) / 100m;
+    decimal salaryWeight = GetSettingValue(settings, "SalaryWeight", 20) / 100m;
+    decimal educationWeight = GetSettingValue(settings, "EducationWeight", 15) / 100m;
+
+    Console.WriteLine($"[Weights] Skills:{skillsWeight*100}% Experience:{experienceWeight*100}% Salary:{salaryWeight*100}% Education:{educationWeight*100}%");
+
+    // Skills score
+    decimal skillsScore = 0;
+    if (jobSkills.Any() && !string.IsNullOrEmpty(parsedSkills))
     {
-        var jobSkillLower = jobSkill.ToLower().Trim();
-        bool isMatched = candidateSkills.Any(cs => 
-            cs == jobSkillLower || 
-            cs.StartsWith(jobSkillLower) || 
-            jobSkillLower.StartsWith(cs));
-        
-        if (isMatched) matched++;
-        Console.WriteLine($"[Skills] {jobSkill}: {(isMatched ? "✅ matched" : "❌ not found")}");
-    }
+        var candidateSkills = parsedSkills.ToLower()
+            .Split(',')
+            .Select(s => s.Trim())
+            .ToList();
 
-    skillsScore = (decimal)matched / jobSkills.Count * 100;
-    Console.WriteLine($"[Skills] Score: {matched}/{jobSkills.Count} = {skillsScore}%");
-}
-else if (!jobSkills.Any() && !string.IsNullOrEmpty(parsedSkills))
-{
-    var candidateSkillCount = parsedSkills.Split(',').Length;
-    skillsScore = Math.Min(candidateSkillCount * 8, 65);
-}
-else
-{
-    skillsScore = 30;
-}
+        // Load skill synonyms
+        var synonyms = await _context.SkillSynonyms.ToListAsync();
 
-            
-         // Experience score (25%)
-decimal experienceScore = 0;
-if (app.Job?.MinExperience > 0)
-{
-    var ratio = (decimal)app.YearsOfExperience / app.Job.MinExperience;
-    experienceScore = Math.Min(ratio * 100, 100);
-    // Penalize if overqualified by a lot
-    if (ratio > 3) experienceScore = 85;
-}
-else if (app.YearsOfExperience == 0)
-{
-    experienceScore = 40; // entry level gets lower score
-}
-else
-{
-    experienceScore = 75;
-}
+        int matched = 0;
+        foreach (var jobSkill in jobSkills)
+        {
+            var jobSkillLower = jobSkill.ToLower().Trim();
 
-            // Salary score (20%)
-            decimal salaryScore = 100;
-            if (app.Job?.SalaryMax.HasValue == true && app.Job.SalaryMax > 0)
+            // Direct match
+            bool isMatched = candidateSkills.Any(cs =>
+                cs == jobSkillLower ||
+                cs.StartsWith(jobSkillLower) ||
+                jobSkillLower.StartsWith(cs));
+
+            // Synonym match
+            if (!isMatched)
             {
-                if (app.ExpectedSalary <= app.Job.SalaryMax)
-                    salaryScore = 100;
-                else
-                    salaryScore = Math.Max(0, 100 - ((app.ExpectedSalary - app.Job.SalaryMax.Value) / app.Job.SalaryMax.Value * 100));
+                var jobSkillSynonyms = synonyms
+                    .Where(s => s.MainSkillName.ToLower() == jobSkillLower ||
+                               s.SynonymName.ToLower() == jobSkillLower)
+                    .SelectMany(s => new[] { s.MainSkillName.ToLower(), s.SynonymName.ToLower() })
+                    .ToList();
+
+                isMatched = candidateSkills.Any(cs =>
+                    jobSkillSynonyms.Contains(cs));
             }
 
-            // Education score (15%)
-            decimal educationScore = 50;
-            var eduMap = new Dictionary<string, int>
-            {
-                { "high school", 1 }, { "diploma", 2 }, { "bachelor", 3 },
-                { "master", 4 }, { "phd", 5 }
-            };
-            var candidateEdu = eduMap.FirstOrDefault(e => app.EducationLevel.ToLower().Contains(e.Key)).Value;
-            var requiredEdu = eduMap.FirstOrDefault(e => (app.Job?.RequiredEducation ?? "").ToLower().Contains(e.Key)).Value;
-            if (candidateEdu > 0 && requiredEdu > 0)
-                educationScore = candidateEdu >= requiredEdu ? 100 : (decimal)candidateEdu / requiredEdu * 100;
-
-            // Weighted total
-            var matchingScore = (skillsScore * 0.40m) + (experienceScore * 0.25m) + (salaryScore * 0.20m) + (educationScore * 0.15m);
-
-            return (
-                Math.Round(matchingScore, 2),
-                Math.Round(skillsScore, 2),
-                Math.Round(experienceScore, 2),
-                Math.Round(salaryScore, 2),
-                Math.Round(educationScore, 2)
-            );
+            if (isMatched) matched++;
+            Console.WriteLine($"[Skills] {jobSkill}: {(isMatched ? "✅" : "❌")}");
         }
+
+        skillsScore = (decimal)matched / jobSkills.Count * 100;
+        Console.WriteLine($"[Skills] Score: {matched}/{jobSkills.Count} = {skillsScore}%");
+    }
+    else if (!jobSkills.Any() && !string.IsNullOrEmpty(parsedSkills))
+    {
+        var candidateSkillCount = parsedSkills.Split(',').Length;
+        skillsScore = Math.Min(candidateSkillCount * 8, 65);
+    }
+    else
+    {
+        skillsScore = 30;
+    }
+
+    // Experience score
+    decimal experienceScore = 0;
+    if (app.Job?.MinExperience > 0)
+    {
+        var diff = app.YearsOfExperience - app.Job.MinExperience;
+        if (diff >= 0) experienceScore = 100;
+        else if (diff == -1) experienceScore = 70;
+        else if (diff == -2) experienceScore = 40;
+        else experienceScore = 20;
+    }
+    else if (app.YearsOfExperience == 0)
+    {
+        experienceScore = 40;
+    }
+    else
+    {
+        experienceScore = 75;
+    }
+
+    // Salary score
+    decimal salaryScore = 100;
+    if (app.Job?.SalaryMax.HasValue == true && app.Job.SalaryMax > 0)
+    {
+        if (app.ExpectedSalary <= app.Job.SalaryMax)
+            salaryScore = 100;
+        else
+        {
+            var overBudgetRatio = (app.ExpectedSalary - app.Job.SalaryMax.Value) / app.Job.SalaryMax.Value;
+            if (overBudgetRatio <= 0.10m) salaryScore = 60;
+            else salaryScore = 0;
+        }
+    }
+
+    // Education score
+    decimal educationScore = 50;
+    var eduMap = new Dictionary<string, int>
+    {
+        { "high school", 1 }, { "diploma", 2 }, { "bachelor", 3 },
+        { "master", 4 }, { "phd", 5 }
+    };
+    var candidateEdu = eduMap.FirstOrDefault(e => app.EducationLevel.ToLower().Contains(e.Key)).Value;
+    var requiredEdu = eduMap.FirstOrDefault(e => (app.Job?.RequiredEducation ?? "").ToLower().Contains(e.Key)).Value;
+
+    if (candidateEdu > 0 && requiredEdu > 0)
+    {
+        if (candidateEdu >= requiredEdu) educationScore = 100;
+        else if (candidateEdu == requiredEdu - 1) educationScore = 50;
+        else educationScore = 20;
+    }
+
+    // Weighted total
+    var matchingScore = (skillsScore * skillsWeight) +
+                        (experienceScore * experienceWeight) +
+                        (salaryScore * salaryWeight) +
+                        (educationScore * educationWeight);
+
+    return (
+        Math.Round(matchingScore, 2),
+        Math.Round(skillsScore, 2),
+        Math.Round(experienceScore, 2),
+        Math.Round(salaryScore, 2),
+        Math.Round(educationScore, 2)
+    );
+}
+
+private decimal GetSettingValue(List<SystemSetting> settings, string key, decimal defaultValue)
+{
+    var setting = settings.FirstOrDefault(s => s.SettingKey == key);
+    if (setting != null && decimal.TryParse(setting.SettingValue, out var value))
+        return value;
+    return defaultValue;
+}
         private async Task AutoUpdateApplicationStatusAsync(int applicationId, decimal matchingScore)
 {
     try

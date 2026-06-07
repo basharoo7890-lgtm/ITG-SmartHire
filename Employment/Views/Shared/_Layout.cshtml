@@ -25,28 +25,71 @@
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
-                <div class="collapse navbar-collapse" id="mainNavbar">
-                    <ul class="navbar-nav mx-auto nav-center-links">
-                        <li class="nav-item">
-                            <a class="nav-link active" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Open Positions</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">My Applications</a>
-                        </li>
-                    </ul>
-
-                    <div class="d-flex align-items-center nav-right-side">
-                        <a asp-controller="Account" asp-action="Login" class="nav-icon-link me-4">
-                            <i class="fa-regular fa-user nav-user-icon"></i>
-                        </a>
-
-                        <a asp-controller="Account" asp-action="Login" class="sign-in-link me-4">Sign In</a>
-
-                        <a asp-controller="Account" asp-action="Register" class="btn get-started-btn">Get Started</a>
-                    </div>
+            <div class="collapse navbar-collapse" id="mainNavbar">
+    <ul class="navbar-nav mx-auto nav-center-links">
+        <li class="nav-item">
+            <a class="nav-link active" asp-controller="Home" asp-action="Index">Home</a>
+        </li>
+        @if (User.IsInRole("Admin") || User.IsInRole("HR") || !User.Identity!.IsAuthenticated)
+        {
+            <li class="nav-item">
+                <a class="nav-link" asp-controller="Home" asp-action="OpenPositions">Open Positions</a>
+            </li>
+        }
+     
+            <li class="nav-item">
+               @if (!User.Identity!.IsAuthenticated || User.IsInRole("Applicant"))
+{
+    <li class="nav-item">
+        <a class="nav-link" asp-controller="Applications" asp-action="MyApplications">My Applications</a>
+    </li>
+}
+            </li>
+        
+        @if (User.IsInRole("HR"))
+        {
+            <li class="nav-item">
+                <a class="nav-link" asp-controller="Dashboard" asp-action="Index">HR Dashboard</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" asp-controller="Dashboard" asp-action="Statistics">Statistics</a>
+            </li>
+        }
+        @if (User.IsInRole("Admin"))
+        {
+            <li class="nav-item">
+                <a class="nav-link" asp-controller="Admin" asp-action="Index">Admin Panel</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" asp-controller="Admin" asp-action="Users">Users</a>
+            </li>
+        }
+    </ul>
+<div class="d-flex align-items-center nav-right-side">
+    @if (User.Identity != null && User.Identity.IsAuthenticated)
+    {
+        <span class="me-3" style="color:#1A7193; font-weight:600;">
+            <i class="fa-regular fa-user me-1"></i>@User.Identity.Name
+        </span>
+        @if (User.IsInRole("Admin"))
+        {
+            <a asp-controller="Admin" asp-action="Index" class="sign-in-link me-3">Admin Panel</a>
+        }
+        @if (User.IsInRole("HR"))
+        {
+            <a asp-controller="Dashboard" asp-action="Index" class="sign-in-link me-3">HR Dashboard</a>
+        }
+        <a asp-controller="Account" asp-action="Logout" class="btn get-started-btn">Logout</a>
+    }
+    else
+    {
+        <a asp-controller="Account" asp-action="Login" class="nav-icon-link me-4">
+            <i class="fa-regular fa-user nav-user-icon"></i>
+        </a>
+        <a asp-controller="Account" asp-action="Login" class="sign-in-link me-4">Sign In</a>
+        <a asp-controller="Account" asp-action="Register" class="btn get-started-btn">Get Started</a>
+    }
+</div>
                 </div>
             </div>
         </nav>
@@ -71,18 +114,19 @@
                 <div class="col-md-3">
                     <h6 class="footer-heading">For Candidates</h6>
                     <ul class="footer-links">
-                        <li><a href="#">Browse Jobs</a></li>
-                        <li><a href="#">My Applications</a></li>
-                        <li><a href="#">Profile</a></li>
+                     <li><a asp-controller="Home" asp-action="OpenPositions">Browse Jobs</a></li>
+<li><a asp-controller="Applications" asp-action="MyApplications">My Applications</a></li>
+<li><a asp-controller="Account" asp-action="Register">Get Started</a></li>
                     </ul>
                 </div>
 
                 <div class="col-md-3">
                     <h6 class="footer-heading">Company</h6>
                     <ul class="footer-links">
-                        <li><a href="#">About Us</a></li>
-                        <li><a href="#">Careers</a></li>
-                        <li><a href="#">Contact</a></li>
+                    <li><a asp-controller="Home" asp-action="Index">About Us</a></li>
+                    <li><a asp-controller="Home" asp-action="Index">Careers</a></li>
+                   <li><a asp-controller="Home" asp-action="Index">Contact</a></li>
+                      
                     </ul>
                 </div>
 

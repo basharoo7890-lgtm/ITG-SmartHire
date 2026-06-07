@@ -101,10 +101,15 @@
                                 <span class="info-value"><i class="fa-solid fa-language me-1" style="color:#1A7193"></i>@Model.DetectedLanguage</span>
                             </div>
                         }
-                     <div class="info-label">CV File</div>
+                   
+
+                   <div class="info-label">CV File</div>
 <div class="info-value">
-    <a href="/uploads/@Model.CVFileName" target="_blank" style="color:#1A7193; text-decoration:none;">
-        <i class="fa-solid fa-file-pdf me-1" style="color:#c62828"></i>@Model.CVFileName
+    <a href="/uploads/@Model.CVFileName" target="_blank" 
+        style="color:#1A7193; text-decoration:none; display:flex; align-items:center; gap:6px;">
+        <i class="fa-solid fa-file-pdf" style="color:#c62828"></i>
+        <span>View CV</span>
+        <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:12px"></i>
     </a>
 </div>
                     </div>

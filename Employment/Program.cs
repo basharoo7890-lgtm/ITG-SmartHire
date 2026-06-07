@@ -3,6 +3,7 @@ using Employment.Interfaces;
 using Employment.Services;
 using Microsoft.EntityFrameworkCore;
 using DotNetEnv;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 // 1. Load the variables from your local .env file into the system environment
 DotNetEnv.Env.Load();

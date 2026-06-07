@@ -55,16 +55,26 @@ else
                             <span><i class="fa-solid fa-clock me-1"></i>@Model.Job.MinExperience+ years experience</span>
                         </div>
 
-                        <a asp-controller="Applications"
-                           asp-action="Apply"
-                           asp-route-jobId="@Model.Job.JobId"
-                           asp-route-title="@Model.Job.Title"
-                           asp-route-department="@Model.Job.Department"
-                           asp-route-location="@Model.Job.Location"
-                           asp-route-type="Full-time"
-                           class="btn apply-position-btn w-100 mt-4">
-                            Apply for This Position
-                        </a>
+                        @if (ViewBag.AlreadyApplied == true)
+                        {
+                            <button class="btn w-100 mt-4" disabled
+                                style="background:#EAF6FA; color:#1A7193; border-radius:10px; padding:12px; font-weight:600; cursor:not-allowed;">
+                                <i class="fa-solid fa-circle-check me-2"></i>Already Applied
+                            </button>
+                        }
+                        else
+                        {
+                            <a asp-controller="Applications"
+                               asp-action="Apply"
+                               asp-route-jobId="@Model.Job.JobId"
+                               asp-route-title="@Model.Job.Title"
+                               asp-route-department="@Model.Job.Department"
+                               asp-route-location="@Model.Job.Location"
+                               asp-route-type="Full-time"
+                               class="btn apply-position-btn w-100 mt-4">
+                                Apply for This Position
+                            </a>
+                        }
                     </div>
 
                     <!-- Description -->
@@ -106,16 +116,26 @@ else
                         {
                             <p><i class="fa-solid fa-dollar-sign me-1"></i>$@Model.Job.SalaryMin — $@Model.Job.SalaryMax</p>
                         }
-                        <a asp-controller="Applications"
-                           asp-action="Apply"
-                           asp-route-jobId="@Model.Job.JobId"
-                           asp-route-title="@Model.Job.Title"
-                           asp-route-department="@Model.Job.Department"
-                           asp-route-location="@Model.Job.Location"
-                           asp-route-type="Full-time"
-                           class="btn apply-now-btn w-100">
-                            Apply Now
-                        </a>
+                        @if (ViewBag.AlreadyApplied == true)
+                        {
+                            <button class="btn w-100" disabled
+                                style="background:#EAF6FA; color:#1A7193; border-radius:10px; padding:10px; font-weight:600;">
+                                <i class="fa-solid fa-circle-check me-2"></i>Already Applied
+                            </button>
+                        }
+                        else
+                        {
+                            <a asp-controller="Applications"
+                               asp-action="Apply"
+                               asp-route-jobId="@Model.Job.JobId"
+                               asp-route-title="@Model.Job.Title"
+                               asp-route-department="@Model.Job.Department"
+                               asp-route-location="@Model.Job.Location"
+                               asp-route-type="Full-time"
+                               class="btn apply-now-btn w-100">
+                                Apply Now
+                            </a>
+                        }
                     </div>
                 </div>
 

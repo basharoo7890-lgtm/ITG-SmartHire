@@ -83,48 +83,33 @@
             </span>
         </div>
         <!-- Filter Bar -->
-<div style="background:white; border-radius:14px; padding:20px 24px; box-shadow:0 2px 12px rgba(0,0,0,0.07); margin-bottom:20px;">
-    <div style="color:#1A7193; font-weight:600; font-size:15px; margin-bottom:12px;">
-        <i class="fa-solid fa-filter me-2"></i>Filter Candidates
-    </div>
-    <div class="row g-3">
+<div style="background:white; border-radius:14px; padding:16px 24px; box-shadow:0 2px 12px rgba(0,0,0,0.07); margin-bottom:16px;">
+    <div class="row g-2 align-items-center">
         <div class="col-md-3">
-            <label style="color:#78A6B7; font-size:12px; font-weight:600; text-transform:uppercase; margin-bottom:4px;">Search by Name</label>
-         <input type="text" id="nameFilter" class="form-control" oninput="applyFilters()">
+            <input type="text" id="nameFilter" class="form-control" placeholder="Search by name..." oninput="applyFilters()">
         </div>
         <div class="col-md-2">
-            <label style="color:#78A6B7; font-size:12px; font-weight:600; text-transform:uppercase; margin-bottom:4px;">Status</label>
             <select id="statusFilter" class="form-select" onchange="applyFilters()">
-                <option value="">All</option>
-                <option value="shortlisted">Shortlisted</option>
-                <option value="screening">Screening</option>
-                <option value="rejected">Rejected</option>
-                <option value="pending">Pending</option>
+                <option value="">All Statuses</option>
+                <option value="Shortlisted">Shortlisted</option>
+                <option value="Screening">Screening</option>
+                <option value="Rejected">Rejected</option>
+                <option value="Pending">Pending</option>
             </select>
         </div>
         <div class="col-md-2">
-            <label style="color:#78A6B7; font-size:12px; font-weight:600; text-transform:uppercase; margin-bottom:4px;">Min Score %</label>
-          <input type="number" id="minScore" class="form-control" min="0" max="100" oninput="applyFilters()">
+            <input type="number" id="minScore" class="form-control" placeholder="Min Score %" oninput="applyFilters()">
         </div>
         <div class="col-md-2">
-            <label style="color:#78A6B7; font-size:12px; font-weight:600; text-transform:uppercase; margin-bottom:4px;">Skill</label>
-           <input type="text" id="skillFilter" class="form-control" oninput="applyFilters()">
+            <input type="number" id="maxSalary" class="form-control" placeholder="Max Salary $" oninput="applyFilters()">
         </div>
         <div class="col-md-2">
-            <label style="color:#78A6B7; font-size:12px; font-weight:600; text-transform:uppercase; margin-bottom:4px;">Sort By</label>
-            <select id="sortBy" class="form-select" onchange="applyFilters()">
-                <option value="score">Highest Score</option>
-                <option value="name">Name A-Z</option>
-                <option value="date">Latest First</option>
-            </select>
+            <input type="text" id="skillFilter" class="form-control" placeholder="Skill..." oninput="applyFilters()">
         </div>
-        <div class="col-md-1 d-flex align-items-end">
-            <button class="btn w-100" style="background:#EAF6FA; color:#1A7193; border-radius:8px; font-weight:600;" onclick="clearFilters()">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
+        <div class="col-md-1">
+            <button class="btn w-100" style="background:#EAF6FA; color:#1A7193; border-radius:8px;" onclick="clearFilters()">Clear</button>
         </div>
     </div>
-    <div class="mt-2" id="filterResults" style="color:#78A6B7; font-size:13px;"></div>
 </div>
 
         <!-- Status Summary -->
@@ -150,7 +135,7 @@
 </div>
 
         <!-- Candidates Table -->
-        <div class="candidates-card">
+x        <div class="candidates-card">
             <div class="candidates-header">
                 <h5><i class="fa-solid fa-users me-2"></i>@Model.JobTitle — Candidates</h5>
          <div class="d-flex align-items-center gap-3">
@@ -178,7 +163,7 @@
             {
                 <table class="table mb-0">
                     <thead>
-                    <tr>
+                    <tr data-skills="@(c.ParsedSkills?.ToLower() ?? "")">
                             <th>Candidate</th>
                             <th>Email</th>
                             <th>Match Score</th>
@@ -187,68 +172,61 @@
                             <th>Actions</th>
                         </tr>
                     </thead>
-                   <tbody>
-@foreach (var c in Model.Candidates)
+                    <tbody>
+                    @foreach (var c in Model.Candidates)
 {
     <tr data-skills="@(c.ParsedSkills?.ToLower() ?? "")">
-        <td>
-            <div class="d-flex align-items-center gap-2">
-                <div style="width:36px; height:36px; border-radius:50%; background:#EAF6FA; display:flex; align-items:center; justify-content:center; color:#1A7193; font-weight:700; font-size:14px; flex-shrink:0;">
-                    @c.CandidateName.Substring(0, 1).ToUpper()
-                </div>
-                <span class="fw-semibold" style="color:#1A7193">@c.CandidateName</span>
-            </div>
-        </td>
-        <td style="color:#78A6B7">@c.CandidateEmail</td>
-        <td>
-            @if (c.MatchingScore.HasValue)
-            {
-                var score = (int)c.MatchingScore.Value;
-                var cls = score >= 80 ? "score-high" : score >= 60 ? "score-mid" : "score-low";
-                <span class="score-badge @cls">@score%</span>
-            }
-            else
-            {
-                <span class="text-muted">N/A</span>
-            }
-        </td>
-        <td>
-            @{
-                var statusCls = c.Status == "Shortlisted" ? "status-shortlisted" :
-                                c.Status == "Rejected" ? "status-rejected" : "status-pending";
-            }
-            <span class="status-badge @statusCls">@c.Status</span>
-        </td>
-        <td style="color:#78A6B7">@c.SubmittedAt.ToShortDateString()</td>
-        <td>
-            <div class="d-flex gap-2 flex-wrap">
-                @if (!c.MatchingScore.HasValue)
-                {
-                    <a href="/Dashboard/RunAI/@c.ApplicationId" class="details-btn"
-                        style="background:#fff8e1; color:#f57f17;">
-                        <i class="fa-solid fa-robot"></i> Analyze
-                    </a>
-                }
-                <a href="/Dashboard/CandidateDetails/@c.ApplicationId" class="details-btn">
-                    <i class="fa-solid fa-eye"></i> Details
-                </a>
-                <form method="post" action="/Dashboard/Accept/@c.ApplicationId" style="display:inline">
-                    @Html.AntiForgeryToken()
-                    <button type="submit" class="accept-btn">
-                        <i class="fa-solid fa-check me-1"></i>Accept
-                    </button>
-                </form>
-                <form method="post" action="/Dashboard/Reject/@c.ApplicationId" style="display:inline">
-                    @Html.AntiForgeryToken()
-                    <button type="submit" class="reject-btn">
-                        <i class="fa-solid fa-xmark me-1"></i>Reject
-                    </button>
-                </form>
-            </div>
-        </td>
-    </tr>
-}
-</tbody>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div style="width:36px; height:36px; border-radius:50%; background:#EAF6FA; display:flex; align-items:center; justify-content:center; color:#1A7193; font-weight:700; font-size:14px; flex-shrink:0;">
+                                            @c.CandidateName.Substring(0, 1).ToUpper()
+                                        </div>
+                                        <span class="fw-semibold" style="color:#1A7193">@c.CandidateName</span>
+                                    </div>
+                                </td>
+                                <td style="color:#78A6B7">@c.CandidateEmail</td>
+                                <td>
+                                    @if (c.MatchingScore.HasValue)
+                                    {
+                                        var score = (int)c.MatchingScore.Value;
+                                        var cls = score >= 80 ? "score-high" : score >= 60 ? "score-mid" : "score-low";
+                                        <span class="score-badge @cls">@score%</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">N/A</span>
+                                    }
+                                </td>
+                                <td>
+                                    @{
+                                        var statusCls = c.Status == "Shortlisted" ? "status-shortlisted" :
+                                                        c.Status == "Rejected" ? "status-rejected" : "status-pending";
+                                    }
+                                    <span class="status-badge @statusCls">@c.Status</span>
+                                </td>
+                                <td style="color:#78A6B7">@c.SubmittedAt.ToShortDateString()</td>
+                                <td>
+                                    <div class="d-flex gap-2 flex-wrap">
+                                        <a href="/Dashboard/CandidateDetails/@c.ApplicationId" class="details-btn">
+                                            <i class="fa-solid fa-eye"></i> Details
+                                        </a>
+                                        <form method="post" action="/Dashboard/Accept/@c.ApplicationId" style="display:inline">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="accept-btn">
+                                                <i class="fa-solid fa-check me-1"></i>Accept
+                                            </button>
+                                        </form>
+                                        <form method="post" action="/Dashboard/Reject/@c.ApplicationId" style="display:inline">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="reject-btn">
+                                                <i class="fa-solid fa-xmark me-1"></i>Reject
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
                 </table>
             }
         </div>
@@ -258,47 +236,39 @@
 </div>
 <script>
 function applyFilters() {
-    const name = document.getElementById('nameFilter').value.toLowerCase().trim();
-    const status = document.getElementById('statusFilter').value.toLowerCase().trim();
+    const name = document.getElementById('nameFilter').value.toLowerCase();
+    const status = document.getElementById('statusFilter').value.toLowerCase();
     const minScore = parseFloat(document.getElementById('minScore').value) || 0;
-    const skill = document.getElementById('skillFilter').value.toLowerCase().trim();
+    const maxSalary = parseFloat(document.getElementById('maxSalary').value) || 999999;
+    const skill = document.getElementById('skillFilter').value.toLowerCase();
 
     const rows = document.querySelectorAll('tbody tr');
-    let visibleCount = 0;
-
     rows.forEach(row => {
-        const rowName = row.cells[0]?.textContent.toLowerCase().trim() || '';
-        const rowStatus = row.querySelector('[class*="status-badge"]')?.textContent.toLowerCase().trim() || '';
-        const scoreBadge = row.querySelector('[class*="score-badge"]');
-        const rowScore = scoreBadge ? parseFloat(scoreBadge.textContent.replace('%', '').trim()) || 0 : 0;
-        const rowSkills = (row.getAttribute('data-skills') || '').toLowerCase();
+        const rowName = row.cells[0]?.textContent.toLowerCase() || '';
+        const rowStatus = row.querySelector('.status-badge')?.textContent.trim().toLowerCase() || '';
+        const rowScore = parseFloat(row.cells[2]?.textContent) || 0;
+        const rowSkills = row.dataset.skills?.toLowerCase() || '';
 
         const matchName = !name || rowName.includes(name);
-        const matchStatus = !status || rowStatus.includes(status);
-        const matchScore = !minScore || rowScore >= minScore;
+        const matchStatus = !status || rowStatus === status;
+        const matchScore = rowScore >= minScore;
         const matchSkill = !skill || rowSkills.includes(skill);
 
-        const show = matchName && matchStatus && matchScore && matchSkill;
-        row.style.display = show ? '' : 'none';
-        if (show) visibleCount++;
+        row.style.display = matchName && matchStatus && matchScore && matchSkill ? '' : 'none';
     });
-
-    const resultsEl = document.getElementById('filterResults');
-    if (resultsEl) resultsEl.textContent = visibleCount + ' candidate(s) match your filters';
 }
 
 function clearFilters() {
     document.getElementById('nameFilter').value = '';
     document.getElementById('statusFilter').value = '';
     document.getElementById('minScore').value = '';
+    document.getElementById('maxSalary').value = '';
     document.getElementById('skillFilter').value = '';
-    document.getElementById('sortBy').value = 'score';
-    document.getElementById('filterResults').textContent = '';
-    document.querySelectorAll('tbody tr').forEach(row => row.style.display = '');
+    applyFilters();
 }
 
 function filterByStatus(status) {
-    document.getElementById('statusFilter').value = status.toLowerCase();
+    document.getElementById('statusFilter').value = status;
     applyFilters();
 }
 </script>

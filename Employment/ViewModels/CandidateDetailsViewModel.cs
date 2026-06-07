@@ -15,7 +15,7 @@ namespace Employment.ViewModels
         public DateTime SubmittedAt { get; set; }
         public string CVFileName { get; set; } = string.Empty;
         public string JobTitle { get; set; } = string.Empty;
-        public int JobId { get; set; }
+                public int JobId { get; set; }
 
         // AI Analysis
         public decimal? MatchingScore { get; set; }

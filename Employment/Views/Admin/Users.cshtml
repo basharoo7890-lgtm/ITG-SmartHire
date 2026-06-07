@@ -1,0 +1,101 @@
+@model List<Employment.Models.User>
+
+@{
+    ViewData["Title"] = "User Management";
+}
+
+<style>
+    .users-page { background-color: #E0EEF0; min-height: 100vh; padding: 36px 0 60px; }
+    .page-header { background: linear-gradient(90deg, #1A7193, #149DD2); border-radius: 18px; padding: 28px 36px; margin-bottom: 28px; color: white; }
+    .page-header h2 { font-size: 28px; font-weight: 700; margin-bottom: 4px; }
+    .users-card { background: white; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.07); overflow: hidden; }
+    .users-card-header { background: linear-gradient(90deg, #1A7193, #149DD2); padding: 14px 24px; }
+    .users-card-header h5 { color: white; margin: 0; font-size: 16px; font-weight: 600; }
+    .table th { color: #78A6B7; font-size: 13px; font-weight: 600; text-transform: uppercase; padding: 14px 20px; border-bottom: 1px solid #f0f4f6; }
+    .table td { padding: 14px 20px; color: #334e5a; font-size: 15px; border-bottom: 1px solid #f8fbfc; vertical-align: middle; }
+    .table tr:last-child td { border-bottom: none; }
+    .role-admin { background: #fdecea; color: #c62828; border-radius: 20px; padding: 4px 14px; font-size: 13px; font-weight: 500; }
+    .role-hr { background: #EAF6FA; color: #1A7193; border-radius: 20px; padding: 4px 14px; font-size: 13px; font-weight: 500; }
+    .role-applicant { background: #e8f5e9; color: #2e7d32; border-radius: 20px; padding: 4px 14px; font-size: 13px; font-weight: 500; }
+</style>
+
+<div class="users-page">
+    <div class="container">
+
+        <div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h2><i class="fa-solid fa-users me-2"></i>User Management</h2>
+                <p>Manage all system users and their roles</p>
+            </div>
+            <a href="/Admin" class="btn" style="background:white; color:#1A7193; border-radius:12px; font-weight:600; padding:12px 24px;">
+                <i class="fa-solid fa-arrow-left me-2"></i>Back to Admin
+            </a>
+        </div>
+
+        <div class="users-card">
+            <div class="users-card-header">
+                <h5><i class="fa-solid fa-users me-2"></i>All Users (@Model.Count)</h5>
+            </div>
+            <table class="table mb-0">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Joined</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in Model)
+                    {
+                        <tr>
+                            <td class="fw-semibold">@user.FullName</td>
+                            <td style="color:#78A6B7">@user.Email</td>
+                            <td>
+                                <span class="role-@user.Role.ToLower()">@user.Role</span>
+                            </td>
+                            <td style="color:#78A6B7">@user.CreatedAt.ToShortDateString()</td>
+                            <td>
+                                <form method="post" action="/Admin/ChangeRole" style="display:inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="userId" value="@user.UserId" />
+                                <select name="role" class="form-select form-select-sm d-inline-block w-auto me-2"
+    onchange="this.form.submit()">
+    @if (user.Role == "Applicant")
+    {
+        <option value="Applicant" selected>Applicant</option>
+        <option value="HR">HR</option>
+        <option value="Admin">Admin</option>
+    }
+    else if (user.Role == "HR")
+    {
+        <option value="Applicant">Applicant</option>
+        <option value="HR" selected>HR</option>
+        <option value="Admin">Admin</option>
+    }
+    else
+    {
+        <option value="Applicant">Applicant</option>
+        <option value="HR">HR</option>
+        <option value="Admin" selected>Admin</option>
+    }
+</select>
+                                </form>
+                                <form method="post" action="/Admin/DeleteUser" style="display:inline"
+                                    onsubmit="return confirm('Delete this user?')">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="userId" value="@user.UserId" />
+                                    <button type="submit" style="background:#fdecea; color:#c62828; border:none; border-radius:8px; padding:6px 12px; font-size:13px; cursor:pointer;">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>

@@ -262,5 +262,44 @@ namespace Employment.Controllers
 
             return RedirectToAction("Index");
         }
+
+        // GET: /Admin/Users
+public async Task<IActionResult> Users()
+{
+    var users = await _context.Users
+        .OrderBy(u => u.Role)
+        .ThenBy(u => u.FullName)
+        .ToListAsync();
+    return View(users);
+}
+
+// POST: /Admin/ChangeRole
+[HttpPost]
+public async Task<IActionResult> ChangeRole(int userId, string role)
+{
+    var user = await _context.Users.FindAsync(userId);
+    if (user == null) return NotFound();
+
+    if (role == "Admin" || role == "HR" || role == "Applicant")
+    {
+        user.Role = role;
+        await _context.SaveChangesAsync();
+    }
+
+    return RedirectToAction("Users");
+}
+
+// POST: /Admin/DeleteUser
+[HttpPost]
+public async Task<IActionResult> DeleteUser(int userId)
+{
+    var user = await _context.Users.FindAsync(userId);
+    if (user == null) return NotFound();
+
+    _context.Users.Remove(user);
+    await _context.SaveChangesAsync();
+
+    return RedirectToAction("Users");
+}
     }
 }

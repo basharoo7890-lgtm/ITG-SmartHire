@@ -97,17 +97,38 @@
 </div>
 
 <script>
+document.getElementById('searchInput').addEventListener('input', filterJobs);
+document.getElementById('locationInput').addEventListener('input', filterJobs);
+
 function filterJobs() {
-    const search = document.getElementById('searchInput').value.toLowerCase();
-    const location = document.getElementById('locationInput').value.toLowerCase();
+    const search = document.getElementById('searchInput').value.toLowerCase().trim();
+    const location = document.getElementById('locationInput').value.toLowerCase().trim();
     const cards = document.querySelectorAll('.position-item-card');
+    let visible = 0;
 
     cards.forEach(card => {
-        const title = card.dataset.title;
-        const loc = card.dataset.location;
-        const matchesSearch = !search || title.includes(search);
-        const matchesLocation = !location || loc.includes(location);
-        card.style.display = matchesSearch && matchesLocation ? 'flex' : 'none';
+        const title = card.dataset.title || '';
+        const loc = card.dataset.location || '';
+        const matchSearch = !search || title.includes(search);
+        const matchLocation = !location || loc.includes(location);
+        card.style.display = matchSearch && matchLocation ? 'flex' : 'none';
+        if (matchSearch && matchLocation) visible++;
     });
+
+    // Update count
+    const countEl = document.querySelector('.positions-filter-footer span');
+    if (countEl) countEl.textContent = 'Showing ' + visible + ' position(s)';
+}
+// Auto-filter from URL params
+const urlParams = new URLSearchParams(window.location.search);
+const keywordParam = urlParams.get('keyword');
+const locationParam = urlParams.get('location');
+if (keywordParam) {
+    document.getElementById('searchInput').value = keywordParam;
+    filterJobs();
+}
+if (locationParam) {
+    document.getElementById('locationInput').value = locationParam;
+    filterJobs();
 }
 </script>

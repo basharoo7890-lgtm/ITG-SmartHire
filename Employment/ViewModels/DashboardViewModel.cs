@@ -18,5 +18,6 @@ namespace Employment.ViewModels
         public decimal? MatchingScore { get; set; }
         public string? Status { get; set; }
         public DateTime SubmittedAt { get; set; }
+         public string? ParsedSkills { get; set; }
     }
 }
