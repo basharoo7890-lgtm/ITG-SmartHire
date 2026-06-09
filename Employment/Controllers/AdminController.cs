@@ -290,16 +290,46 @@ public async Task<IActionResult> ChangeRole(int userId, string role)
 }
 
 // POST: /Admin/DeleteUser
+
 [HttpPost]
+[ValidateAntiForgeryToken]
 public async Task<IActionResult> DeleteUser(int userId)
 {
-    var user = await _context.Users.FindAsync(userId);
-    if (user == null) return NotFound();
-
-    _context.Users.Remove(user);
-    await _context.SaveChangesAsync();
-
-    return RedirectToAction("Users");
+    try
+    {
+        var user = await _context.Users
+            .Include(u => u.Applications)
+            .FirstOrDefaultAsync(u => u.UserId == userId);
+            
+        if (user == null)
+        {
+            TempData["Error"] = "User not found";
+            return RedirectToAction(nameof(Users));
+        }
+        
+        // Check if user has applications
+        if (user.Applications != null && user.Applications.Any())
+        {
+            // Option 1: Delete applications first
+            _context.Applications.RemoveRange(user.Applications);
+            
+            // Option 2: Or just warn and don't delete
+            // TempData["Error"] = $"Cannot delete user with {user.Applications.Count} existing applications. Delete applications first.";
+            // return RedirectToAction(nameof(Users));
+        }
+        
+        _context.Users.Remove(user);
+        await _context.SaveChangesAsync();
+        
+        TempData["Success"] = "User deleted successfully";
+    }
+    catch (DbUpdateException ex)
+    {
+        TempData["Error"] = "Cannot delete user because they have existing applications. Please delete their applications first.";
+        Console.WriteLine($"Delete error: {ex.Message}");
+    }
+    
+    return RedirectToAction(nameof(Users));
 }
     }
 }

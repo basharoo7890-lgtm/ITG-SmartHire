@@ -1106,6 +1106,21 @@
     margin-top: 32px;
 }
 
+.position-applied-btn {
+    background-color: #28a745 !important;
+    color: white !important;
+    border: none;
+    border-radius: 10px;
+    padding: 12px 24px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: not-allowed;
+    opacity: 0.8;
+}
+
+.position-applied-btn:hover {
+    background-color: #28a745 !important;
+}
 .page-btn {
     background-color: white;
     color: #1A7193 !important;

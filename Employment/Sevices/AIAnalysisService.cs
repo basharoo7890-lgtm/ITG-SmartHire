@@ -26,15 +26,15 @@ namespace Employment.Services
         public async Task<AIAnalysis?> AnalyzeApplicationAsync(int applicationId)
         {
             var application = await _context.Applications
-    .Include(a => a.Job)
-    .FirstOrDefaultAsync(a => a.ApplicationId == applicationId);
+                .Include(a => a.Job)
+                .FirstOrDefaultAsync(a => a.ApplicationId == applicationId);
 
             if (application == null || application.Job == null)
                 return null;
 
             // Step 1 - Parse CV
             var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
-            var cvPath = Path.Combine(uploadsPath, application.CVFileName);
+            var cvPath = Path.Combine(uploadsPath, application.CVFileName ?? "");
             var cvText = _cvParser.ExtractText(cvPath);
 
             if (string.IsNullOrEmpty(cvText))
@@ -52,9 +52,10 @@ namespace Employment.Services
             };
 
             var jobSkills = await _context.JobSkills
-     .Where(s => s.JobId == application.Job.JobId)
-     .Select(s => s.SkillName)
-     .ToListAsync();
+                .Where(s => s.JobId == application.Job.JobId)
+                .Select(s => s.SkillName ?? "")
+                .Where(s => !string.IsNullOrEmpty(s))
+                .ToListAsync();
 
             var skillsList = jobSkills.Any() ? string.Join(", ", jobSkills) : "general skills";
 
@@ -63,10 +64,10 @@ namespace Employment.Services
 
             var extractPrompt = $"{languageInstruction}\n\nCV Text:\n{cvText}\n\nJob Title: {application.Job.Title}\nRequired Skills: {skillsList}\n\nRespond ONLY with a JSON object in this exact format, no markdown:\n{jsonFormat}";
 
-        var aiResponse = await _gemini.GenerateAsync(extractPrompt);
-Console.WriteLine($"[AI Raw Response]: {aiResponse?.Substring(0, Math.Min(500, aiResponse?.Length ?? 0))}");
+            var aiResponse = await _gemini.GenerateAsync(extractPrompt);
+            Console.WriteLine($"[AI Raw Response]: {aiResponse?.Substring(0, Math.Min(500, aiResponse?.Length ?? 0))}");
 
-if (aiResponse == null)
+            if (aiResponse == null)
                 return null;
 
             // Step 5 - Parse JSON response
@@ -108,8 +109,8 @@ if (aiResponse == null)
                     existing.AnalysisDate = DateTime.Now;
                     await _context.SaveChangesAsync();
 
-                    // Auto shortlist/reject based on score
-                    await AutoUpdateApplicationStatusAsync(applicationId, scores.MatchingScore);
+                    // Update application status (no auto-rejection)
+                    await UpdateApplicationStatusAsync(applicationId, scores.MatchingScore);
 
                     return existing;
                 }
@@ -133,8 +134,8 @@ if (aiResponse == null)
                     _context.AIAnalyses.Add(analysis);
                     await _context.SaveChangesAsync();
 
-                    // Auto shortlist/reject based on score
-                    await AutoUpdateApplicationStatusAsync(applicationId, scores.MatchingScore);
+                    // Update application status (no auto-rejection)
+                    await UpdateApplicationStatusAsync(applicationId, scores.MatchingScore);
 
                     return analysis;
                 }
@@ -147,186 +148,293 @@ if (aiResponse == null)
             }
         }
 
-    private async Task<(decimal MatchingScore, decimal SkillsScore, decimal ExperienceScore, decimal SalaryScore, decimal EducationScore)>
-    CalculateScoresAsync(Application app, string parsedSkills, List<string> jobSkills)
-{
-    // Read weights from System_Setting table
-    var settings = await _context.SystemSettings.ToListAsync();
-
-    decimal skillsWeight = GetSettingValue(settings, "SkillsWeight", 40) / 100m;
-    decimal experienceWeight = GetSettingValue(settings, "ExperienceWeight", 25) / 100m;
-    decimal salaryWeight = GetSettingValue(settings, "SalaryWeight", 20) / 100m;
-    decimal educationWeight = GetSettingValue(settings, "EducationWeight", 15) / 100m;
-
-    Console.WriteLine($"[Weights] Skills:{skillsWeight*100}% Experience:{experienceWeight*100}% Salary:{salaryWeight*100}% Education:{educationWeight*100}%");
-
-    // Skills score
-    decimal skillsScore = 0;
-    if (jobSkills.Any() && !string.IsNullOrEmpty(parsedSkills))
-    {
-        var candidateSkills = parsedSkills.ToLower()
-            .Split(',')
-            .Select(s => s.Trim())
-            .ToList();
-
-        // Load skill synonyms
-        var synonyms = await _context.SkillSynonyms.ToListAsync();
-
-        int matched = 0;
-        foreach (var jobSkill in jobSkills)
+        private async Task<(decimal MatchingScore, decimal SkillsScore, decimal ExperienceScore, decimal SalaryScore, decimal EducationScore)>
+            CalculateScoresAsync(Application app, string parsedSkills, List<string> jobSkills)
         {
-            var jobSkillLower = jobSkill.ToLower().Trim();
+            // Read weights from System_Setting table
+            var settings = await _context.SystemSettings.ToListAsync();
 
-            // Direct match
-            bool isMatched = candidateSkills.Any(cs =>
-                cs == jobSkillLower ||
-                cs.StartsWith(jobSkillLower) ||
-                jobSkillLower.StartsWith(cs));
+            decimal skillsWeight = GetSettingValue(settings, "SkillsWeight", 40) / 100m;
+            decimal experienceWeight = GetSettingValue(settings, "ExperienceWeight", 25) / 100m;
+            decimal salaryWeight = GetSettingValue(settings, "SalaryWeight", 20) / 100m;
+            decimal educationWeight = GetSettingValue(settings, "EducationWeight", 15) / 100m;
 
-            // Synonym match
-            if (!isMatched)
+            Console.WriteLine($"[Weights] Skills:{skillsWeight * 100}% Experience:{experienceWeight * 100}% Salary:{salaryWeight * 100}% Education:{educationWeight * 100}%");
+
+            // Calculate scores
+            var skillsScore = await CalculateSkillsScoreAsync(app, parsedSkills, jobSkills);
+            var experienceScore = CalculateExperienceScore(app);
+            var salaryScore = CalculateSalaryScore(app, settings);
+            var educationScore = CalculateEducationScore(app);
+
+            // Weighted total
+            var matchingScore = (skillsScore * skillsWeight) +
+                                (experienceScore * experienceWeight) +
+                                (salaryScore * salaryWeight) +
+                                (educationScore * educationWeight);
+
+            return (
+                Math.Round(matchingScore, 2),
+                Math.Round(skillsScore, 2),
+                Math.Round(experienceScore, 2),
+                Math.Round(salaryScore, 2),
+                Math.Round(educationScore, 2)
+            );
+        }
+
+        private async Task<decimal> CalculateSkillsScoreAsync(Application app, string parsedSkills, List<string> jobSkills)
+        {
+            decimal skillsScore = 0;
+
+            if (jobSkills.Any() && !string.IsNullOrEmpty(parsedSkills))
             {
-                var jobSkillSynonyms = synonyms
-                    .Where(s => s.MainSkillName.ToLower() == jobSkillLower ||
-                               s.SynonymName.ToLower() == jobSkillLower)
-                    .SelectMany(s => new[] { s.MainSkillName.ToLower(), s.SynonymName.ToLower() })
+                var candidateSkills = parsedSkills.ToLower()
+                    .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(s => s.Trim())
                     .ToList();
 
-                isMatched = candidateSkills.Any(cs =>
-                    jobSkillSynonyms.Contains(cs));
+                var synonyms = await _context.SkillSynonyms.ToListAsync();
+                
+                var validSynonymPairs = new List<(string MainSkill, string Synonym)>();
+                foreach (var synonym in synonyms)
+                {
+                    if (!string.IsNullOrEmpty(synonym.MainSkillName) && !string.IsNullOrEmpty(synonym.SynonymName))
+                    {
+                        validSynonymPairs.Add((synonym.MainSkillName.ToLower(), synonym.SynonymName.ToLower()));
+                    }
+                }
+
+                int matched = 0;
+                foreach (var jobSkill in jobSkills)
+                {
+                    var jobSkillLower = jobSkill.ToLower().Trim();
+
+                    bool isMatched = candidateSkills.Any(cs =>
+                        cs == jobSkillLower ||
+                        cs.StartsWith(jobSkillLower) ||
+                        jobSkillLower.StartsWith(cs));
+
+                    if (!isMatched && validSynonymPairs.Any())
+                    {
+                        var jobSkillSynonyms = new List<string>();
+                        
+                        var mainSkillMatches = validSynonymPairs
+                            .Where(p => p.MainSkill == jobSkillLower)
+                            .Select(p => p.Synonym)
+                            .ToList();
+                        jobSkillSynonyms.AddRange(mainSkillMatches);
+                        
+                        var synonymMatches = validSynonymPairs
+                            .Where(p => p.Synonym == jobSkillLower)
+                            .Select(p => p.MainSkill)
+                            .ToList();
+                        jobSkillSynonyms.AddRange(synonymMatches);
+                        
+                        jobSkillSynonyms.Add(jobSkillLower);
+                        jobSkillSynonyms = jobSkillSynonyms.Distinct().ToList();
+
+                        isMatched = candidateSkills.Any(cs => jobSkillSynonyms.Contains(cs));
+                    }
+
+                    if (isMatched) matched++;
+                    Console.WriteLine($"[Skills] {jobSkill}: {(isMatched ? "✅" : "❌")}");
+                }
+
+                skillsScore = (decimal)matched / jobSkills.Count * 100;
+                Console.WriteLine($"[Skills] Score: {matched}/{jobSkills.Count} = {skillsScore}%");
+            }
+            else if (!jobSkills.Any() && !string.IsNullOrEmpty(parsedSkills))
+            {
+                var candidateSkillCount = parsedSkills.Split(',').Length;
+                skillsScore = Math.Min(candidateSkillCount * 8, 65);
+            }
+            else
+            {
+                skillsScore = 30;
             }
 
-            if (isMatched) matched++;
-            Console.WriteLine($"[Skills] {jobSkill}: {(isMatched ? "✅" : "❌")}");
+            return Math.Min(skillsScore, 100);
         }
 
-        skillsScore = (decimal)matched / jobSkills.Count * 100;
-        Console.WriteLine($"[Skills] Score: {matched}/{jobSkills.Count} = {skillsScore}%");
-    }
-    else if (!jobSkills.Any() && !string.IsNullOrEmpty(parsedSkills))
-    {
-        var candidateSkillCount = parsedSkills.Split(',').Length;
-        skillsScore = Math.Min(candidateSkillCount * 8, 65);
-    }
-    else
-    {
-        skillsScore = 30;
-    }
-
-    // Experience score
-    decimal experienceScore = 0;
-    if (app.Job?.MinExperience > 0)
-    {
-        var diff = app.YearsOfExperience - app.Job.MinExperience;
-        if (diff >= 0) experienceScore = 100;
-        else if (diff == -1) experienceScore = 70;
-        else if (diff == -2) experienceScore = 40;
-        else experienceScore = 20;
-    }
-    else if (app.YearsOfExperience == 0)
-    {
-        experienceScore = 40;
-    }
-    else
-    {
-        experienceScore = 75;
-    }
-
-    // Salary score
-    decimal salaryScore = 100;
-    if (app.Job?.SalaryMax.HasValue == true && app.Job.SalaryMax > 0)
-    {
-        if (app.ExpectedSalary <= app.Job.SalaryMax)
-            salaryScore = 100;
-        else
+        private decimal CalculateExperienceScore(Application app)
         {
-            var overBudgetRatio = (app.ExpectedSalary - app.Job.SalaryMax.Value) / app.Job.SalaryMax.Value;
-            if (overBudgetRatio <= 0.10m) salaryScore = 60;
-            else salaryScore = 0;
+            decimal experienceScore = 0;
+
+            if (app.Job?.MinExperience > 0)
+            {
+                var diff = app.YearsOfExperience - app.Job.MinExperience;
+                if (diff >= 0) experienceScore = 100;
+                else if (diff == -1) experienceScore = 70;
+                else if (diff == -2) experienceScore = 40;
+                else experienceScore = 20;
+            }
+            else if (app.YearsOfExperience == 0)
+            {
+                experienceScore = 40;
+            }
+            else
+            {
+                experienceScore = 75;
+            }
+
+            Console.WriteLine($"[Experience] Candidate: {app.YearsOfExperience} years, Required: {app.Job?.MinExperience ?? 0} years → Score: {experienceScore}");
+            return experienceScore;
         }
-    }
 
-    // Education score
-    decimal educationScore = 50;
-    var eduMap = new Dictionary<string, int>
-    {
-        { "high school", 1 }, { "diploma", 2 }, { "bachelor", 3 },
-        { "master", 4 }, { "phd", 5 }
-    };
-    var candidateEdu = eduMap.FirstOrDefault(e => app.EducationLevel.ToLower().Contains(e.Key)).Value;
-    var requiredEdu = eduMap.FirstOrDefault(e => (app.Job?.RequiredEducation ?? "").ToLower().Contains(e.Key)).Value;
-
-    if (candidateEdu > 0 && requiredEdu > 0)
-    {
-        if (candidateEdu >= requiredEdu) educationScore = 100;
-        else if (candidateEdu == requiredEdu - 1) educationScore = 50;
-        else educationScore = 20;
-    }
-
-    // Weighted total
-    var matchingScore = (skillsScore * skillsWeight) +
-                        (experienceScore * experienceWeight) +
-                        (salaryScore * salaryWeight) +
-                        (educationScore * educationWeight);
-
-    return (
-        Math.Round(matchingScore, 2),
-        Math.Round(skillsScore, 2),
-        Math.Round(experienceScore, 2),
-        Math.Round(salaryScore, 2),
-        Math.Round(educationScore, 2)
-    );
-}
-
-private decimal GetSettingValue(List<SystemSetting> settings, string key, decimal defaultValue)
-{
-    var setting = settings.FirstOrDefault(s => s.SettingKey == key);
-    if (setting != null && decimal.TryParse(setting.SettingValue, out var value))
-        return value;
-    return defaultValue;
-}
-        private async Task AutoUpdateApplicationStatusAsync(int applicationId, decimal matchingScore)
-{
-    try
-    {
-        // Get thresholds from System_Setting
-        var shortlistThresholdSetting = await _context.SystemSettings
-            .FirstOrDefaultAsync(s => s.SettingKey == "AutoShortlistThreshold");
-        var rejectThresholdSetting = await _context.SystemSettings
-            .FirstOrDefaultAsync(s => s.SettingKey == "AutoRejectThreshold");
-
-        var shortlistThreshold = decimal.TryParse(shortlistThresholdSetting?.SettingValue, out var st) ? st : 70;
-        var rejectThreshold = decimal.TryParse(rejectThresholdSetting?.SettingValue, out var rt) ? rt : 50;
-
-        var application = await _context.Applications.FindAsync(applicationId);
-        if (application == null) return;
-
-        // Don't override if already manually decided
-       if (application.Status == "Rejected")
-    return;
-
-        if (matchingScore >= shortlistThreshold)
+        /// <summary>
+        /// Calculate salary score - PENALTY for exceeding budget, but NO auto-rejection
+        /// Score decreases progressively as expected salary goes above max
+        /// </summary>
+        private decimal CalculateSalaryScore(Application app, List<SystemSetting> settings)
         {
-            application.Status = "Shortlisted";
-            Console.WriteLine($"[AI Pipeline] ✅ Auto-shortlisted application {applicationId} (score: {matchingScore}%)");
-        }
-        else if (matchingScore < rejectThreshold)
-        {
-            application.Status = "AutoRejected";
-            Console.WriteLine($"[AI Pipeline] ❌ Auto-rejected application {applicationId} (score: {matchingScore}%)");
-        }
-        else
-        {
-            application.Status = "Screening";
-            Console.WriteLine($"[AI Pipeline] ⏳ Application {applicationId} needs manual review (score: {matchingScore}%)");
+            bool hasSalaryMax = app.Job?.SalaryMax.HasValue == true && app.Job.SalaryMax > 0;
+            
+            // If no salary max defined, give full score
+            if (!hasSalaryMax)
+            {
+                Console.WriteLine($"[Salary] No salary max defined for this job → Score: 100");
+                return 100;
+            }
+
+            var salaryMax = app.Job!.SalaryMax!.Value;
+            var expectedSalary = app.ExpectedSalary;
+            
+            Console.WriteLine($"[Salary] Job Max: {salaryMax}, Candidate Expected: {expectedSalary}");
+            
+            // Case 1: Expected salary is within budget - FULL SCORE
+            if (expectedSalary <= salaryMax)
+            {
+                var percentageOfMax = (expectedSalary / salaryMax) * 100;
+                Console.WriteLine($"[Salary] Within budget ({percentageOfMax:F0}% of max) → Score: 100");
+                return 100;
+            }
+            
+            // Case 2: Expected salary exceeds budget - CALCULATE PENALTY
+            var excessAmount = expectedSalary - salaryMax;
+            var excessPercentage = (excessAmount / salaryMax) * 100;
+            
+            Console.WriteLine($"[Salary] Exceeds budget by {excessAmount} ({excessPercentage:F1}%)");
+            
+            // Progressive penalty system - the more over budget, the lower the score
+            // But NEVER goes to 0 completely (minimum 10%)
+            
+            if (excessPercentage <= 10)
+            {
+                // Up to 10% over budget: 90% score
+                Console.WriteLine($"[Salary] Slightly over budget (≤10%) → Score: 90");
+                return 90;
+            }
+            else if (excessPercentage <= 20)
+            {
+                // 11-20% over budget: 75% score
+                Console.WriteLine($"[Salary] Moderately over budget (11-20%) → Score: 75");
+                return 75;
+            }
+            else if (excessPercentage <= 30)
+            {
+                // 21-30% over budget: 60% score
+                Console.WriteLine($"[Salary] Significantly over budget (21-30%) → Score: 60");
+                return 60;
+            }
+            else if (excessPercentage <= 50)
+            {
+                // 31-50% over budget: 40% score
+                Console.WriteLine($"[Salary] Well over budget (31-50%) → Score: 40");
+                return 40;
+            }
+            else if (excessPercentage <= 75)
+            {
+                // 51-75% over budget: 25% score
+                Console.WriteLine($"[Salary] Far over budget (51-75%) → Score: 25");
+                return 25;
+            }
+            else
+            {
+                // Over 75% over budget: 10% score (minimum, not zero)
+                Console.WriteLine($"[Salary] Extremely over budget (>75%) → Score: 10");
+                return 10;
+            }
         }
 
-        await _context.SaveChangesAsync();
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"[AI Pipeline] ❌ Auto-status error: {ex.Message}");
-    }
-}
+        private decimal CalculateEducationScore(Application app)
+        {
+            decimal educationScore = 50;
+            
+            var eduMap = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
+            {
+                { "high school", 1 },
+                { "diploma", 2 },
+                { "bachelor", 3 },
+                { "master", 4 },
+                { "phd", 5 }
+            };
+            
+            var candidateEdu = eduMap.FirstOrDefault(e => (app.EducationLevel ?? "").ToLower().Contains(e.Key)).Value;
+            var requiredEdu = eduMap.FirstOrDefault(e => (app.Job?.RequiredEducation ?? "").ToLower().Contains(e.Key)).Value;
+
+            if (candidateEdu > 0 && requiredEdu > 0)
+            {
+                if (candidateEdu >= requiredEdu)
+                {
+                    educationScore = 100;
+                    Console.WriteLine($"[Education] Candidate: {app.EducationLevel}, Required: {app.Job?.RequiredEducation} → Meets requirement ✅ Score: 100");
+                }
+                else if (candidateEdu == requiredEdu - 1)
+                {
+                    educationScore = 50;
+                    Console.WriteLine($"[Education] Candidate: {app.EducationLevel}, Required: {app.Job?.RequiredEducation} → One level below Score: 50");
+                }
+                else
+                {
+                    educationScore = 20;
+                    Console.WriteLine($"[Education] Candidate: {app.EducationLevel}, Required: {app.Job?.RequiredEducation} → Multiple levels below Score: 20");
+                }
+            }
+            else
+            {
+                Console.WriteLine($"[Education] Candidate: {app.EducationLevel}, Required: {app.Job?.RequiredEducation ?? "None"} → Default Score: 50");
+            }
+
+            return educationScore;
+        }
+
+        private decimal GetSettingValue(List<SystemSetting> settings, string key, decimal defaultValue)
+        {
+            var setting = settings.FirstOrDefault(s => s.SettingKey == key);
+            if (setting != null && decimal.TryParse(setting.SettingValue, out var value))
+                return value;
+            return defaultValue;
+        }
+
+        /// <summary>
+        /// Updates application status - NO AUTO-REJECTION EVER
+        /// All applicants keep "Screening" status by default
+        /// </summary>
+        private async Task UpdateApplicationStatusAsync(int applicationId, decimal matchingScore)
+        {
+            try
+            {
+                var application = await _context.Applications.FindAsync(applicationId);
+                if (application == null) return;
+
+                // CRITICAL: NEVER change status if it's already been manually set by HR
+                if (application.Status == "Rejected" || 
+                    application.Status == "Shortlisted" || 
+                    application.Status == "Hired" ||
+                    application.Status == "Interviewing")
+                {
+                    Console.WriteLine($"[AI Pipeline] ⏭️ Preserving manual status '{application.Status}' for application {applicationId}");
+                    return;
+                }
+
+                // Keep status as "Screening" - NO AUTO-REJECTION
+                // Only HR can change status
+                Console.WriteLine($"[AI Pipeline] ✅ Application {applicationId} status is 'Screening' (Match Score: {matchingScore}%)");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[AI Pipeline] ❌ Error: {ex.Message}");
+            }
+        }
     }
 }

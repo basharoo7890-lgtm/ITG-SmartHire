@@ -25,10 +25,7 @@ else
 
             <div class="row g-4 align-items-start">
 
-                <!-- Left Column -->
                 <div class="col-lg-8">
-
-                    <!-- Top Card -->
                     <div class="details-card top-job-card">
                         <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
                             <div class="d-flex align-items-start gap-3">
@@ -62,9 +59,8 @@ else
 
                         @if (ViewBag.AlreadyApplied == true)
                         {
-                            <button class="btn w-100 mt-4" disabled
-                                    style="background:#EAF6FA; color:#1A7193; border-radius:10px; padding:12px; font-weight:600; cursor:not-allowed;">
-                                <i class="fa-solid fa-circle-check me-2"></i>Already Applied
+                            <button class="btn w-100 mt-4" disabled style="background:#28a745; color:white; border-radius:10px; padding:12px; font-weight:600; cursor:not-allowed;">
+                                <i class="fa-solid fa-check-circle me-2"></i> Already Applied
                             </button>
                         }
                         else
@@ -72,29 +68,22 @@ else
                             <a asp-controller="Applications"
                                asp-action="Apply"
                                asp-route-jobId="@Model.Job.JobId"
-                               asp-route-title="@Model.Job.Title"
-                               asp-route-department="@Model.Job.Department"
-                               asp-route-location="@Model.Job.Location"
-                               asp-route-type="Full-time"
                                class="btn apply-position-btn w-100 mt-4">
                                 Apply for This Position
                             </a>
                         }
                     </div>
 
-                    <!-- Description -->
                     <div class="details-card mt-4">
                         <h2 class="details-section-title">Job Description</h2>
                         <p class="details-text" style="white-space: pre-line">@Model.Job.Description</p>
                     </div>
 
-                    <!-- Requirements -->
                     <div class="details-card mt-4">
                         <h2 class="details-section-title">Requirements</h2>
                         <p class="details-text">@Model.Job.RequiredEducation</p>
                     </div>
 
-                    <!-- Required Skills -->
                     @if (Model.JobSkills != null && Model.JobSkills.Any())
                     {
                         <div class="details-card mt-4">
@@ -115,33 +104,16 @@ else
                             </ul>
                         </div>
                     }
-
-                    <!-- Extra Info -->
-                    <div class="details-card mt-4">
-                        <h2 class="details-section-title">Job Information</h2>
-                        <ul class="details-list">
-                            <li><i class="fa-solid fa-check"></i>Department: @Model.Job.Department</li>
-                            <li><i class="fa-solid fa-check"></i>Location: @Model.Job.Location</li>
-                            <li><i class="fa-solid fa-check"></i>Minimum Experience: @Model.Job.MinExperience years</li>
-                            <li><i class="fa-solid fa-check"></i>Status: @Model.Job.Status</li>
-                        </ul>
-                    </div>
                 </div>
 
-                <!-- Right Column -->
                 <div class="col-lg-4">
                     <div class="apply-sticky-card">
                         <h3>@Model.Job.Title</h3>
                         <p>@Model.Job.Department • @Model.Job.Location</p>
-                        @if (Model.Job.SalaryMin.HasValue && Model.Job.SalaryMax.HasValue)
-                        {
-                            <p><i class="fa-solid fa-dollar-sign me-1"></i>$@Model.Job.SalaryMin — $@Model.Job.SalaryMax</p>
-                        }
                         @if (ViewBag.AlreadyApplied == true)
                         {
-                            <button class="btn w-100" disabled
-                                    style="background:#EAF6FA; color:#1A7193; border-radius:10px; padding:10px; font-weight:600;">
-                                <i class="fa-solid fa-circle-check me-2"></i>Already Applied
+                            <button class="btn w-100" disabled style="background:#28a745; color:white; border-radius:10px; padding:10px; font-weight:600;">
+                                <i class="fa-solid fa-check-circle me-2"></i> Already Applied
                             </button>
                         }
                         else
@@ -149,10 +121,6 @@ else
                             <a asp-controller="Applications"
                                asp-action="Apply"
                                asp-route-jobId="@Model.Job.JobId"
-                               asp-route-title="@Model.Job.Title"
-                               asp-route-department="@Model.Job.Department"
-                               asp-route-location="@Model.Job.Location"
-                               asp-route-type="Full-time"
                                class="btn apply-now-btn w-100">
                                 Apply Now
                             </a>
@@ -161,7 +129,24 @@ else
                 </div>
 
             </div>
-
         </div>
     </div>
 }
+
+<style>
+    .job-details-page { background-color: #E0EEF0; min-height: 100vh; padding: 36px 0 60px; }
+    .back-jobs-link { color: #1A7193; text-decoration: none; font-weight: 500; display: inline-flex; align-items: center; }
+    .back-jobs-link:hover { color: #149DD2; }
+    .details-card { background: white; border-radius: 16px; padding: 28px; box-shadow: 0 2px 12px rgba(0,0,0,0.07); margin-bottom: 20px; }
+    .details-job-icon-box { width: 70px; height: 70px; background: #EAF6FA; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 28px; color: #1A7193; }
+    .details-job-title { color: #1A7193; font-size: 28px; font-weight: 700; }
+    .details-meta { display: flex; flex-wrap: wrap; gap: 20px; color: #78A6B7; font-size: 14px; }
+    .job-type-badge { background: #EAF6FA; color: #1A7193; padding: 6px 16px; border-radius: 20px; font-size: 13px; }
+    .details-extra-info { display: flex; flex-wrap: wrap; gap: 20px; padding-top: 16px; border-top: 1px solid #D8E4EA; }
+    .apply-position-btn, .apply-now-btn { background: linear-gradient(90deg, #1A7193, #149DD2) !important; color: white !important; border: none; border-radius: 10px; padding: 14px; font-weight: 600; }
+    .details-section-title { color: #1A7193; font-size: 20px; font-weight: 700; margin-bottom: 16px; }
+    .details-list { list-style: none; padding: 0; }
+    .details-list li { padding: 8px 0; display: flex; align-items: center; gap: 10px; }
+    .apply-sticky-card { background: white; border-radius: 16px; padding: 24px; position: sticky; top: 20px; text-align: center; }
+    .apply-sticky-card h3 { color: #1A7193; font-size: 20px; font-weight: 700; }
+</style>

@@ -695,3 +695,8 @@ MigrationBackup/
 .ionide/
 
 # End of https://www.toptal.com/developers/gitignore/api/vsEmployment/appsettings.Development.json
+
+# Custom project overrides
+.env
+wwwroot/uploads/*
+!wwwroot/uploads/.gitkeep

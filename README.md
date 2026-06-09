@@ -77,9 +77,8 @@ SmartHire/
 |------|------|
 | Bashar Mukaddam | PMO + DevOps |
 | Omar | Backend Developer (Core) |
-| Mazen | Full-Stack Developer (Dashboard + Admin) |
+| Mazen | Full-Stack Developer (Dashboard + Admin) + AI Developer |
 | Ghazal | Backend + Documentation |
-| Sedeen | AI Developer |
 | Farah Atef | Database + QA |
 | Rama | UI/UX Design |
 

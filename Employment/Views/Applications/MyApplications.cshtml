@@ -12,15 +12,17 @@
     .app-card:hover { transform: translateY(-3px); }
     .app-title { color: #1A7193; font-size: 18px; font-weight: 700; margin-bottom: 6px; }
     .app-meta { color: #78A6B7; font-size: 14px; margin-bottom: 12px; }
-    .status-badge { padding: 6px 16px; border-radius: 20px; font-size: 14px; font-weight: 500; }
+    .status-badge { padding: 6px 16px; border-radius: 20px; font-size: 14px; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; }
     .status-pending { background-color: #EAF6FA; color: #1A7193; }
     .status-screening { background-color: #fff8e1; color: #f57f17; }
-    .status-shortlisted { background-color: #e8f5e9; color: #2e7d32; }
+    .status-review { background-color: #e3f2fd; color: #1565c0; }
     .status-rejected { background-color: #fdecea; color: #c62828; }
     .status-autorejected { background-color: #fdecea; color: #c62828; }
+    .status-accepted { background-color: #e8f5e9; color: #2e7d32; }
+    .info-message { background: #EAF6FA; border-left: 3px solid #1A7193; border-radius: 0 8px 8px 0; padding: 12px 16px; margin-top: 12px; color: #1A7193; font-size: 14px; line-height: 1.6; }
     .gap-report { background: #f8fbfc; border-left: 3px solid #1A7193; border-radius: 0 8px 8px 0; padding: 12px 16px; margin-top: 12px; color: #334e5a; font-size: 14px; line-height: 1.6; }
     .reject-reason { background: #fdecea; border-left: 3px solid #c62828; border-radius: 0 8px 8px 0; padding: 12px 16px; margin-top: 12px; color: #c62828; font-size: 14px; }
-    .score-pill { background: #EAF6FA; color: #1A7193; border-radius: 20px; padding: 4px 14px; font-size: 13px; font-weight: 600; }
+    .score-pill { background: #EAF6FA; color: #1A7193; border-radius: 20px; padding: 4px 14px; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
 </style>
 
 <div class="my-apps-page">
@@ -58,47 +60,67 @@
                             @if (app.AIAnalysis != null && app.AIAnalysis.MatchingScore.HasValue)
                             {
                                 <span class="score-pill">
-                                    <i class="fa-solid fa-star me-1"></i>Match Score: @((int)app.AIAnalysis.MatchingScore.Value)%
+                                    <i class="fa-solid fa-chart-line me-1"></i>Match Score: @((int)app.AIAnalysis.MatchingScore.Value)%
                                 </span>
                             }
                         </div>
                         <div>
                             @{
-                                var cls = app.Status switch {
-                                    "Shortlisted" => "status-shortlisted",
+                                // Map status to display text (hide "Shortlisted" from applicant)
+                                var displayStatus = app.Status switch 
+                                {
+                                    "Shortlisted" => "Under Review",
+                                    "Screening" => "Screening",
+                                    "Rejected" => "Not Selected",
+                                    "AutoRejected" => "Not Selected",
+                                    "Accepted" => "Accepted",
+                                    "Review" => "Under Review",
+                                    _ => "Application Received"
+                                };
+                                
+                                var statusClass = app.Status switch 
+                                {
+                                    "Shortlisted" => "status-review",
+                                    "Screening" => "status-screening",
                                     "Rejected" => "status-rejected",
                                     "AutoRejected" => "status-autorejected",
-                                    "Screening" => "status-screening",
+                                    "Accepted" => "status-accepted",
+                                    "Review" => "status-review",
                                     _ => "status-pending"
                                 };
+                                
+                                var statusIcon = app.Status switch 
+                                {
+                                    "Shortlisted" => "fa-regular fa-eye",
+                                    "Screening" => "fa-solid fa-spinner",
+                                    "Rejected" => "fa-solid fa-circle-xmark",
+                                    "AutoRejected" => "fa-solid fa-circle-xmark",
+                                    "Accepted" => "fa-solid fa-check-circle",
+                                    "Review" => "fa-regular fa-eye",
+                                    _ => "fa-solid fa-clock"
+                                };
                             }
-                            <span class="status-badge @cls">
-                                @if (app.Status == "Shortlisted")
-                                {
-                                    <i class="fa-solid fa-circle-check me-1"></i>
-                                }
-                                else if (app.Status == "Rejected" || app.Status == "AutoRejected")
-                                {
-                                    <i class="fa-solid fa-circle-xmark me-1"></i>
-                                }
-                                else if (app.Status == "Screening")
-                                {
-                                    <i class="fa-solid fa-spinner me-1"></i>
-                                }
-                                else
-                                {
-                                    <i class="fa-solid fa-clock me-1"></i>
-                                }
-                                @app.Status
+                            <span class="status-badge @statusClass">
+                                <i class="@statusIcon"></i>
+                                @displayStatus
                             </span>
                         </div>
                     </div>
 
-                    @* Show gap report if available *@
-                    @if (app.AIAnalysis != null && !string.IsNullOrEmpty(app.AIAnalysis.GapReport))
+                    @* Show friendly message for pending/review applications *@
+                    @if (app.Status == "Pending" || app.Status == "Screening" || app.Status == "Shortlisted" || app.Status == "Review")
+                    {
+                        <div class="info-message">
+                            <i class="fa-solid fa-clock me-2"></i>
+                            <strong>Application Received:</strong> Your application is being reviewed by our HR team. We'll contact you if your qualifications match our requirements.
+                        </div>
+                    }
+
+                    @* Show gap report if available from AI *@
+                    @if (app.AIAnalysis != null && !string.IsNullOrEmpty(app.AIAnalysis.GapReport) && app.Status != "Pending" && app.Status != "Shortlisted")
                     {
                         <div class="gap-report">
-                            <strong><i class="fa-solid fa-envelope me-2"></i>Message from HR:</strong><br/>
+                            <strong><i class="fa-solid fa-envelope me-2"></i>Feedback:</strong><br/>
                             @app.AIAnalysis.GapReport
                         </div>
                     }
@@ -108,16 +130,32 @@
                     {
                         <div class="reject-reason">
                             <i class="fa-solid fa-circle-info me-2"></i>
-                            <strong>Application not shortlisted.</strong>
-                            Your profile did not meet the minimum requirements for this position.
+                            <strong>Application Status:</strong> Not selected for this position.
                             @if (app.ExpectedSalary > (app.Job?.SalaryMax ?? 999999))
                             {
-                                <span> Your expected salary exceeds the budget.</span>
+                                <span> Your expected salary exceeds the budget range for this position.</span>
                             }
-                            @if (app.YearsOfExperience < (app.Job?.MinExperience ?? 0))
+                            else if (app.YearsOfExperience < (app.Job?.MinExperience ?? 0))
                             {
-                                <span> Your experience is below the minimum required.</span>
+                                <span> Your years of experience are below the minimum requirement for this position.</span>
                             }
+                            else
+                            {
+                                <span> Your profile did not meet the specific requirements for this position.</span>
+                            }
+                            <br/><br/>
+                            <small>We encourage you to apply for other positions that match your skills and experience.</small>
+                        </div>
+                    }
+                    
+                    @* Show regular rejection message *@
+                    @if (app.Status == "Rejected")
+                    {
+                        <div class="reject-reason">
+                            <i class="fa-solid fa-circle-info me-2"></i>
+                            <strong>Application Status:</strong> After careful review, we have decided to move forward with other candidates whose qualifications more closely match our requirements.
+                            <br/><br/>
+                            <small>We appreciate your interest and encourage you to apply for future opportunities.</small>
                         </div>
                     }
                 </div>

@@ -2,7 +2,9 @@
 
 @{
     ViewData["Title"] = "Open Positions";
+    var appliedStatus = ViewBag.AppliedJobs as Dictionary<int, bool> ?? new Dictionary<int, bool>();
 }
+
 <style>
     .position-item-card {
         transition: transform 0.25s ease, box-shadow 0.25s ease !important;
@@ -11,6 +13,21 @@
     .position-item-card:hover {
         transform: translateY(-8px) !important;
         box-shadow: 0 12px 32px rgba(26, 113, 147, 0.25) !important;
+    }
+    .position-applied-btn {
+        background-color: #28a745 !important;
+        color: white !important;
+        border: none;
+        border-radius: 10px;
+        padding: 12px 24px;
+        font-weight: 600;
+        font-size: 14px;
+        cursor: not-allowed;
+        opacity: 0.8;
+        pointer-events: none;
+    }
+    .position-applied-btn i {
+        margin-right: 8px;
     }
 </style>
 
@@ -48,7 +65,11 @@
             {
                 @foreach (var job in Model)
                 {
-                    <div class="position-item-card" data-title="@job.Title.ToLower()" data-location="@job.Location.ToLower()">
+                    var lowerTitle = !string.IsNullOrEmpty(job.Title) ? job.Title.ToLower() : "";
+                    var lowerLocation = !string.IsNullOrEmpty(job.Location) ? job.Location.ToLower() : "";
+                    var hasApplied = appliedStatus.ContainsKey(job.JobId) && appliedStatus[job.JobId];
+
+                    <div class="position-item-card" data-title="@lowerTitle" data-location="@lowerLocation">
                         <div class="position-left">
                             <div class="position-icon-box">
                                 <i class="fa-solid fa-briefcase"></i>
@@ -92,23 +113,32 @@
                             <span class="position-badge">@job.Status</span>
 
                             <div class="position-buttons">
-                                <a asp-controller="Home"
-                                   asp-action="JobDetails"
-                                   asp-route-id="@job.JobId"
-                                   class="btn position-details-btn">
-                                    View Details
-                                </a>
+                               <a asp-controller="Home"
+   asp-action="JobDetails"
+   asp-route-id="@job.JobId"
+   class="btn position-details-btn">
+    View Details
+</a>
 
-                                <a asp-controller="Applications"
-                                   asp-action="Apply"
-                                   asp-route-jobId="@job.JobId"
-                                   asp-route-title="@job.Title"
-                                   asp-route-department="@job.Department"
-                                   asp-route-location="@job.Location"
-                                   asp-route-type="Full-time"
-                                   class="btn position-apply-btn">
-                                    Apply Now
-                                </a>
+                                @if (hasApplied)
+                                {
+                                    <button class="btn position-applied-btn" disabled>
+                                        <i class="fa-solid fa-check-circle"></i> Already Applied
+                                    </button>
+                                }
+                                else
+                                {
+                                    <a asp-controller="Applications"
+                                       asp-action="Apply"
+                                       asp-route-jobId="@job.JobId"
+                                       asp-route-title="@job.Title"
+                                       asp-route-department="@job.Department"
+                                       asp-route-location="@job.Location"
+                                       asp-route-type="Full-time"
+                                       class="btn position-apply-btn">
+                                        Apply Now
+                                    </a>
+                                }
                             </div>
                         </div>
                     </div>
@@ -151,29 +181,25 @@
             if (matchSearch && matchLocation) visible++;
         });
 
-        // Update count
         const countEl = document.querySelector('.positions-filter-footer span');
         if (countEl) countEl.textContent = 'Showing ' + visible + ' position(s)';
     }
 
-    // Add event listeners for real-time filtering
     document.getElementById('searchInput').addEventListener('input', filterJobs);
     document.getElementById('locationInput').addEventListener('input', filterJobs);
 
-    // Auto-filter from URL params
     const urlParams = new URLSearchParams(window.location.search);
     const titleParam = urlParams.get('title');
     const locationParam = urlParams.get('location');
     
     if (titleParam) {
-        document.getElementById('searchInput').value = titleParam;
+        document.getElementById('searchInput').value = titleParam.trim();
     }
     if (locationParam) {
-        document.getElementById('locationInput').value = locationParam;
+        document.getElementById('locationInput').value = locationParam.trim();
     }
     
-    // Trigger initial filter if there are URL params
-    if (titleParam || locationParam) {
+    if ((titleParam && titleParam.trim() !== "") || (locationParam && locationParam.trim() !== "")) {
         filterJobs();
     }
 </script>

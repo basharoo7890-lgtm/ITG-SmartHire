@@ -1,75 +1,77 @@
-using Employment.Data;
-using Employment.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using Employment.Interfaces;
+using Employment.Models;
+using Employment.ViewModels;
 using System.Diagnostics;
+using System.Threading.Tasks;
+using System.Linq;
 using System.Security.Claims;
 
 namespace Employment.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
-        private readonly ApplicationDbContext _context;
+        private readonly IJobService _jobService;
 
-        public HomeController(ILogger<HomeController> logger, ApplicationDbContext context)
+        public HomeController(IJobService jobService)
         {
-            _logger = logger;
-            _context = context;
+            _jobService = jobService;
         }
 
         public async Task<IActionResult> Index()
         {
-            var jobs = await _context.Jobs
-                .Where(j => j.Status == "Open")
-                .OrderByDescending(j => j.CreatedAt)
-                .Take(3)
-                .ToListAsync();
-
-            return View(jobs);
+            var recentJobs = await _jobService.GetAllJobsAsync();
+            return View(recentJobs.Take(3).ToList());
         }
 
         public async Task<IActionResult> OpenPositions(string title, string location)
         {
-            var jobs = _context.Jobs.AsQueryable();
-
+            var allJobs = await _jobService.GetAllJobsAsync();
+            
             if (!string.IsNullOrEmpty(title))
             {
-                jobs = jobs.Where(j => j.Title.Contains(title));
+                allJobs = allJobs.Where(j => j.Title.Contains(title, System.StringComparison.OrdinalIgnoreCase)).ToList();
             }
-
             if (!string.IsNullOrEmpty(location))
             {
-                jobs = jobs.Where(j => j.Location.Contains(location));
+                allJobs = allJobs.Where(j => j.Location.Contains(location, System.StringComparison.OrdinalIgnoreCase)).ToList();
             }
-
-            var jobList = await jobs
-                .Where(j => j.Status == "Open")
-                .OrderByDescending(j => j.CreatedAt)
-                .ToListAsync();
-
-            return View(jobList);
+            
+            if (User?.Identity?.IsAuthenticated == true)
+            {
+                var userId = GetCurrentUserId();
+                if (userId > 0)
+                {
+                    var jobIds = allJobs.Select(j => j.JobId).ToList();
+                    var appliedStatus = await _jobService.GetUserApplicationsStatusAsync(userId, jobIds);
+                    ViewBag.AppliedJobs = appliedStatus;
+                }
+            }
+            
+            return View(allJobs);
         }
 
-        public async Task<IActionResult> JobDetails(int? id)
+        public async Task<IActionResult> JobDetails(int id)
         {
-            if (id == null)
-                return NotFound();
+            var viewModel = await _jobService.GetJobDetailsAsync(id);
+            if (viewModel == null) return NotFound();
+            
+            if (User?.Identity?.IsAuthenticated == true)
+            {
+                var userId = GetCurrentUserId();
+                if (userId > 0)
+                {
+                    ViewBag.AlreadyApplied = await _jobService.HasUserAppliedToJobAsync(userId, id);
+                }
+            }
+            
+            return View("JobDetails", viewModel);
+        }
 
-            var job = await _context.Jobs
-                .FirstOrDefaultAsync(j => j.JobId == id);
-
-            if (job == null)
-                return NotFound();
-
-            // Check if user already applied
-            var userId = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var uid) ? uid : 0;
-            var alreadyApplied = userId > 0 && await _context.Applications
-                .AnyAsync(a => a.JobId == id && a.UserId == userId);
-
-            ViewBag.AlreadyApplied = alreadyApplied;
-
-            return View(job);
+        // FIX: Remove 'async' keyword - this is a synchronous redirect
+        public IActionResult Details(int id)
+        {
+            return RedirectToAction("JobDetails", new { id = id });
         }
 
         public IActionResult Privacy()
@@ -81,6 +83,22 @@ namespace Employment.Controllers
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+        
+        private int GetCurrentUserId()
+        {
+            if (User?.Identity == null || !User.Identity.IsAuthenticated)
+            {
+                return 0;
+            }
+            
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim != null && int.TryParse(userIdClaim.Value, out int userId))
+            {
+                return userId;
+            }
+            
+            return 0;
         }
     }
 }
