@@ -32,12 +32,12 @@
                             <a class="nav-link active" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
                         
-                     @if (!User.IsInRole("Admin") && !User.IsInRole("HR"))
-{
-    <li class="nav-item">
-<a class="nav-link" asp-controller="Jobs" asp-action="Index">Open Positions</a>
-    </li>
-}
+                        @if (!User.IsInRole("Admin") && !User.IsInRole("HR"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Home" asp-action="OpenPositions">Open Positions</a>
+                            </li>
+                        }
                         
                         @if (!User.Identity!.IsAuthenticated || User.IsInRole("Applicant"))
                         {
@@ -121,7 +121,7 @@
                     <h6 class="footer-heading">For Candidates</h6>
                     <ul class="footer-links">
                         <li>
-<a asp-controller="Jobs" asp-action="Index">Browse Jobs</a>
+                            <a asp-controller="Home" asp-action="OpenPositions">Browse Jobs</a>
                         </li>
                         <li>
                             <a asp-controller="Applications" asp-action="MyApplications">My Applications</a>

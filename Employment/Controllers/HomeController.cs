@@ -28,6 +28,7 @@ namespace Employment.Controllers
         {
             var allJobs = await _jobService.GetAllJobsAsync();
             
+            // Apply filters if provided
             if (!string.IsNullOrEmpty(title))
             {
                 allJobs = allJobs.Where(j => j.Title.Contains(title, System.StringComparison.OrdinalIgnoreCase)).ToList();
@@ -37,10 +38,11 @@ namespace Employment.Controllers
                 allJobs = allJobs.Where(j => j.Location.Contains(location, System.StringComparison.OrdinalIgnoreCase)).ToList();
             }
             
+            // Get applied status if user is logged in
             if (User?.Identity?.IsAuthenticated == true)
             {
                 var userId = GetCurrentUserId();
-                if (userId > 0)
+                if (userId > 0 && allJobs.Any())
                 {
                     var jobIds = allJobs.Select(j => j.JobId).ToList();
                     var appliedStatus = await _jobService.GetUserApplicationsStatusAsync(userId, jobIds);
@@ -56,6 +58,7 @@ namespace Employment.Controllers
             var viewModel = await _jobService.GetJobDetailsAsync(id);
             if (viewModel == null) return NotFound();
             
+            // Check if current user has applied
             if (User?.Identity?.IsAuthenticated == true)
             {
                 var userId = GetCurrentUserId();
@@ -63,12 +66,20 @@ namespace Employment.Controllers
                 {
                     ViewBag.AlreadyApplied = await _jobService.HasUserAppliedToJobAsync(userId, id);
                 }
+                else
+                {
+                    ViewBag.AlreadyApplied = false;
+                }
+            }
+            else
+            {
+                ViewBag.AlreadyApplied = false;
             }
             
             return View("JobDetails", viewModel);
         }
 
-        // FIX: Remove 'async' keyword - this is a synchronous redirect
+        // Redirect any calls to "Details" to "JobDetails"
         public IActionResult Details(int id)
         {
             return RedirectToAction("JobDetails", new { id = id });
