@@ -13,24 +13,37 @@ namespace Employment.Data
         public DbSet<AIAnalysis> AIAnalyses { get; set; }
         public DbSet<JobSkill> JobSkills { get; set; }
         public DbSet<SkillSynonym> SkillSynonyms { get; set; }
-
-        // ✅ أضف هذا السطر
         public DbSet<SystemSetting> SystemSettings { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
+            // إعداد الجداول (Table Mapping)
             modelBuilder.Entity<Application>().ToTable("Application");
             modelBuilder.Entity<Job>().ToTable("Jobs");
             modelBuilder.Entity<User>().ToTable("Users");
             modelBuilder.Entity<AIAnalysis>().ToTable("Ai_Analysis");
             modelBuilder.Entity<JobSkill>().ToTable("Job_Skill");
             modelBuilder.Entity<SkillSynonym>().ToTable("Skill_Synonyms");
-
-            // ✅ أضف هذا السطر
             modelBuilder.Entity<SystemSetting>().ToTable("System_Setting");
 
+            // ✅ معالجة تحذيرات الدقة المالية (Precision and Scale)
+            // نستخدم HasPrecision(18, 2) لضمان دقة العملات (Currency Precision)
+
+            modelBuilder.Entity<Application>()
+                .Property(a => a.ExpectedSalary)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<Job>()
+                .Property(j => j.SalaryMax)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<Job>()
+                .Property(j => j.SalaryMin)
+                .HasPrecision(18, 2);
+
+            // العلاقات (Relationships)
             modelBuilder.Entity<Application>()
                 .HasOne(a => a.User)
                 .WithMany(u => u.Applications)

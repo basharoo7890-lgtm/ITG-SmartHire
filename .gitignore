@@ -700,3 +700,10 @@ MigrationBackup/
 .env
 wwwroot/uploads/*
 !wwwroot/uploads/.gitkeep
+bin/
+obj/
+.vs/
+appsettings.Development.json
+*.user
+*.suo
+*.db
