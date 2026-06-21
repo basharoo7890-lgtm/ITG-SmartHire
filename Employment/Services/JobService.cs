@@ -20,25 +20,14 @@ namespace Employment.Services
 
         public async Task<List<Job>> GetAllJobsAsync()
         {
-            // DEBUG: Get ALL jobs first to see what's in the database
             var allJobs = await _context.Jobs
                 .AsNoTracking()
                 .ToListAsync();
 
-            _logger.LogWarning($"=== DEBUG: Total jobs in DB: {allJobs.Count} ===");
-
-            foreach (var job in allJobs)
-            {
-                _logger.LogWarning($"Job ID: {job.JobId}, Title: {job.Title}, Status: '{job.Status}', CreatedAt: {job.CreatedAt}");
-            }
-
-            // Now filter for Active
             var activeJobs = allJobs
                 .Where(j => j.Status == "Active")
                 .OrderByDescending(j => j.CreatedAt)
                 .ToList();
-
-            _logger.LogWarning($"=== DEBUG: Active jobs found: {activeJobs.Count} ===");
 
             return activeJobs;
         }

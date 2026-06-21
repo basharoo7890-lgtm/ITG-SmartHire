@@ -78,6 +78,13 @@ namespace Employment.Services
                 if (json.StartsWith("```"))
                     json = string.Join("\n", json.Split('\n').Skip(1).SkipLast(1));
 
+                // Sanitize malformed JSON escapes the AI sometimes returns
+                // (e.g. a stray backslash before a letter like "\Experience"
+                // instead of a valid escape sequence). Strip any backslash
+                // that is not followed by a valid JSON escape character.
+                json = System.Text.RegularExpressions.Regex.Replace(
+                    json, @"\\(?![""\\/bfnrtu])", "");
+
                 var doc = System.Text.Json.JsonDocument.Parse(json);
                 var root = doc.RootElement;
 

@@ -155,9 +155,13 @@ namespace Employment.Controllers
         [HttpPost]
         public async Task<IActionResult> Settings(SettingsViewModel vm)
         {
-            // Validate weights sum to 100
+            // Validate weights sum to 100.
+            // NOTE: don't trust the posted IsWeight hidden field - recompute
+            // it from the setting key itself, same as the GET action does,
+            // so a missing/tampered/unbound hidden field can't bypass validation.
             var weightSettings = vm.Settings
-                .Where(s => s.IsWeight)
+                .Where(s => s.SettingKey.ToLower().Contains("weight") ||
+                            s.SettingKey.ToLower().Contains("score"))
                 .ToList();
 
             if (weightSettings.Any())
