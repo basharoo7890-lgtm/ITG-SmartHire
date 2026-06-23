@@ -1,4 +1,4 @@
-﻿using Employment.Data;
+using Employment.Data;
 using Employment.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

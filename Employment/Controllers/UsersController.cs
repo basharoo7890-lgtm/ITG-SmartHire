@@ -1,4 +1,4 @@
-﻿using Employment.Data;
+using Employment.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;

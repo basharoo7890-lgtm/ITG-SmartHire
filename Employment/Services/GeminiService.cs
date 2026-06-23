@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using Microsoft.Extensions.Logging;
 
 namespace Employment.Services
 {
@@ -7,11 +8,13 @@ namespace Employment.Services
     {
         private readonly HttpClient _httpClient;
         private readonly string _apiKey;
+        private readonly ILogger<GeminiService> _logger;
 
-        public GeminiService(HttpClient httpClient, IConfiguration configuration)
+        public GeminiService(HttpClient httpClient, IConfiguration configuration, ILogger<GeminiService> logger)
         {
             _httpClient = httpClient;
             _apiKey = configuration["GeminiApiKey"] ?? "";
+            _logger = logger;
         }
 
         public async Task<string?> GenerateAsync(string prompt)
@@ -38,7 +41,7 @@ namespace Employment.Services
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    Console.WriteLine($"OpenRouter API Error: {response.StatusCode} - {responseJson}");
+                    _logger.LogError("OpenRouter API Error: {StatusCode} - {Response}", response.StatusCode, responseJson);
                     return null;
                 }
 
@@ -51,7 +54,7 @@ namespace Employment.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"OpenRouter Exception: {ex.Message}");
+                _logger.LogError(ex, "OpenRouter request failed");
                 return null;
             }
         }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -44,7 +44,7 @@ namespace Employment.Models
         [ForeignKey("JobId")]
         public virtual Job? Job { get; set; }
 
-        // ✅ أضف هذا السطر
+        // ? ??? ??? ?????
         public virtual AIAnalysis? AIAnalysis { get; set; }
     }
 }

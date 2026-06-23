@@ -1,0 +1,39 @@
+# ============================================================
+# Dockerfile.dev — DEVELOPMENT only
+# ============================================================
+# Features:
+#   - dotnet watch (Hot Reload) — changes reflect instantly
+#   - Full SDK included (for dotnet ef, tooling, etc.)
+#   - Source code mounted as volume — no need to rebuild image
+#   - NOT suitable for production
+# ============================================================
+
+FROM mcr.microsoft.com/dotnet/sdk:8.0
+
+# Install curl for health checks during development
+RUN apt-get update && apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Install EF Core CLI tools for running migrations from container
+RUN dotnet tool install --global dotnet-ef
+ENV PATH="$PATH:/root/.dotnet/tools"
+
+# Copy project file and restore (cached layer)
+COPY Employment.csproj ./
+RUN dotnet restore Employment.csproj
+
+# Source is mounted as a volume in docker-compose.dev.yml
+# so we don't COPY here — changes are reflected immediately
+
+EXPOSE 8080
+EXPOSE 8081
+
+ENV ASPNETCORE_ENVIRONMENT=Development
+ENV ASPNETCORE_URLS=http://+:8080
+ENV DOTNET_RUNNING_IN_CONTAINER=true
+ENV DOTNET_USE_POLLING_FILE_WATCHER=true
+
+# Use dotnet watch for Hot Reload
+ENTRYPOINT ["dotnet", "watch", "run", "--project", "Employment.csproj", "--no-hot-reload"]

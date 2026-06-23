@@ -1,4 +1,4 @@
-ï»¿@model List<Employment.Models.Job>
+@model List<Employment.Models.Job>
 
 @{
     ViewData["Title"] = "Open Positions";
@@ -99,11 +99,11 @@
                                     <span>Min Experience: @job.MinExperience years</span>
                                     @if (!string.IsNullOrEmpty(job.RequiredEducation))
                                     {
-                                        <span class="ms-3">â€¢ Education: @job.RequiredEducation</span>
+                                        <span class="ms-3">• Education: @job.RequiredEducation</span>
                                     }
                                     @if (job.SalaryMin.HasValue && job.SalaryMax.HasValue)
                                     {
-                                        <span class="ms-3">â€¢ Salary: @job.SalaryMin â€” @job.SalaryMax</span>
+                                        <span class="ms-3">• Salary: @job.SalaryMin — @job.SalaryMax</span>
                                     }
                                 </div>
                             </div>

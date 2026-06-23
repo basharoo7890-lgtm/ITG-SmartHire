@@ -5,6 +5,7 @@ using Employment.Models;
 using Employment.ViewModels;
 using Employment.Services;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace Employment.Controllers
 {
@@ -13,10 +14,12 @@ namespace Employment.Controllers
     public class AdminController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly ILogger<AdminController> _logger;
 
-        public AdminController(ApplicationDbContext context)
+        public AdminController(ApplicationDbContext context, ILogger<AdminController> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         // GET: /Admin
@@ -50,7 +53,7 @@ namespace Employment.Controllers
                 MinExperience = vm.MinExperience,
                 RequiredEducation = vm.RequiredEducation,
                 Status = "Active",
-                CreatedBy = 1
+                CreatedBy = GetCurrentUserId()
             };
 
             _context.Jobs.Add(job);
@@ -129,8 +132,6 @@ namespace Employment.Controllers
             return RedirectToAction("Index");
         }
 
-        // GET: /Admin/Settings
-        // GET: /Admin/Settings
         // GET: /Admin/Settings
         public async Task<IActionResult> Settings()
         {
@@ -230,7 +231,7 @@ namespace Employment.Controllers
 
         // POST: /Admin/DeleteJob/5
         [HttpPost]
-        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteJob(int id)
         {
             var job = await _context.Jobs.FindAsync(id);
@@ -330,10 +331,17 @@ public async Task<IActionResult> DeleteUser(int userId)
     catch (DbUpdateException ex)
     {
         TempData["Error"] = "Cannot delete user because they have existing applications. Please delete their applications first.";
-        Console.WriteLine($"Delete error: {ex.Message}");
+        _logger.LogError(ex, "Error deleting user {UserId}", userId);
     }
     
     return RedirectToAction(nameof(Users));
 }
+
+        // Helper: get current logged-in user ID from Claims
+        private int GetCurrentUserId()
+        {
+            var claim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            return int.TryParse(claim, out var id) ? id : 0;
+        }
     }
 }

@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Employment.Models;
 using Employment.Data;
 using Employment.Interfaces;
@@ -17,13 +17,15 @@ namespace Employment.Controllers
         private readonly IApplicationService _applicationService;
         private readonly AIAnalysisService _aiService;
         private readonly IJobService _jobService;
+        private readonly ILogger<ApplicationsController> _logger;
 
-        public ApplicationsController(ApplicationDbContext context, IApplicationService applicationService, AIAnalysisService aiService, IJobService jobService)
+        public ApplicationsController(ApplicationDbContext context, IApplicationService applicationService, AIAnalysisService aiService, IJobService jobService, ILogger<ApplicationsController> logger)
         {
             _context = context;
             _applicationService = applicationService;
             _aiService = aiService;
             _jobService = jobService;
+            _logger = logger;
         }
 
         [Authorize]
@@ -144,7 +146,7 @@ namespace Employment.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error extracting CV text: {ex.Message}");
+                _logger.LogWarning(ex, "Error extracting CV text from file");
             }
 
             var app = new Application
@@ -186,12 +188,11 @@ namespace Employment.Controllers
                     // if (updatedApp?.Status != "AutoRejected")
                     // {
                     await aiService.AnalyzeApplicationAsync(appId);
-                    Console.WriteLine($"[Pipeline] ✅ AI analysis complete for {appId}");
-                    // }
+                    _logger.LogInformation("[Pipeline] AI analysis complete for application {AppId}", appId);
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"[Pipeline] ❌ Error: {ex.Message}");
+                    _logger.LogError(ex, "[Pipeline] AI analysis failed for application {AppId}", appId);
                 }
             });
 

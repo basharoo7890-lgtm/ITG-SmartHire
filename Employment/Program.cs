@@ -5,24 +5,31 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using DotNetEnv;
 
-// 1. Load the variables from your local .env file into the system environment
-DotNetEnv.Env.Load();
+// 1. Load .env file only in Development (not in production Docker containers)
+if (Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") != "true")
+{
+    DotNetEnv.Env.Load();
+}
 
+// 2. Inject environment variables into configuration
 var builder = WebApplication.CreateBuilder(args);
-
-// 2. Tell .NET to inject environment variables into builder.Configuration
 builder.Configuration.AddEnvironmentVariables();
 
+// 3. Database
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// 4. Authentication
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
         options.LoginPath = "/Account/Login";
         options.AccessDeniedPath = "/Account/Login";
+        options.ExpireTimeSpan = TimeSpan.FromHours(8);
+        options.SlidingExpiration = true;
     });
 
+// 5. Services
 builder.Services.AddScoped<IJobService, JobService>();
 builder.Services.AddScoped<IApplicationService, ApplicationService>();
 builder.Services.AddControllersWithViews();
@@ -36,10 +43,12 @@ builder.Services.AddScoped<SkillsGapService>();
 
 var app = builder.Build();
 
+// 6. Configure pipeline
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
+    app.UseHttpsRedirection(); // Only redirect in production (reverse proxy handles it in Docker)
 }
 
 app.UseStaticFiles();

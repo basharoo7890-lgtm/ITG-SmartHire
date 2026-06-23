@@ -1,4 +1,4 @@
-﻿namespace Employment.Interfaces
+namespace Employment.Interfaces
 {
     public interface IApplicationService
     {

@@ -1,0 +1,43 @@
+# ============================================================
+# .dockerignore — Files excluded from Docker build context
+# ============================================================
+
+# Build outputs
+**/bin/
+**/obj/
+
+# Visual Studio / IDE files
+**/.vs/
+**/*.user
+**/*.suo
+**/*.userprefs
+**/.vscode/
+**/*.sln.DotSettings.user
+
+# Git
+.git/
+.gitignore
+
+# Secrets — NEVER include in image
+.env
+**/.env
+**/appsettings.Development.json
+
+# Node / npm (if any frontend tools are added later)
+**/node_modules/
+**/npm-debug.log
+
+# Uploaded CVs — should be stored in a volume or cloud storage (Azure Blob, S3)
+**/wwwroot/uploads/
+
+# Migrations obj folder (excluded in csproj too)
+**/Migrations/obj/
+
+# Test projects
+**/*Tests*/
+**/*.Tests/
+
+# Documentation
+README.md
+docs/
+*.md

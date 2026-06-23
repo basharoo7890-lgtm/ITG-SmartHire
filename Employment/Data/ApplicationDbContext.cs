@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Employment.Models;
 
 namespace Employment.Data
@@ -19,7 +19,7 @@ namespace Employment.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // إعداد الجداول (Table Mapping)
+            // ????? ??????? (Table Mapping)
             modelBuilder.Entity<Application>().ToTable("Application");
             modelBuilder.Entity<Job>().ToTable("Jobs");
             modelBuilder.Entity<User>().ToTable("Users");
@@ -28,8 +28,8 @@ namespace Employment.Data
             modelBuilder.Entity<SkillSynonym>().ToTable("Skill_Synonyms");
             modelBuilder.Entity<SystemSetting>().ToTable("System_Setting");
 
-            // ✅ معالجة تحذيرات الدقة المالية (Precision and Scale)
-            // نستخدم HasPrecision(18, 2) لضمان دقة العملات (Currency Precision)
+            // ? ?????? ??????? ????? ??????? (Precision and Scale)
+            // ?????? HasPrecision(18, 2) ????? ??? ??????? (Currency Precision)
 
             modelBuilder.Entity<Application>()
                 .Property(a => a.ExpectedSalary)
@@ -43,7 +43,7 @@ namespace Employment.Data
                 .Property(j => j.SalaryMin)
                 .HasPrecision(18, 2);
 
-            // العلاقات (Relationships)
+            // ???????? (Relationships)
             modelBuilder.Entity<Application>()
                 .HasOne(a => a.User)
                 .WithMany(u => u.Applications)

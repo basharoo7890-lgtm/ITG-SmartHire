@@ -1,4 +1,4 @@
-﻿using Employment.Data;
+using Employment.Data;
 using Employment.Interfaces;
 using Employment.Models;
 using Microsoft.EntityFrameworkCore;

@@ -1,4 +1,4 @@
-﻿using Employment.Models;
+using Employment.Models;
 
 namespace Employment.ViewModels
 {

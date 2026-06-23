@@ -1,6 +1,7 @@
 using Employment.Data;
 using Employment.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Employment.Services
 {
@@ -10,17 +11,20 @@ namespace Employment.Services
         private readonly CVParserService _cvParser;
         private readonly LanguageDetectorService _langDetector;
         private readonly ApplicationDbContext _context;
+        private readonly ILogger<AIAnalysisService> _logger;
 
         public AIAnalysisService(
             GeminiService gemini,
             CVParserService cvParser,
             LanguageDetectorService langDetector,
-            ApplicationDbContext context)
+            ApplicationDbContext context,
+            ILogger<AIAnalysisService> logger)
         {
             _gemini = gemini;
             _cvParser = cvParser;
             _langDetector = langDetector;
             _context = context;
+            _logger = logger;
         }
 
         public async Task<AIAnalysis?> AnalyzeApplicationAsync(int applicationId)
@@ -65,7 +69,7 @@ namespace Employment.Services
             var extractPrompt = $"{languageInstruction}\n\nCV Text:\n{cvText}\n\nJob Title: {application.Job.Title}\nRequired Skills: {skillsList}\n\nRespond ONLY with a JSON object in this exact format, no markdown:\n{jsonFormat}";
 
             var aiResponse = await _gemini.GenerateAsync(extractPrompt);
-            Console.WriteLine($"[AI Raw Response]: {aiResponse?.Substring(0, Math.Min(500, aiResponse?.Length ?? 0))}");
+            _logger.LogDebug("[AI Raw Response]: {Preview}", aiResponse?.Substring(0, Math.Min(500, aiResponse?.Length ?? 0)));
 
             if (aiResponse == null)
                 return null;
@@ -149,8 +153,7 @@ namespace Employment.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"AI Analysis Error: {ex.Message}");
-                Console.WriteLine($"Raw response: {aiResponse}");
+                _logger.LogError(ex, "AI Analysis Error. Raw response: {RawResponse}", aiResponse);
                 return null;
             }
         }
@@ -166,7 +169,7 @@ namespace Employment.Services
             decimal salaryWeight = GetSettingValue(settings, "SalaryWeight", 20) / 100m;
             decimal educationWeight = GetSettingValue(settings, "EducationWeight", 15) / 100m;
 
-            Console.WriteLine($"[Weights] Skills:{skillsWeight * 100}% Experience:{experienceWeight * 100}% Salary:{salaryWeight * 100}% Education:{educationWeight * 100}%");
+            _logger.LogDebug("[Weights] Skills:{S}% Experience:{E}% Salary:{Sal}% Education:{Ed}%", skillsWeight * 100, experienceWeight * 100, salaryWeight * 100, educationWeight * 100);
 
             // Calculate scores
             var skillsScore = await CalculateSkillsScoreAsync(app, parsedSkills, jobSkills);
@@ -244,11 +247,11 @@ namespace Employment.Services
                     }
 
                     if (isMatched) matched++;
-                    Console.WriteLine($"[Skills] {jobSkill}: {(isMatched ? "✅" : "❌")}");
+                    _logger.LogDebug("[Skills] {Skill}: {Status}", jobSkill, isMatched ? "Matched" : "Not Matched");
                 }
 
                 skillsScore = (decimal)matched / jobSkills.Count * 100;
-                Console.WriteLine($"[Skills] Score: {matched}/{jobSkills.Count} = {skillsScore}%");
+                _logger.LogDebug("[Skills] Score: {Matched}/{Total} = {Score}%", matched, jobSkills.Count, skillsScore);
             }
             else if (!jobSkills.Any() && !string.IsNullOrEmpty(parsedSkills))
             {
@@ -284,7 +287,7 @@ namespace Employment.Services
                 experienceScore = 75;
             }
 
-            Console.WriteLine($"[Experience] Candidate: {app.YearsOfExperience} years, Required: {app.Job?.MinExperience ?? 0} years → Score: {experienceScore}");
+            _logger.LogDebug("[Experience] Candidate: {CandidateYears} years, Required: {RequiredYears} years => Score: {Score}", app.YearsOfExperience, app.Job?.MinExperience ?? 0, experienceScore);
             return experienceScore;
         }
 
@@ -299,20 +302,20 @@ namespace Employment.Services
             // If no salary max defined, give full score
             if (!hasSalaryMax)
             {
-                Console.WriteLine($"[Salary] No salary max defined for this job → Score: 100");
+                _logger.LogDebug("[Salary] No salary max defined for this job => Score: 100");
                 return 100;
             }
 
             var salaryMax = app.Job!.SalaryMax!.Value;
             var expectedSalary = app.ExpectedSalary;
             
-            Console.WriteLine($"[Salary] Job Max: {salaryMax}, Candidate Expected: {expectedSalary}");
+            _logger.LogDebug("[Salary] Job Max: {SalaryMax}, Candidate Expected: {Expected}", salaryMax, expectedSalary);
             
             // Case 1: Expected salary is within budget - FULL SCORE
             if (expectedSalary <= salaryMax)
             {
                 var percentageOfMax = (expectedSalary / salaryMax) * 100;
-                Console.WriteLine($"[Salary] Within budget ({percentageOfMax:F0}% of max) → Score: 100");
+                _logger.LogDebug("[Salary] Within budget ({Pct:F0}% of max) => Score: 100", percentageOfMax);
                 return 100;
             }
             
@@ -320,7 +323,7 @@ namespace Employment.Services
             var excessAmount = expectedSalary - salaryMax;
             var excessPercentage = (excessAmount / salaryMax) * 100;
             
-            Console.WriteLine($"[Salary] Exceeds budget by {excessAmount} ({excessPercentage:F1}%)");
+            _logger.LogDebug("[Salary] Exceeds budget by {ExcessAmount} ({ExcessPct:F1}%)", excessAmount, excessPercentage);
             
             // Progressive penalty system - the more over budget, the lower the score
             // But NEVER goes to 0 completely (minimum 10%)
@@ -328,37 +331,37 @@ namespace Employment.Services
             if (excessPercentage <= 10)
             {
                 // Up to 10% over budget: 90% score
-                Console.WriteLine($"[Salary] Slightly over budget (≤10%) → Score: 90");
+                _logger.LogDebug("[Salary] Slightly over budget (<=10%) => Score: 90");
                 return 90;
             }
             else if (excessPercentage <= 20)
             {
                 // 11-20% over budget: 75% score
-                Console.WriteLine($"[Salary] Moderately over budget (11-20%) → Score: 75");
+                _logger.LogDebug("[Salary] Moderately over budget (11-20%) => Score: 75");
                 return 75;
             }
             else if (excessPercentage <= 30)
             {
                 // 21-30% over budget: 60% score
-                Console.WriteLine($"[Salary] Significantly over budget (21-30%) → Score: 60");
+                _logger.LogDebug("[Salary] Significantly over budget (21-30%) => Score: 60");
                 return 60;
             }
             else if (excessPercentage <= 50)
             {
                 // 31-50% over budget: 40% score
-                Console.WriteLine($"[Salary] Well over budget (31-50%) → Score: 40");
+                _logger.LogDebug("[Salary] Well over budget (31-50%) => Score: 40");
                 return 40;
             }
             else if (excessPercentage <= 75)
             {
                 // 51-75% over budget: 25% score
-                Console.WriteLine($"[Salary] Far over budget (51-75%) → Score: 25");
+                _logger.LogDebug("[Salary] Far over budget (51-75%) => Score: 25");
                 return 25;
             }
             else
             {
                 // Over 75% over budget: 10% score (minimum, not zero)
-                Console.WriteLine($"[Salary] Extremely over budget (>75%) → Score: 10");
+                _logger.LogDebug("[Salary] Extremely over budget (>75%) => Score: 10");
                 return 10;
             }
         }
@@ -384,22 +387,22 @@ namespace Employment.Services
                 if (candidateEdu >= requiredEdu)
                 {
                     educationScore = 100;
-                    Console.WriteLine($"[Education] Candidate: {app.EducationLevel}, Required: {app.Job?.RequiredEducation} → Meets requirement ✅ Score: 100");
+                    _logger.LogDebug("[Education] Candidate: {CandEdu}, Required: {ReqEdu} => Meets requirement. Score: 100", app.EducationLevel, app.Job?.RequiredEducation);
                 }
                 else if (candidateEdu == requiredEdu - 1)
                 {
                     educationScore = 50;
-                    Console.WriteLine($"[Education] Candidate: {app.EducationLevel}, Required: {app.Job?.RequiredEducation} → One level below Score: 50");
+                    _logger.LogDebug("[Education] Candidate: {CandEdu}, Required: {ReqEdu} => One level below. Score: 50", app.EducationLevel, app.Job?.RequiredEducation);
                 }
                 else
                 {
                     educationScore = 20;
-                    Console.WriteLine($"[Education] Candidate: {app.EducationLevel}, Required: {app.Job?.RequiredEducation} → Multiple levels below Score: 20");
+                    _logger.LogDebug("[Education] Candidate: {CandEdu}, Required: {ReqEdu} => Multiple levels below. Score: 20", app.EducationLevel, app.Job?.RequiredEducation);
                 }
             }
             else
             {
-                Console.WriteLine($"[Education] Candidate: {app.EducationLevel}, Required: {app.Job?.RequiredEducation ?? "None"} → Default Score: 50");
+                _logger.LogDebug("[Education] Candidate: {CandEdu}, Required: {ReqEdu} => Default Score: 50", app.EducationLevel, app.Job?.RequiredEducation ?? "None");
             }
 
             return educationScore;
@@ -430,17 +433,17 @@ namespace Employment.Services
                     application.Status == "Hired" ||
                     application.Status == "Interviewing")
                 {
-                    Console.WriteLine($"[AI Pipeline] ⏭️ Preserving manual status '{application.Status}' for application {applicationId}");
+                    _logger.LogInformation("[AI Pipeline] Preserving manual status '{Status}' for application {ApplicationId}", application.Status, applicationId);
                     return;
                 }
 
                 // Keep status as "Screening" - NO AUTO-REJECTION
                 // Only HR can change status
-                Console.WriteLine($"[AI Pipeline] ✅ Application {applicationId} status is 'Screening' (Match Score: {matchingScore}%)");
+                _logger.LogInformation("[AI Pipeline] Application {ApplicationId} status is 'Screening' (Match Score: {Score}%)", applicationId, matchingScore);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[AI Pipeline] ❌ Error: {ex.Message}");
+                _logger.LogError(ex, "[AI Pipeline] Error updating status for application {ApplicationId}", applicationId);
             }
         }
     }

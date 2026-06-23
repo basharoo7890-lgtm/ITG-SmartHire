@@ -1,4 +1,4 @@
-ï»¿@model Employment.ViewModels.JobDetailsViewModel
+@model Employment.ViewModels.JobDetailsViewModel
 
 @{
     ViewData["Title"] = Model?.Job?.Title ?? "Job Details";
@@ -96,7 +96,7 @@ else
                                         @skill.SkillName
                                         @if (skill.MinYearOfExperience > 0)
                                         {
-                                            <span class="text-muted" style="font-size:13px"> â€” @skill.MinYearOfExperience+ years</span>
+                                            <span class="text-muted" style="font-size:13px"> — @skill.MinYearOfExperience+ years</span>
                                         }
                                         <span class="ms-2" style="background:#EAF6FA; color:#1A7193; border-radius:20px; padding:2px 10px; font-size:12px;">@skill.ImportantLevel</span>
                                     </li>
@@ -109,7 +109,7 @@ else
                 <div class="col-lg-4">
                     <div class="apply-sticky-card">
                         <h3>@Model.Job.Title</h3>
-                        <p>@Model.Job.Department â€¢ @Model.Job.Location</p>
+                        <p>@Model.Job.Department • @Model.Job.Location</p>
                         @if (ViewBag.AlreadyApplied == true)
                         {
                             <button class="btn w-100" disabled style="background:#28a745; color:white; border-radius:10px; padding:10px; font-weight:600;">

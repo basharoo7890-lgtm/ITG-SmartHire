@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Employment.Interfaces;
 using Employment.Models;
 using Employment.Data;
