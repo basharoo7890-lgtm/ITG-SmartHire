@@ -1,17 +1,96 @@
-version: '3.8'
+# ============================================================
+# docker-compose.yml — PRODUCTION environment
+# ============================================================
+# Usage:
+#   1. Create a .env file with real credentials (see Employment/.env.example)
+#   2. docker-compose up -d --build
+#
+# Architecture:
+#   nginx (reverse proxy + SSL) → app (ASP.NET Core) → sqlserver
+# ============================================================
 
 services:
-  db:
-    platform: linux/amd64
+
+  # ---- SQL Server ----
+  sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
-    ports:
-      - "1433:1433"
+    container_name: smarthire_sqlserver
+    platform: linux/amd64
     environment:
-      - ACCEPT_EULA=Y
-      - SA_PASSWORD=SmartHire2026!
-      - MSSQL_PID=Developer
+      # ⚠️ يجب تعيين DB_PASSWORD في ملف .env — لا تستخدم القيمة الافتراضية في بيئة الإنتاج!
+      # Set DB_PASSWORD in your .env file before running in production
+      SA_PASSWORD: "${DB_PASSWORD:?❌ DB_PASSWORD is required. Set it in .env file}"
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: "Express"
+    ports:
+      # Bind to localhost only — never expose SQL Server publicly
+      - "127.0.0.1:1433:1433"
     volumes:
-      - sqldata:/var/opt/mssql
+      - sqlserver_data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$$SA_PASSWORD\" -Q 'SELECT 1' -No || exit 1"]
+      interval: 20s
+      retries: 5
+      start_period: 40s
+      timeout: 10s
+    networks:
+      - smarthire_internal
+    restart: unless-stopped
+
+  # ---- ASP.NET Core Application ----
+  app:
+    build:
+      context: ./Employment
+      dockerfile: Dockerfile
+      target: final
+    image: smarthire-app:latest
+    container_name: smarthire_app
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: "http://+:8080"
+      DOTNET_RUNNING_IN_CONTAINER: "true"
+      ConnectionStrings__DefaultConnection: "Server=sqlserver,1433;Database=Employment;User Id=sa;Password=${DB_PASSWORD:?❌ DB_PASSWORD is required};TrustServerCertificate=True;"
+      GeminiApiKey: "${GEMINI_API_KEY:?❌ GEMINI_API_KEY is required. Set it in .env file}"
+    volumes:
+      # CV uploads persist across deployments — backup this volume regularly!
+      - cv_uploads:/app/wwwroot/uploads
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    networks:
+      - smarthire_internal
+      - smarthire_public
+    restart: unless-stopped
+
+  # ---- Nginx Reverse Proxy ----
+  # Handles: reverse proxy, compression, security headers
+  # For HTTPS: uncomment the SSL block in nginx.conf and add ssl volume below
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: smarthire_nginx
+    ports:
+      - "80:80"
+      # - "443:443"  # ← Uncomment when SSL is configured
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      # - ./nginx/ssl:/etc/nginx/ssl:ro  # ← Uncomment when SSL certificates are placed
+    depends_on:
+      - app
+    networks:
+      - smarthire_public
+    restart: unless-stopped
 
 volumes:
-  sqldata:
+  sqlserver_data:
+    driver: local
+  cv_uploads:
+    driver: local
+
+networks:
+  # Internal: SQL Server only reachable by the app
+  smarthire_internal:
+    driver: bridge
+    internal: true
+  # Public: Nginx ↔ App
+  smarthire_public:
+    driver: bridge

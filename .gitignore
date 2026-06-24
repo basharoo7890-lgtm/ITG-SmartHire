@@ -707,3 +707,4 @@ appsettings.Development.json
 *.user
 *.suo
 *.db
+*/appsettings.json

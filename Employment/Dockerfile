@@ -34,6 +34,11 @@ RUN dotnet publish Employment.csproj \
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
 
+# Install curl for HEALTHCHECK
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/*
+
 # Security: Run as non-root user
 RUN addgroup --system --gid 1001 appgroup \
     && adduser --system --uid 1001 --ingroup appgroup appuser
@@ -52,9 +57,9 @@ USER appuser
 # Expose HTTP port (HTTPS is handled by the reverse proxy: Nginx / Azure / AWS ALB)
 EXPOSE 8080
 
-# Health check — ensures the container is healthy before receiving traffic
+# Health check — uses /health endpoint (returns 200 OK without authentication)
 HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
-    CMD curl -f http://localhost:8080/ 2>/dev/null || exit 1
+    CMD curl -f http://localhost:8080/health 2>/dev/null || exit 1
 
 # Set the environment
 ENV ASPNETCORE_URLS=http://+:8080

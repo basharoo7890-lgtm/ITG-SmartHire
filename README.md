@@ -45,8 +45,8 @@ cd ITG-SmartHire
 cp .env.example .env
 # Edit .env and add your Gemini API key
 dotnet restore
-dotnet ef database update --project SmartHire
-dotnet run --project SmartHire
+dotnet ef database update --project Employment
+dotnet run --project Employment
 ```
 
 App runs at: http://localhost:5000
@@ -54,21 +54,28 @@ App runs at: http://localhost:5000
 ### Run with Docker
 
 ```bash
-cd docker
 docker-compose up -d
 ```
 
 ## Project Structure
 
 ```
-SmartHire/
-├── Controllers/         # Request handling
-├── Models/              # Data entities
-├── ViewModels/          # View-specific models
-├── Services/            # Business logic + AI
-├── Views/               # Razor views (UI)
-├── Data/                # DbContext + Migrations
-└── wwwroot/             # Static files (CSS, JS, Bootstrap)
+ITG-SmartHire/
+├── Employment/              # مجلد المشروع الرئيسي (SmartHire)
+│   ├── Controllers/         # Request handling
+│   ├── Models/              # Data entities
+│   ├── ViewModels/          # View-specific models
+│   ├── Services/            # Business logic + AI
+│   ├── Interfaces/          # Service contracts
+│   ├── Views/               # Razor views (UI)
+│   ├── Data/                # DbContext
+│   ├── Migrations/          # EF Core migrations
+│   ├── Queries/             # SQL seed scripts
+│   └── wwwroot/             # Static files (CSS, JS, Bootstrap)
+├── docker-compose.yml       # Production Docker setup
+├── docker-compose.dev.yml   # Development Docker setup
+├── nginx/                   # Nginx reverse proxy config
+└── init-db/                 # Database initialization scripts
 ```
 
 ## Team

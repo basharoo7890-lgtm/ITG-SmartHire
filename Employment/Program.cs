@@ -2,13 +2,19 @@ using Employment.Data;
 using Employment.Interfaces;
 using Employment.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using DotNetEnv;
 
 // 1. Load .env file only in Development (not in production Docker containers)
 if (Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") != "true")
 {
-    DotNetEnv.Env.Load();
+    // .env lives in the repo root (parent of the project folder)
+    var envPath = Path.Combine(Directory.GetCurrentDirectory(), ".env");
+    if (!File.Exists(envPath))
+        envPath = Path.Combine(Directory.GetCurrentDirectory(), "..", ".env");
+
+    DotNetEnv.Env.Load(envPath);
 }
 
 // 2. Inject environment variables into configuration
@@ -43,13 +49,23 @@ builder.Services.AddScoped<SkillsGapService>();
 
 var app = builder.Build();
 
+// Seed Admin and HR users from environment variables
+var seedLogger = app.Services.GetRequiredService<ILogger<Program>>();
+await DbSeeder.SeedAsync(app.Services, app.Configuration, seedLogger);
+
 // 6. Configure pipeline
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
-    app.UseHttpsRedirection(); // Only redirect in production (reverse proxy handles it in Docker)
 }
+
+// Trust Reverse Proxy headers (Koyeb / Nginx / AWS ALB)
+// هذا يجعل التطبيق يتعرف على IP المستخدم الحقيقي وبروتوكول HTTPS
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+});
 
 app.UseStaticFiles();
 app.UseRouting();
@@ -59,5 +75,9 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+// Health Check endpoint — used by Koyeb, AWS ALB, Docker HEALTHCHECK
+// يُستخدم للتحقق من أن التطبيق يعمل بشكل صحيح
+app.MapGet("/health", () => Results.Ok(new { status = "Healthy", timestamp = DateTime.UtcNow }));
 
 app.Run();
