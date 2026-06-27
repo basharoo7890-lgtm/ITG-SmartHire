@@ -13,27 +13,23 @@
 
 services:
 
-  # ---- SQL Server ----
-  sqlserver:
-    image: mcr.microsoft.com/mssql/server:2022-latest
-    container_name: smarthire_sqlserver_dev
-    platform: linux/amd64
+  # ---- MySQL ----
+  mysql:
+    image: mysql:8.0
+    container_name: smarthire_mysql_dev
     environment:
-      # يتم جلب الباسورد من ملف .env وإن لم يتوفر يستخدم القيمة الافتراضية
-      SA_PASSWORD: "${DB_PASSWORD:-Dev@Str0ngP@ssw0rd!}"
-      ACCEPT_EULA: "Y"
-      MSSQL_PID: "Developer"
+      MYSQL_ROOT_PASSWORD: "${DB_PASSWORD:-Dev@Str0ngP@ssw0rd!}"
+      MYSQL_DATABASE: "Employment"
     ports:
-      - "1433:1433"
+      - "3306:3306"
     volumes:
-      - sqlserver_dev_data:/var/opt/mssql
+      - mysql_dev_data:/var/lib/mysql
     healthcheck:
-      # نستخدم المتغير $$SA_PASSWORD لكي يقرأه من بيئة الحاوية مباشرة بدلاً من كتابته صراحة
-      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P \"$$SA_PASSWORD\" -Q 'SELECT 1' || exit 1"]
-      interval: 15s
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
+      interval: 10s
+      timeout: 5s
       retries: 5
       start_period: 30s
-      timeout: 10s
     networks:
       - smarthire_dev_net
 
@@ -47,28 +43,38 @@ services:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: "http://0.0.0.0:8080"
       DOTNET_RUNNING_IN_CONTAINER: "true"
-      # Connection string pointing to the SQL Server container
-      ConnectionStrings__DefaultConnection: "Server=sqlserver,1433;Database=Employment;User Id=sa;Password=${DB_PASSWORD:-Dev@Str0ngP@ssw0rd!};TrustServerCertificate=True;"
+      # Connection string pointing to the MySQL container
+      ConnectionStrings__DefaultConnection: "Server=mysql;Port=3306;Database=Employment;Uid=root;Pwd=${DB_PASSWORD:-Dev@Str0ngP@ssw0rd!};"
       # AI API key — override here or in your .env file
-      GeminiApiKey: "${GEMINI_API_KEY:-your-openrouter-api-key-here}"
+      GeminiApiKey: "${GeminiApiKey:-your-openrouter-api-key-here}"
+      # --- Seed Accounts ---
+      ADMIN_EMAIL: "${ADMIN_EMAIL:-}"
+      ADMIN_PASSWORD: "${ADMIN_PASSWORD:-}"
+      ADMIN_NAME: "${ADMIN_NAME:-System Admin}"
+      HR_EMAIL: "${HR_EMAIL:-}"
+      HR_PASSWORD: "${HR_PASSWORD:-}"
+      HR_NAME: "${HR_NAME:-HR Manager}"
     ports:
       - "8080:8080"
     volumes:
       # Mount source code for Hot Reload — changes are reflected instantly
       - ./Employment:/app
+      # Exclude Windows-compiled bin/obj — let the container use its own
+      - /app/bin
+      - /app/obj
       # Persist NuGet packages cache to avoid re-downloading on each restart
       - nuget_cache:/root/.nuget/packages
       # Persist uploaded CVs
       - cv_uploads_dev:/app/wwwroot/uploads
     depends_on:
-      sqlserver:
+      mysql:
         condition: service_healthy
     networks:
       - smarthire_dev_net
     restart: unless-stopped
 
 volumes:
-  sqlserver_dev_data:
+  mysql_dev_data:
   nuget_cache:
   cv_uploads_dev:
 

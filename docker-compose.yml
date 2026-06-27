@@ -11,28 +11,23 @@
 
 services:
 
-  # ---- SQL Server ----
-  sqlserver:
-    image: mcr.microsoft.com/mssql/server:2022-latest
-    container_name: smarthire_sqlserver
-    platform: linux/amd64
+  # ---- MySQL ----
+  mysql:
+    image: mysql:8.0
+    container_name: smarthire_mysql
     environment:
-      # ⚠️ يجب تعيين DB_PASSWORD في ملف .env — لا تستخدم القيمة الافتراضية في بيئة الإنتاج!
-      # Set DB_PASSWORD in your .env file before running in production
-      SA_PASSWORD: "${DB_PASSWORD:?❌ DB_PASSWORD is required. Set it in .env file}"
-      ACCEPT_EULA: "Y"
-      MSSQL_PID: "Express"
+      MYSQL_ROOT_PASSWORD: "${DB_PASSWORD:?❌ DB_PASSWORD is required. Set it in .env file}"
+      MYSQL_DATABASE: "Employment"
     ports:
-      # Bind to localhost only — never expose SQL Server publicly
-      - "127.0.0.1:1433:1433"
+      - "127.0.0.1:3306:3306"
     volumes:
-      - sqlserver_data:/var/opt/mssql
+      - mysql_data:/var/lib/mysql
     healthcheck:
-      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$$SA_PASSWORD\" -Q 'SELECT 1' -No || exit 1"]
-      interval: 20s
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
+      interval: 10s
+      timeout: 5s
       retries: 5
-      start_period: 40s
-      timeout: 10s
+      start_period: 30s
     networks:
       - smarthire_internal
     restart: unless-stopped
@@ -49,13 +44,20 @@ services:
       ASPNETCORE_ENVIRONMENT: Production
       ASPNETCORE_URLS: "http://+:8080"
       DOTNET_RUNNING_IN_CONTAINER: "true"
-      ConnectionStrings__DefaultConnection: "Server=sqlserver,1433;Database=Employment;User Id=sa;Password=${DB_PASSWORD:?❌ DB_PASSWORD is required};TrustServerCertificate=True;"
-      GeminiApiKey: "${GEMINI_API_KEY:?❌ GEMINI_API_KEY is required. Set it in .env file}"
+      ConnectionStrings__DefaultConnection: "Server=mysql;Port=3306;Database=Employment;Uid=root;Pwd=${DB_PASSWORD:?❌ DB_PASSWORD is required};"
+      GeminiApiKey: "${GeminiApiKey:?❌ GeminiApiKey is required. Set it in .env file}"
+      # --- Seed Accounts (auto-created on first startup) ---
+      ADMIN_EMAIL: "${ADMIN_EMAIL:-}"
+      ADMIN_PASSWORD: "${ADMIN_PASSWORD:-}"
+      ADMIN_NAME: "${ADMIN_NAME:-System Admin}"
+      HR_EMAIL: "${HR_EMAIL:-}"
+      HR_PASSWORD: "${HR_PASSWORD:-}"
+      HR_NAME: "${HR_NAME:-HR Manager}"
     volumes:
       # CV uploads persist across deployments — backup this volume regularly!
       - cv_uploads:/app/wwwroot/uploads
     depends_on:
-      sqlserver:
+      mysql:
         condition: service_healthy
     networks:
       - smarthire_internal
@@ -81,7 +83,7 @@ services:
     restart: unless-stopped
 
 volumes:
-  sqlserver_data:
+  mysql_data:
     driver: local
   cv_uploads:
     driver: local
