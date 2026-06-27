@@ -11,7 +11,7 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS restore
 WORKDIR /src
 
 # Copy only the project file first (Docker layer cache optimization)
-COPY Employment.csproj ./
+COPY Employment/Employment.csproj ./
 RUN dotnet restore Employment.csproj --runtime linux-x64
 
 # ---- Stage 2: Build & Publish ----
@@ -19,7 +19,7 @@ FROM restore AS publish
 WORKDIR /src
 
 # Copy the full source
-COPY . .
+COPY Employment/ .
 
 # Publish as self-contained, single-folder, Release mode
 RUN dotnet publish Employment.csproj \
