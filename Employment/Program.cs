@@ -23,7 +23,12 @@ builder.Configuration.AddEnvironmentVariables();
 
 // 3. Database
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        sqlOptions => sqlOptions.EnableRetryOnFailure(
+            maxRetryCount: 5,
+            maxRetryDelay: TimeSpan.FromSeconds(10),
+            errorNumbersToAdd: null)));
 
 // 4. Authentication
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -48,6 +53,13 @@ builder.Services.AddScoped<AIAnalysisService>();
 builder.Services.AddScoped<SkillsGapService>();
 
 var app = builder.Build();
+
+// Auto-apply pending migrations (creates the database if it doesn't exist)
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    db.Database.Migrate();
+}
 
 // Seed Admin and HR users from environment variables
 var seedLogger = app.Services.GetRequiredService<ILogger<Program>>();
