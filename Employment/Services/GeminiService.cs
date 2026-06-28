@@ -27,7 +27,7 @@ namespace Employment.Services
                 {
                     var requestBody = new
                     {
-                        model = "openai/gpt-oss-120b:free",
+                        model = "gpt-4o-mini",
                         messages = new[]
                         {
                             new { role = "user", content = prompt }
@@ -40,13 +40,13 @@ namespace Employment.Services
                     _httpClient.DefaultRequestHeaders.Clear();
                     _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_apiKey}");
 
-                    var response = await _httpClient.PostAsync("https://openrouter.ai/api/v1/chat/completions", content);
+                    var response = await _httpClient.PostAsync("https://api.openai.com/v1/chat/completions", content);
                     var responseJson = await response.Content.ReadAsStringAsync();
 
                     if (!response.IsSuccessStatusCode)
                     {
                         _logger.LogWarning(
-                            "OpenRouter API attempt {Attempt}/{Max} failed: {StatusCode} - {Response}",
+                            "OpenAI API attempt {Attempt}/{Max} failed: {StatusCode} - {Response}",
                             attempt, maxAttempts, response.StatusCode, responseJson);
 
                         if (IsTransientStatus(response.StatusCode) && attempt < maxAttempts)
@@ -64,7 +64,7 @@ namespace Employment.Services
                         choices.GetArrayLength() == 0)
                     {
                         _logger.LogWarning(
-                            "OpenRouter attempt {Attempt}/{Max} returned no choices. Raw: {Raw}",
+                            "OpenAI attempt {Attempt}/{Max} returned no choices. Raw: {Raw}",
                             attempt, maxAttempts, responseJson);
 
                         if (attempt < maxAttempts)
@@ -84,7 +84,7 @@ namespace Employment.Services
                     if (string.IsNullOrWhiteSpace(text))
                     {
                         _logger.LogWarning(
-                            "OpenRouter attempt {Attempt}/{Max} returned empty content. Retrying if possible.",
+                            "OpenAI attempt {Attempt}/{Max} returned empty content. Retrying if possible.",
                             attempt, maxAttempts);
 
                         if (attempt < maxAttempts)
@@ -100,7 +100,7 @@ namespace Employment.Services
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "OpenRouter request attempt {Attempt}/{Max} threw an exception", attempt, maxAttempts);
+                    _logger.LogError(ex, "OpenAI request attempt {Attempt}/{Max} threw an exception", attempt, maxAttempts);
 
                     if (attempt < maxAttempts)
                     {
