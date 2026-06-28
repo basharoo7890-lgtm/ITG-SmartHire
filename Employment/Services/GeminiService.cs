@@ -27,7 +27,7 @@ namespace Employment.Services
                 {
                     var requestBody = new
                     {
-                        model = "gpt-4o-mini",
+                        model = "llama-3.3-70b-versatile",
                         messages = new[]
                         {
                             new { role = "user", content = prompt }
@@ -40,13 +40,13 @@ namespace Employment.Services
                     _httpClient.DefaultRequestHeaders.Clear();
                     _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_apiKey}");
 
-                    var response = await _httpClient.PostAsync("https://api.openai.com/v1/chat/completions", content);
+                    var response = await _httpClient.PostAsync("https://api.groq.com/openai/v1/chat/completions", content);
                     var responseJson = await response.Content.ReadAsStringAsync();
 
                     if (!response.IsSuccessStatusCode)
                     {
                         _logger.LogWarning(
-                            "OpenAI API attempt {Attempt}/{Max} failed: {StatusCode} - {Response}",
+                            "Groq API attempt {Attempt}/{Max} failed: {StatusCode} - {Response}",
                             attempt, maxAttempts, response.StatusCode, responseJson);
 
                         if (IsTransientStatus(response.StatusCode) && attempt < maxAttempts)
@@ -64,7 +64,7 @@ namespace Employment.Services
                         choices.GetArrayLength() == 0)
                     {
                         _logger.LogWarning(
-                            "OpenAI attempt {Attempt}/{Max} returned no choices. Raw: {Raw}",
+                            "Groq API attempt {Attempt}/{Max} returned no choices. Raw: {Raw}",
                             attempt, maxAttempts, responseJson);
 
                         if (attempt < maxAttempts)
@@ -84,7 +84,7 @@ namespace Employment.Services
                     if (string.IsNullOrWhiteSpace(text))
                     {
                         _logger.LogWarning(
-                            "OpenAI attempt {Attempt}/{Max} returned empty content. Retrying if possible.",
+                            "Groq API attempt {Attempt}/{Max} returned empty content. Retrying if possible.",
                             attempt, maxAttempts);
 
                         if (attempt < maxAttempts)
@@ -100,7 +100,7 @@ namespace Employment.Services
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "OpenAI request attempt {Attempt}/{Max} threw an exception", attempt, maxAttempts);
+                    _logger.LogError(ex, "Groq API request attempt {Attempt}/{Max} threw an exception", attempt, maxAttempts);
 
                     if (attempt < maxAttempts)
                     {
