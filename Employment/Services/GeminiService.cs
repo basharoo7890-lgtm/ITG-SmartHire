@@ -19,44 +19,111 @@ namespace Employment.Services
 
         public async Task<string?> GenerateAsync(string prompt)
         {
-            try
+            const int maxAttempts = 3;
+
+            for (int attempt = 1; attempt <= maxAttempts; attempt++)
             {
-                var requestBody = new
+                try
                 {
-            model = "openai/gpt-oss-120b:free",
-                    messages = new[]
+                    var requestBody = new
                     {
-                        new { role = "user", content = prompt }
+                        model = "openai/gpt-oss-120b:free",
+                        messages = new[]
+                        {
+                            new { role = "user", content = prompt }
+                        }
+                    };
+
+                    var json = JsonSerializer.Serialize(requestBody);
+                    var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                    _httpClient.DefaultRequestHeaders.Clear();
+                    _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_apiKey}");
+
+                    var response = await _httpClient.PostAsync("https://openrouter.ai/api/v1/chat/completions", content);
+                    var responseJson = await response.Content.ReadAsStringAsync();
+
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        _logger.LogWarning(
+                            "OpenRouter API attempt {Attempt}/{Max} failed: {StatusCode} - {Response}",
+                            attempt, maxAttempts, response.StatusCode, responseJson);
+
+                        if (IsTransientStatus(response.StatusCode) && attempt < maxAttempts)
+                        {
+                            await Task.Delay(GetBackoffDelay(attempt));
+                            continue;
+                        }
+
+                        return null;
                     }
-                };
 
-                var json = JsonSerializer.Serialize(requestBody);
-                var content = new StringContent(json, Encoding.UTF8, "application/json");
+                    var doc = JsonDocument.Parse(responseJson);
 
-                _httpClient.DefaultRequestHeaders.Clear();
-                _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_apiKey}");
+                    if (!doc.RootElement.TryGetProperty("choices", out var choices) ||
+                        choices.GetArrayLength() == 0)
+                    {
+                        _logger.LogWarning(
+                            "OpenRouter attempt {Attempt}/{Max} returned no choices. Raw: {Raw}",
+                            attempt, maxAttempts, responseJson);
 
-                var response = await _httpClient.PostAsync("https://openrouter.ai/api/v1/chat/completions", content);
-                var responseJson = await response.Content.ReadAsStringAsync();
+                        if (attempt < maxAttempts)
+                        {
+                            await Task.Delay(GetBackoffDelay(attempt));
+                            continue;
+                        }
 
-                if (!response.IsSuccessStatusCode)
+                        return null;
+                    }
+
+                    var text = choices[0]
+                        .GetProperty("message")
+                        .GetProperty("content")
+                        .GetString();
+
+                    if (string.IsNullOrWhiteSpace(text))
+                    {
+                        _logger.LogWarning(
+                            "OpenRouter attempt {Attempt}/{Max} returned empty content. Retrying if possible.",
+                            attempt, maxAttempts);
+
+                        if (attempt < maxAttempts)
+                        {
+                            await Task.Delay(GetBackoffDelay(attempt));
+                            continue;
+                        }
+
+                        return null;
+                    }
+
+                    return text;
+                }
+                catch (Exception ex)
                 {
-                    _logger.LogError("OpenRouter API Error: {StatusCode} - {Response}", response.StatusCode, responseJson);
+                    _logger.LogError(ex, "OpenRouter request attempt {Attempt}/{Max} threw an exception", attempt, maxAttempts);
+
+                    if (attempt < maxAttempts)
+                    {
+                        await Task.Delay(GetBackoffDelay(attempt));
+                        continue;
+                    }
+
                     return null;
                 }
+            }
 
-                var doc = JsonDocument.Parse(responseJson);
-                return doc.RootElement
-                    .GetProperty("choices")[0]
-                    .GetProperty("message")
-                    .GetProperty("content")
-                    .GetString();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "OpenRouter request failed");
-                return null;
-            }
+            return null;
+        }
+
+        private static bool IsTransientStatus(System.Net.HttpStatusCode statusCode)
+        {
+            return statusCode == System.Net.HttpStatusCode.TooManyRequests
+                || (int)statusCode >= 500;
+        }
+
+        private static TimeSpan GetBackoffDelay(int attempt)
+        {
+            return TimeSpan.FromSeconds(Math.Pow(2, attempt - 1));
         }
     }
 }

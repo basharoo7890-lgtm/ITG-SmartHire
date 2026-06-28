@@ -4,6 +4,7 @@ using Employment.Data;
 using Employment.ViewModels;
 using Employment.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Logging;
 
 
 
@@ -16,10 +17,14 @@ namespace Employment.Controllers
     public class DashboardController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly AIAnalysisService _aiService;
+        private readonly ILogger<DashboardController> _logger;
 
-        public DashboardController(ApplicationDbContext context)
+        public DashboardController(ApplicationDbContext context, AIAnalysisService aiService, ILogger<DashboardController> logger)
         {
             _context = context;
+            _aiService = aiService;
+            _logger = logger;
         }
 
         // GET: /Dashboard/Index?jobId=1
@@ -30,6 +35,25 @@ namespace Employment.Controllers
 
             // Default to first job if none selected
             var selectedJobId = jobId ?? jobs.FirstOrDefault()?.JobId ?? 0;
+
+            // Auto-analyze any candidate for this job that doesn't have AI results yet,
+            // so HR never has to press "Analyze" manually.
+            var unanalyzedIds = await _context.Applications
+                .Where(a => a.JobId == selectedJobId && a.Status != "AutoRejected" && a.AIAnalysis == null)
+                .Select(a => a.ApplicationId)
+                .ToListAsync();
+
+            foreach (var appId in unanalyzedIds)
+            {
+                try
+                {
+                    await _aiService.AnalyzeApplicationAsync(appId);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "[Dashboard] Auto-analysis failed for application {ApplicationId}", appId);
+                }
+            }
 
             var candidates = await _context.Applications
                .Where(a => a.JobId == selectedJobId && a.Status != "AutoRejected")

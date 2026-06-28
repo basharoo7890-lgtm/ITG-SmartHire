@@ -68,36 +68,56 @@ namespace Employment.Services
 
             var extractPrompt = $"{languageInstruction}\n\nCV Text:\n{cvText}\n\nJob Title: {application.Job.Title}\nRequired Skills: {skillsList}\n\nRespond ONLY with a JSON object in this exact format, no markdown:\n{jsonFormat}";
 
-            var aiResponse = await _gemini.GenerateAsync(extractPrompt);
-            _logger.LogDebug("[AI Raw Response]: {Preview}", aiResponse?.Substring(0, Math.Min(500, aiResponse?.Length ?? 0)));
+            const int maxParseAttempts = 3;
+            string? aiResponse = null;
+            System.Text.Json.JsonDocument? doc = null;
+            string parsedSkills = "", summary = "", strengths = "", weaknesses = "", interviewQuestions = "";
+            bool parsedOk = false;
 
-            if (aiResponse == null)
+            for (int attempt = 1; attempt <= maxParseAttempts && !parsedOk; attempt++)
+            {
+                aiResponse = await _gemini.GenerateAsync(extractPrompt);
+                _logger.LogDebug("[AI Raw Response - attempt {Attempt}]: {Preview}", attempt, aiResponse?.Substring(0, Math.Min(500, aiResponse?.Length ?? 0)));
+
+                if (aiResponse == null)
+                {
+                    _logger.LogWarning("[AI Analysis] Attempt {Attempt}/{Max}: Gemini/OpenRouter returned null", attempt, maxParseAttempts);
+                    continue;
+                }
+
+                try
+                {
+                    var json = aiResponse.Trim();
+                    if (json.StartsWith("```"))
+                        json = string.Join("\n", json.Split('\n').Skip(1).SkipLast(1));
+
+                    json = System.Text.RegularExpressions.Regex.Replace(
+                    json, @"\\(?![""\\/bfnrtu])", "");
+                    doc = System.Text.Json.JsonDocument.Parse(json);
+                    var root = doc.RootElement;
+
+                    parsedSkills = root.GetProperty("parsedSkills").GetString() ?? "";
+                    summary = root.GetProperty("summary").GetString() ?? "";
+                    strengths = root.GetProperty("strengths").GetString() ?? "";
+                    weaknesses = root.GetProperty("weaknesses").GetString() ?? "";
+                    interviewQuestions = root.GetProperty("interviewQuestions").GetString() ?? "";
+
+                    parsedOk = true;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "[AI Analysis] Attempt {Attempt}/{Max}: failed to parse AI JSON response. Raw: {RawResponse}", attempt, maxParseAttempts, aiResponse);
+                }
+            }
+
+            if (!parsedOk)
+            {
+                _logger.LogError("[AI Analysis] All {Max} attempts failed for application {ApplicationId}", maxParseAttempts, applicationId);
                 return null;
+            }
 
-            // Step 5 - Parse JSON response
             try
             {
-                // Clean response
-                var json = aiResponse.Trim();
-                if (json.StartsWith("```"))
-                    json = string.Join("\n", json.Split('\n').Skip(1).SkipLast(1));
-
-                // Sanitize malformed JSON escapes the AI sometimes returns
-                // (e.g. a stray backslash before a letter like "\Experience"
-                // instead of a valid escape sequence). Strip any backslash
-                // that is not followed by a valid JSON escape character.
-                json = System.Text.RegularExpressions.Regex.Replace(
-                    json, @"\\(?![""\\/bfnrtu])", "");
-
-                var doc = System.Text.Json.JsonDocument.Parse(json);
-                var root = doc.RootElement;
-
-                var parsedSkills = root.GetProperty("parsedSkills").GetString() ?? "";
-                var summary = root.GetProperty("summary").GetString() ?? "";
-                var strengths = root.GetProperty("strengths").GetString() ?? "";
-                var weaknesses = root.GetProperty("weaknesses").GetString() ?? "";
-                var interviewQuestions = root.GetProperty("interviewQuestions").GetString() ?? "";
-
                 // Step 6 - Calculate scores
                 var scores = await CalculateScoresAsync(application, parsedSkills, jobSkills);
 

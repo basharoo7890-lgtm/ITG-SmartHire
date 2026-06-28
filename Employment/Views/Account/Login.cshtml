@@ -42,9 +42,15 @@
             display: none;
         }
 
-        input[type="password"]::-webkit-credentials-auto-fill-button,
-        input[type="password"]::-webkit-textfield-decoration-container {
-            display: none !important;
+        /* NOTE: display:none on ::-webkit-textfield-decoration-container breaks
+           the input's focus/typing in some Chromium versions until the field's
+           type attribute changes (e.g. via the eye toggle). Use a non-destructive
+           hide instead so the field works correctly on first click. */
+        input[type="password"]::-webkit-credentials-auto-fill-button {
+            visibility: hidden;
+            pointer-events: none;
+            position: absolute;
+            right: 0;
         }
     </style>
     </head>
@@ -90,7 +96,8 @@
                                            name="PasswordHash"
                                            id="password"
                                            class="form-control signin-input"
-                                           placeholder="Enter your password" />
+                                           placeholder="Enter your password"
+                                           autocomplete="current-password" />
 
                                     <button type="button" class="password-toggle" onclick="togglePassword('password', 'passwordIcon')">
                                         <i id="passwordIcon" class="fa-solid fa-eye"></i>
