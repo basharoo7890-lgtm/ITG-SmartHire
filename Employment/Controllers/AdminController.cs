@@ -136,6 +136,18 @@ namespace Employment.Controllers
         public async Task<IActionResult> Settings()
         {
             var settings = await _context.SystemSettings.ToListAsync();
+            if (!settings.Any())
+            {
+                settings = new List<SystemSetting>
+                {
+                    new SystemSetting { SettingKey = "SkillsWeight", SettingValue = "40", Description = "Weight percentage for candidate skills match" },
+                    new SystemSetting { SettingKey = "ExperienceWeight", SettingValue = "25", Description = "Weight percentage for candidate years of experience match" },
+                    new SystemSetting { SettingKey = "SalaryWeight", SettingValue = "20", Description = "Weight percentage for expected salary match" },
+                    new SystemSetting { SettingKey = "EducationWeight", SettingValue = "15", Description = "Weight percentage for candidate education level match" }
+                };
+                _context.SystemSettings.AddRange(settings);
+                await _context.SaveChangesAsync();
+            }
 
             var vm = new SettingsViewModel
             {

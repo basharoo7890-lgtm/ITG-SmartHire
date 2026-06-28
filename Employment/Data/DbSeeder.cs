@@ -14,6 +14,7 @@ namespace Employment.Data
 
             await SeedUserAsync(context, config, logger, "Admin");
             await SeedUserAsync(context, config, logger, "HR");
+            await SeedSettingsAsync(context, logger);
         }
 
         private static async Task SeedUserAsync(
@@ -73,6 +74,24 @@ namespace Employment.Data
             using var sha256 = SHA256.Create();
             var bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
             return Convert.ToBase64String(bytes);
+        }
+
+        private static async Task SeedSettingsAsync(ApplicationDbContext context, ILogger logger)
+        {
+            if (!await context.SystemSettings.AnyAsync())
+            {
+                var defaultSettings = new List<SystemSetting>
+                {
+                    new SystemSetting { SettingKey = "SkillsWeight", SettingValue = "40", Description = "Weight percentage for skills matching in AI scoring" },
+                    new SystemSetting { SettingKey = "ExperienceWeight", SettingValue = "25", Description = "Weight percentage for experience matching in AI scoring" },
+                    new SystemSetting { SettingKey = "SalaryWeight", SettingValue = "20", Description = "Weight percentage for salary matching in AI scoring" },
+                    new SystemSetting { SettingKey = "EducationWeight", SettingValue = "15", Description = "Weight percentage for education matching in AI scoring" }
+                };
+
+                context.SystemSettings.AddRange(defaultSettings);
+                await context.SaveChangesAsync();
+                logger.LogInformation("Seeder: Created default system settings (scoring weights).");
+            }
         }
     }
 }
